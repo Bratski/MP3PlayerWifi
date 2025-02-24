@@ -1,0 +1,19 @@
+# Ignore build directories
+build-*/
+
+# Ignore Qt Creator files
+*.user
+*.user.*
+
+# Ignore compiled files
+*.o
+*.a
+*.so
+*.dll
+*.exe
+
+# Ignore generated files
+Makefile
+moc_*
+ui_*
+qrc_*
