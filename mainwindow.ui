@@ -288,6 +288,7 @@
      <string>Sort</string>
     </property>
     <addaction name="actionby_Artist"/>
+    <addaction name="actionby_Album"/>
     <addaction name="actionby_Album_Yer"/>
     <addaction name="actionby_Genre"/>
     <addaction name="actionundo_Sort"/>
@@ -298,10 +299,17 @@
     </property>
     <addaction name="actionOled_Display"/>
    </widget>
+   <widget class="QMenu" name="menuSearchfilter">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionSearchfilter"/>
+   </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuAdd"/>
    <addaction name="menuRemove"/>
    <addaction name="menuSort"/>
+   <addaction name="menuSearchfilter"/>
    <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -415,7 +423,7 @@
   </action>
   <action name="actionby_Album_Yer">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailReplySender"/>
+    <iconset theme="QIcon::ThemeIcon::MailForward"/>
    </property>
    <property name="text">
     <string>by Album Year</string>
@@ -476,6 +484,25 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionby_Album">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+   </property>
+   <property name="text">
+    <string>by Album</string>
+   </property>
+  </action>
+  <action name="actionSearchfilter">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::EditFind"/>
+   </property>
+   <property name="text">
+    <string>Searchfilter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

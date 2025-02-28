@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
   // oled.autodetect();
 
   QApplication a(argc, argv);
-  MainWindow w(0, &oled);
+  MainWindow w(nullptr, &oled);
   w.show();
   return a.exec();
 }

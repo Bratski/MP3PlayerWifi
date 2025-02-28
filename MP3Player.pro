@@ -10,16 +10,22 @@ CONFIG += c++17
 
 SOURCES += \
     #../Oled/OLEDTest/COled.cpp \
+    dialogprogress.cpp \
+    dialogsearch.cpp \
     dialogsettings.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     #../Oled/OLEDTest/COled.h \
+    dialogprogress.h \
+    dialogsearch.h \
     dialogsettings.h \
     mainwindow.h
 
 FORMS += \
+    dialogprogress.ui \
+    dialogsearch.ui \
     dialogsettings.ui \
     mainwindow.ui
 
