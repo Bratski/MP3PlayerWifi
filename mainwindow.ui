@@ -228,7 +228,7 @@
          <bool>false</bool>
         </property>
         <property name="format">
-         <string>HH:MM:SS</string>
+         <string>0:00:00</string>
         </property>
        </widget>
       </item>

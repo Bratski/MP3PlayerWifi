@@ -27,12 +27,12 @@ public:
   ~MainWindow();
 
 public slots:
+  // header
   void openSettingsDialog();
   void openProgressDialog();
   void openSearch();
   void openManagement();
-  void playSong(QString &filelocation);
-  void stopSong();
+  // player
   void setVolume(int level);
 
 private:
@@ -44,5 +44,9 @@ private:
   DialogProgress *_dlgProgess;
   DialogSearch *_dlgSearch;
   DialogManagement *_dlgManagement;
+  QString playThisSong =
+      "/home/bart/Music/Bart/calexico/mix/calexico - Dutch TV-show.mp3";
+  QString time;
+  QString &convertMilliSec(qint64 &millisec);
 };
 #endif // MAINWINDOW_H
