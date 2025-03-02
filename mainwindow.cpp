@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled)
                    &MainWindow::openProgressDialog);
   QObject::connect(ui->actionSearchfilter, &QAction::triggered, this,
                    &MainWindow::openSearch);
+  QObject::connect(ui->actionManagement, &QAction::triggered, this,
+                   &MainWindow::openManagement);
 }
 
 MainWindow::~MainWindow() {
@@ -36,4 +38,9 @@ void MainWindow::openProgressDialog() {
 void MainWindow::openSearch() {
   _dlgSearch = new DialogSearch(this);
   _dlgSearch->show();
+}
+
+void MainWindow::openManagement() {
+  _dlgManagement = new DialogManagement(this);
+  _dlgManagement->show();
 }
