@@ -9,6 +9,9 @@
 #include <dialogsearch.h>
 #include <dialogsettings.h>
 
+#include <QtMultimedia/QAudioOutput>
+#include <QtMultimedia/QMediaPlayer>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -19,7 +22,8 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(QWidget *parent = nullptr, COled *oled = nullptr);
+  MainWindow(QWidget *parent = nullptr, COled *oled = nullptr,
+             QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr);
   ~MainWindow();
 
 public slots:
@@ -27,10 +31,15 @@ public slots:
   void openProgressDialog();
   void openSearch();
   void openManagement();
+  void playSong(QString &filelocation);
+  void stopSong();
+  void setVolume(int level);
 
 private:
   Ui::MainWindow *ui;
   COled *_oled;
+  QMediaPlayer *_player;
+  QAudioOutput *_audio;
   DialogSettings *_dlgSettings;
   DialogProgress *_dlgProgess;
   DialogSearch *_dlgSearch;
