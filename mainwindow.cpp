@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
       _audio(audio) {
   ui->setupUi(this);
 
-  // seting default parameters and initialize:
+  // setting default parameters and initialize:
   setWindowTitle("Bratskis MP3 Player Nitro");
   _audio->setVolume(startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);

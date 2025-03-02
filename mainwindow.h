@@ -45,11 +45,11 @@ private:
   DialogProgress *_dlgProgess;
   DialogSearch *_dlgSearch;
   DialogManagement *_dlgManagement;
-  QString playThisSong =
-      "/home/bart/Music/Bart/calexico/mix/calexico - Dutch TV-show.mp3";
+  QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch "
+                         "TV-show.mp3"; // just for testing
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
-  float startVolume = 0.2;
+  float startVolume = 0.2; // setting the start volume to 20%
   const QString convertMilliSec(const qint64 &millisec);
 };
 #endif // MAINWINDOW_H
