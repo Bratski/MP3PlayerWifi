@@ -32,6 +32,7 @@ public slots:
   void openProgressDialog();
   void openSearch();
   void openManagement();
+
   // player
   void setVolume(int level);
 
@@ -46,7 +47,9 @@ private:
   DialogManagement *_dlgManagement;
   QString playThisSong =
       "/home/bart/Music/Bart/calexico/mix/calexico - Dutch TV-show.mp3";
-  QString time;
-  QString &convertMilliSec(qint64 &millisec);
+  QString timeSong = "Time Song";
+  QString timeList = "Total Time";
+  float startVolume = 0.2;
+  const QString convertMilliSec(const qint64 &millisec);
 };
 #endif // MAINWINDOW_H

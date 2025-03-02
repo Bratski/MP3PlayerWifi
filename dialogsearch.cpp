@@ -5,10 +5,8 @@ DialogSearch::DialogSearch(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogSearch) {
   ui->setupUi(this);
   setWindowTitle("Search and filter");
-  QObject::connect(ui->pushButtonCancel, SIGNAL(clicked(bool)), this,
-                   SLOT(cancel()));
+  QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
+                   &DialogSearch::close);
 }
 
 DialogSearch::~DialogSearch() { delete ui; }
-
-void DialogSearch::cancel() { this->close(); }

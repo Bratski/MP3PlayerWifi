@@ -1,18 +1,23 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+// TODO read and save settings from a config file
+
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
       _audio(audio) {
   ui->setupUi(this);
 
-  // set default settings and initialze
+  // seting default parameters and initialize:
   setWindowTitle("Bratskis MP3 Player Nitro");
-  _audio->setVolume(0.5); // set start volume to 50%
+  _audio->setVolume(startVolume);
+  ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
       static_cast<int>(_audio->volume() * 100));
   _player->setSource(QUrl::fromLocalFile(playThisSong));
+  ui->progressBarSong->setFormat(timeSong);
+  ui->labelTotalTime->setText(timeList);
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -26,18 +31,24 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                      ui->horizontalSliderSong->setValue(static_cast<int>(pos));
                      ui->progressBarSong->setValue(static_cast<int>(pos));
                    });
+
   // the other way around, read the slider position and move to the
   // corresponding position in the song:
   QObject::connect(
       ui->horizontalSliderSong, &QSlider::sliderMoved, ui->horizontalSliderSong,
       [this](int pos) { _player->setPosition(static_cast<qint64>(pos)); });
+
+  // reading the volume slider:
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
+
+  // reading the time and display it in the progress bar:
   QObject::connect(_player, &QMediaPlayer::positionChanged, ui->progressBarSong,
                    [this](qint64 timeMS) {
-                     QString time = convertMilliSec(timeMS);
-                     ui->progressBarSong->setFormat(time);
+                     timeSong = convertMilliSec(timeMS);
+                     ui->progressBarSong->setFormat(timeSong);
                    });
+
   // header menu items:
   QObject::connect(ui->actionExit, &QAction::triggered, this,
                    &MainWindow::close);
@@ -47,6 +58,9 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::openProgressDialog);
   QObject::connect(ui->actionSearchfilter, &QAction::triggered, this,
                    &MainWindow::openSearch);
+  QObject::connect(ui->actionManagement, &QAction::triggered, this,
+                   &MainWindow::openManagement);
+
   // pushbuttons for playing songs:
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, _player,
                    &QMediaPlayer::play);
@@ -58,7 +72,9 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
 MainWindow::~MainWindow() { delete ui; }
 
-// header windows
+// header windows, the Dialog object pointed to by _dlgxxx is deleted
+// automatically when its parent object (the one referred to by this) is
+// destroyed.
 void MainWindow::openSettingsDialog() {
   _dlgSettings = new DialogSettings(this, _oled);
   _dlgSettings->show();
@@ -79,19 +95,21 @@ void MainWindow::openManagement() {
   _dlgManagement->show();
 }
 
-// setting the volume level:
+// setting the volume level, the audio volume must be a float between 0.0 (=no
+// sound) and 1.0 (=max volume):
 void MainWindow::setVolume(int level) {
   float audioLevel = static_cast<float>(level) / 100.0f;
   _audio->setVolume(audioLevel);
 }
 
-QString &MainWindow::convertMilliSec(qint64 &millisec) {
+// converts milliseconds and returns a QString displaying the time in this
+// format "0:00:00":
+const QString MainWindow::convertMilliSec(const qint64 &millisec) {
   int sec = (millisec / 1000) % 60;
   int min = (millisec / (60 * 1000)) % 60;
   int hr = (millisec / (60 * 60 * 1000));
 
-  time = QString::number(hr) + ":" +
+  return QString::number(hr) + ":" +
          QString::number(min).rightJustified(2, '0') + ":" +
          QString::number(sec).rightJustified(2, '0');
-  return time;
 }

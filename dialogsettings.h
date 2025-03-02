@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
+// TODO: save and read settings from a config file
+
 namespace Ui {
 class DialogSettings;
 }
@@ -18,7 +20,6 @@ public:
   ~DialogSettings();
 
 public slots:
-  void cancel();
   void autodetectOled();
   void initializeOled();
   void toggleOledButtons(bool checked);

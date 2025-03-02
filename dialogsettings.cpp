@@ -7,8 +7,8 @@ DialogSettings::DialogSettings(QWidget *parent, COled *oled)
   setWindowTitle("Settings");
   showOledData();
 
-  QObject::connect(ui->pushButtonCancel, SIGNAL(clicked(bool)), this,
-                   SLOT(cancel()));
+  QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
+                   &DialogSettings::close);
   QObject::connect(ui->pushButtonAutoDetectOled, SIGNAL(clicked(bool)), this,
                    SLOT(autodetectOled()));
   QObject::connect(ui->pushButtonInitializeOled, SIGNAL(clicked(bool)), this,
@@ -24,8 +24,6 @@ DialogSettings::DialogSettings(QWidget *parent, COled *oled)
 }
 
 DialogSettings::~DialogSettings() { delete ui; }
-
-void DialogSettings::cancel() { this->close(); }
 
 void DialogSettings::autodetectOled() {
   _oled->autodetect();
@@ -68,6 +66,7 @@ void DialogSettings::showOledData() {
 
 void DialogSettings::toggleOledButtons(bool checked) {
   _statusOled = checked;
+
   ui->pushButtonAutoDetectOled->setEnabled(_statusOled);
   ui->pushButtonInitializeOled->setEnabled(_statusOled);
   ui->lineEditi2cAdress->setEnabled(_statusOled);

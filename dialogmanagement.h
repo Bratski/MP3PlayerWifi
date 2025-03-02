@@ -15,7 +15,6 @@ public:
   ~DialogManagement();
 
 public slots:
-  void cancel();
 
 private:
   Ui::DialogManagement *ui;

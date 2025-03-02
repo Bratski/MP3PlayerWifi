@@ -7,19 +7,17 @@ namespace Ui {
 class DialogSearch;
 }
 
-class DialogSearch : public QDialog
-{
-    Q_OBJECT
+class DialogSearch : public QDialog {
+  Q_OBJECT
 
 public:
-    explicit DialogSearch(QWidget *parent = nullptr);
-    ~DialogSearch();
+  explicit DialogSearch(QWidget *parent = nullptr);
+  ~DialogSearch();
 
 public slots:
-    void cancel();
 
 private:
-    Ui::DialogSearch *ui;
+  Ui::DialogSearch *ui;
 };
 
 #endif // DIALOGSEARCH_H

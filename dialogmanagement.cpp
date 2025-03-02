@@ -5,10 +5,8 @@ DialogManagement::DialogManagement(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogManagement) {
   ui->setupUi(this);
   setWindowTitle("Playlist Management");
-  QObject::connect(ui->pushButtonCancel, SIGNAL(clicked(bool)), this,
-                   SLOT(cancel()));
+  QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
+                   &DialogManagement::close);
 }
 
 DialogManagement::~DialogManagement() { delete ui; }
-
-void DialogManagement::cancel() { this->close(); }

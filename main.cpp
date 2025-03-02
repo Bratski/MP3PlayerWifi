@@ -7,20 +7,18 @@
 
 int main(int argc, char *argv[]) {
 
-  COled oled;
-  QMediaPlayer player;
-  QAudioOutput audioOutput;
+  // creating Objects:
+  COled oled;               // for Oled Display
+  QMediaPlayer player;      // for playing audiofiles
+  QAudioOutput audioOutput; // needed for setting the audio output
+
+  // Set the players audio output:
   player.setAudioOutput(&audioOutput);
 
-  // player.setSource(QUrl::fromLocalFile(
-  //     "/home/bart/Music/Bart/Broadcast/broadcast - austin powers.mp3"));
-  // audioOutput.setVolume(50);
-  // player.play();
-
-  // oled.autodetect();
-
   QApplication a(argc, argv);
-  MainWindow w(nullptr, &oled, &player, &audioOutput);
+  MainWindow w(
+      nullptr, &oled, &player,
+      &audioOutput); // passing all the objects as pointers to the main window
   w.show();
   return a.exec();
 }
