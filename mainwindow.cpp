@@ -109,7 +109,12 @@ const QString MainWindow::convertMilliSec(const qint64 &millisec) {
   int min = (millisec / (60 * 1000)) % 60;
   int hr = (millisec / (60 * 60 * 1000));
 
-  return QString::number(hr) + ":" +
-         QString::number(min).rightJustified(2, '0') + ":" +
-         QString::number(sec).rightJustified(2, '0');
+  QString timeExHr = QString::number(min).rightJustified(2, '0') + ":" +
+                     QString::number(sec).rightJustified(2, '0');
+  QString timeInHr = QString::number(hr) + ":" + timeExHr;
+
+  if (!hr)
+    return timeExHr;
+  else
+    return timeInHr;
 }

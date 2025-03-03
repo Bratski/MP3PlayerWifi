@@ -7,6 +7,7 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
+
   // creating Objects:
   COled oled;               // for Oled Display
   QMediaPlayer player;      // for playing audiofiles
