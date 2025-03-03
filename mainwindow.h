@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "COled.h"
+#include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
 #include <dialogmanagement.h>

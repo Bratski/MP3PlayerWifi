@@ -6,7 +6,7 @@
 #include <QtMultimedia/QMediaPlayer>
 
 int main(int argc, char *argv[]) {
-
+  QApplication a(argc, argv);
   // creating Objects:
   COled oled;               // for Oled Display
   QMediaPlayer player;      // for playing audiofiles
@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
   // Set the players audio output:
   player.setAudioOutput(&audioOutput);
 
-  QApplication a(argc, argv);
   MainWindow w(
       nullptr, &oled, &player,
       &audioOutput); // passing all the objects as pointers to the main window
