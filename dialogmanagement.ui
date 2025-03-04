@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
-    <height>534</height>
+    <width>406</width>
+    <height>418</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,17 +21,12 @@
     <widget class="QTableWidget" name="tableWidgetPlaylists">
      <column>
       <property name="text">
-       <string>Nr.</string>
+       <string>ID-Nr.</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Date</string>
       </property>
      </column>
     </widget>

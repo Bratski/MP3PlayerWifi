@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::openSearch);
   QObject::connect(ui->actionManagement, &QAction::triggered, this,
                    &MainWindow::openManagement);
+  QObject::connect(ui->actionOther_Playlist, &QAction::triggered, this,
+                   &MainWindow::openAddPlaylist);
 
   // pushbuttons for playing songs:
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, _player,
@@ -93,6 +95,11 @@ void MainWindow::openSearch() {
 void MainWindow::openManagement() {
   _dlgManagement = new DialogManagement(this);
   _dlgManagement->show();
+}
+
+void MainWindow::openAddPlaylist() {
+  _dlgAddPlaylist = new DialogAddPlaylist(this);
+  _dlgAddPlaylist->show();
 }
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no

@@ -361,7 +361,7 @@
     <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
    </property>
    <property name="text">
-    <string>File</string>
+    <string>Music File</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
@@ -372,7 +372,7 @@
     <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
    </property>
    <property name="text">
-    <string>Folder</string>
+    <string>Music Folder</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>

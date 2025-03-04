@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
+#include <dialogaddplaylist.h>
 #include <dialogmanagement.h>
 #include <dialogprogress.h>
 #include <dialogsearch.h>
@@ -33,6 +34,7 @@ public slots:
   void openProgressDialog();
   void openSearch();
   void openManagement();
+  void openAddPlaylist();
 
   // player
   void setVolume(int level);
@@ -46,8 +48,14 @@ private:
   DialogProgress *_dlgProgess;
   DialogSearch *_dlgSearch;
   DialogManagement *_dlgManagement;
-  QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch "
-                         "TV-show.mp3"; // just for testing
+  DialogAddPlaylist *_dlgAddPlaylist;
+
+  QString playThisSong =
+      "/home/bart/Music/Fridge/Happiness (Anniversary Edition)/07 - Drums Bass "
+      "Sonics & Edits - Remastered.flac";
+  // QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch
+  // "
+  //                        "TV-show.mp3"; // just for testing
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
