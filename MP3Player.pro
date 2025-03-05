@@ -1,4 +1,4 @@
-QT       += core gui multimedia
+QT       += core gui multimedia sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     #../Oled/OLEDTest/COled.h \
+    dbconnect.h \
     dialogaddplaylist.h \
     dialogmanagement.h \
     dialogprogress.h \

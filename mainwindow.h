@@ -5,6 +5,8 @@
 #include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
+//#include <QtSql/QSqlQueryModel>
+#include <QtSql/QSqlTableModel>
 #include <dialogaddplaylist.h>
 #include <dialogmanagement.h>
 #include <dialogprogress.h>
@@ -32,9 +34,9 @@ public slots:
   // header
   void openSettingsDialog();
   void openProgressDialog();
-  void openSearch();
-  void openManagement();
-  void openAddPlaylist();
+  void openSearchDialog();
+  void openManagementDialog();
+  void openAddPlaylistDialog();
 
   // player
   void setVolume(int level);
@@ -49,7 +51,17 @@ private:
   DialogSearch *_dlgSearch;
   DialogManagement *_dlgManagement;
   DialogAddPlaylist *_dlgAddPlaylist;
+  // QSqlQueryModel *_sqlq; // not able to edit a database, it's read only
+  QSqlTableModel *_sqlq;
 
+  QString fill_SqlqWith =
+      "SELECT Track.TraID, Track.TraTitle, Track.TraArtist, Track.TraAlbum, "
+      "Track.TraYear, Track.TraNumber, "
+      "Track.TraGenre, Track.TraDuration, Track.TraBitrate, "
+      "Track.TraSamplerate, Track.TraChannels, Playlist.PllID, Playlist.PllName"
+      " JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK"
+      " JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID"
+      " WHERE Playlist.PllID = :playlistId";
   QString playThisSong =
       "/home/bart/Music/Fridge/Happiness (Anniversary Edition)/07 - Drums Bass "
       "Sonics & Edits - Remastered.flac";
@@ -59,6 +71,6 @@ private:
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
-  const QString convertMilliSec(const qint64 &millisec);
+  const QString convertMilliSecToTimeString(const qint64 &millisec);
 };
 #endif // MAINWINDOW_H

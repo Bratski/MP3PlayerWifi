@@ -18,6 +18,24 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   _player->setSource(QUrl::fromLocalFile(playThisSong));
   ui->progressBarSong->setFormat(timeSong);
   ui->labelTotalTime->setText(timeList);
+  //_sqlq = new QSqlQueryModel(); // readonly
+  _sqlq = new QSqlTableModel();   // read and write
+  _sqlq->setQuery(fill_SqlqWith); // fill _sqlq with the database data, as
+                                  // described in the Qstring fill_SqlqWith
+  // setting the _sqlq headers:
+  _sqlq->setHeaderData(0, Qt::Horizontal, "Track ID");
+  _sqlq->setHeaderData(1, Qt::Horizontal, "Title");
+  _sqlq->setHeaderData(2, Qt::Horizontal, "Artist");
+  _sqlq->setHeaderData(3, Qt::Horizontal, "Album");
+  _sqlq->setHeaderData(4, Qt::Horizontal, "Year");
+  _sqlq->setHeaderData(5, Qt::Horizontal, "Number");
+  _sqlq->setHeaderData(6, Qt::Horizontal, "Genre");
+  _sqlq->setHeaderData(7, Qt::Horizontal, "Duration");
+  _sqlq->setHeaderData(8, Qt::Horizontal, "Bitrate");
+  _sqlq->setHeaderData(9, Qt::Horizontal, "Samplerate");
+  _sqlq->setHeaderData(10, Qt::Horizontal, "Channels");
+  _sqlq->setHeaderData(11, Qt::Horizontal, "Playlist ID");
+  _sqlq->setHeaderData(12, Qt::Horizontal, "Playlist Name");
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -45,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // reading the time and display it in the progress bar:
   QObject::connect(_player, &QMediaPlayer::positionChanged, ui->progressBarSong,
                    [this](qint64 timeMS) {
-                     timeSong = convertMilliSec(timeMS);
+                     timeSong = convertMilliSecToTimeString(timeMS);
                      ui->progressBarSong->setFormat(timeSong);
                    });
 
@@ -57,11 +75,11 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   QObject::connect(ui->actionFolder, &QAction::triggered, this,
                    &MainWindow::openProgressDialog);
   QObject::connect(ui->actionSearchfilter, &QAction::triggered, this,
-                   &MainWindow::openSearch);
+                   &MainWindow::openSearchDialog);
   QObject::connect(ui->actionManagement, &QAction::triggered, this,
-                   &MainWindow::openManagement);
+                   &MainWindow::openManagementDialog);
   QObject::connect(ui->actionOther_Playlist, &QAction::triggered, this,
-                   &MainWindow::openAddPlaylist);
+                   &MainWindow::openAddPlaylistDialog);
 
   // pushbuttons for playing songs:
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, _player,
@@ -72,7 +90,10 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &QMediaPlayer::stop);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  delete _sqlq;
+}
 
 // header windows, the Dialog object pointed to by _dlgxxx is deleted
 // automatically when its parent object (the one referred to by this) is
@@ -87,17 +108,17 @@ void MainWindow::openProgressDialog() {
   _dlgProgess->show();
 }
 
-void MainWindow::openSearch() {
+void MainWindow::openSearchDialog() {
   _dlgSearch = new DialogSearch(this);
   _dlgSearch->show();
 }
 
-void MainWindow::openManagement() {
+void MainWindow::openManagementDialog() {
   _dlgManagement = new DialogManagement(this);
   _dlgManagement->show();
 }
 
-void MainWindow::openAddPlaylist() {
+void MainWindow::openAddPlaylistDialog() {
   _dlgAddPlaylist = new DialogAddPlaylist(this);
   _dlgAddPlaylist->show();
 }
@@ -111,7 +132,7 @@ void MainWindow::setVolume(int level) {
 
 // converts milliseconds and returns a QString displaying the time in this
 // format "0:00:00":
-const QString MainWindow::convertMilliSec(const qint64 &millisec) {
+const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
   int sec = (millisec / 1000) % 60;
   int min = (millisec / (60 * 1000)) % 60;
   int hr = (millisec / (60 * 60 * 1000));

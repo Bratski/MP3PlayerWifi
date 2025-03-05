@@ -1,9 +1,11 @@
 #include "COled.h"
+#include "dbconnect.h"
 #include "mainwindow.h"
 
 #include <QApplication>
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
+#include <QtSql/QSql>
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
@@ -15,6 +17,11 @@ int main(int argc, char *argv[]) {
 
   // Set the players audio output:
   player.setAudioOutput(&audioOutput);
+
+  // Create Database, stop program if not succesfull
+  if (!createConnection()) {
+    return EXIT_FAILURE;
+  }
 
   MainWindow w(
       nullptr, &oled, &player,
