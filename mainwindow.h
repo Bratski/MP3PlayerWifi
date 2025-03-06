@@ -5,8 +5,8 @@
 #include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
-//#include <QtSql/QSqlQueryModel>
-#include <QtSql/QSqlTableModel>
+//#include <QtSql/QSqlTableModel>
+#include <QtSql/QSqlQuery>
 #include <dialogaddplaylist.h>
 #include <dialogmanagement.h>
 #include <dialogprogress.h>
@@ -52,19 +52,21 @@ private:
   DialogManagement *_dlgManagement;
   DialogAddPlaylist *_dlgAddPlaylist;
   // QSqlQueryModel *_sqlq; // not able to edit a database, it's read only
-  QSqlTableModel *_sqlq;
+  // QSqlTableModel *_sqlq;
 
-  QString fill_SqlqWith =
-      "SELECT Track.TraID, Track.TraTitle, Track.TraArtist, Track.TraAlbum, "
-      "Track.TraYear, Track.TraNumber, "
-      "Track.TraGenre, Track.TraDuration, Track.TraBitrate, "
-      "Track.TraSamplerate, Track.TraChannels, Playlist.PllID, Playlist.PllName"
-      " JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK"
-      " JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID"
-      " WHERE Playlist.PllID = :playlistId";
+  // QString fill_SqlqWith =
+  //     "SELECT Track.TraID, Track.TraTitle, Track.TraArtist, Track.TraAlbum, "
+  //     "Track.TraYear, Track.TraNumber, "
+  //     "Track.TraGenre, Track.TraDuration, Track.TraBitrate, "
+  //     "Track.TraSamplerate, Track.TraChannels, Track.TraFileLocation, "
+  //     "Playlist.PllID, Playlist.PllName"
+  //     " JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK"
+  //     " JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID"
+  //     " WHERE Playlist.PllID = :playlistId";
   QString playThisSong =
       "/home/bart/Music/Fridge/Happiness (Anniversary Edition)/07 - Drums Bass "
       "Sonics & Edits - Remastered.flac";
+  QString defaultPlaylistName = "Country";
   // QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch
   // "
   //                        "TV-show.mp3"; // just for testing
@@ -72,5 +74,7 @@ private:
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
   const QString convertMilliSecToTimeString(const qint64 &millisec);
+  void fillTableWithDatabase(const QString &playlistName);
+  int getPlaylistID(const QString &playlistName);
 };
 #endif // MAINWINDOW_H

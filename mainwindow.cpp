@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
       _audio(audio) {
   ui->setupUi(this);
 
-  // setting default parameters and initialize:
+  // setting default parameters and initialize
   setWindowTitle("Bratskis MP3 Player Nitro");
   _audio->setVolume(startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
@@ -18,28 +18,35 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   _player->setSource(QUrl::fromLocalFile(playThisSong));
   ui->progressBarSong->setFormat(timeSong);
   ui->labelTotalTime->setText(timeList);
+
+  // not usefull for a TableWidget, only for TableView!
   //_sqlq = new QSqlQueryModel(); // readonly
-  _sqlq = new QSqlTableModel();   // read and write
-  _sqlq->setQuery(fill_SqlqWith); // fill _sqlq with the database data, as
-                                  // described in the Qstring fill_SqlqWith
-  // setting the _sqlq headers:
-  _sqlq->setHeaderData(0, Qt::Horizontal, "Track ID");
-  _sqlq->setHeaderData(1, Qt::Horizontal, "Title");
-  _sqlq->setHeaderData(2, Qt::Horizontal, "Artist");
-  _sqlq->setHeaderData(3, Qt::Horizontal, "Album");
-  _sqlq->setHeaderData(4, Qt::Horizontal, "Year");
-  _sqlq->setHeaderData(5, Qt::Horizontal, "Number");
-  _sqlq->setHeaderData(6, Qt::Horizontal, "Genre");
-  _sqlq->setHeaderData(7, Qt::Horizontal, "Duration");
-  _sqlq->setHeaderData(8, Qt::Horizontal, "Bitrate");
-  _sqlq->setHeaderData(9, Qt::Horizontal, "Samplerate");
-  _sqlq->setHeaderData(10, Qt::Horizontal, "Channels");
-  _sqlq->setHeaderData(11, Qt::Horizontal, "Playlist ID");
-  _sqlq->setHeaderData(12, Qt::Horizontal, "Playlist Name");
+  //_sqlq = new QSqlTableModel();   // read and write
+  //_sqlq->setQuery(fill_SqlqWith); // fill _sqlq with the database data, as
+  // described in the Qstring fill_SqlqWith
+
+  // // setting the _sqlq headers, only usefull with tableView, not with
+  // TableWidget _sqlq->setHeaderData(0, Qt::Horizontal, "Track ID");
+  // _sqlq->setHeaderData(1, Qt::Horizontal, "Title");
+  // _sqlq->setHeaderData(2, Qt::Horizontal, "Artist");
+  // _sqlq->setHeaderData(3, Qt::Horizontal, "Album");
+  // _sqlq->setHeaderData(4, Qt::Horizontal, "Year");
+  // _sqlq->setHeaderData(5, Qt::Horizontal, "Number");
+  // _sqlq->setHeaderData(6, Qt::Horizontal, "Genre");
+  // _sqlq->setHeaderData(7, Qt::Horizontal, "Duration");
+  // _sqlq->setHeaderData(8, Qt::Horizontal, "Bitrate");
+  // _sqlq->setHeaderData(9, Qt::Horizontal, "Samplerate");
+  // _sqlq->setHeaderData(10, Qt::Horizontal, "Channels");
+  // _sqlq->setHeaderData(11, Qt::Horizontal, "File Location");
+  // _sqlq->setHeaderData(12, Qt::Horizontal, "Playlist ID");
+  // _sqlq->setHeaderData(13, Qt::Horizontal, "Playlist Name");
+
+  // filling the Table in MainWindow with database entries
+  fillTableWithDatabase(defaultPlaylistName);
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
-  // corresponding positions:
+  // corresponding positions
   QObject::connect(_player, &QMediaPlayer::positionChanged,
                    ui->horizontalSliderSong, [this](qint64 pos) {
                      ui->horizontalSliderSong->setRange(
@@ -51,23 +58,23 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    });
 
   // the other way around, read the slider position and move to the
-  // corresponding position in the song:
+  // corresponding position in the song
   QObject::connect(
       ui->horizontalSliderSong, &QSlider::sliderMoved, ui->horizontalSliderSong,
       [this](int pos) { _player->setPosition(static_cast<qint64>(pos)); });
 
-  // reading the volume slider:
+  // reading the volume slider
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
 
-  // reading the time and display it in the progress bar:
+  // reading the time and display it in the progress bar
   QObject::connect(_player, &QMediaPlayer::positionChanged, ui->progressBarSong,
                    [this](qint64 timeMS) {
                      timeSong = convertMilliSecToTimeString(timeMS);
                      ui->progressBarSong->setFormat(timeSong);
                    });
 
-  // header menu items:
+  // header menu items
   QObject::connect(ui->actionExit, &QAction::triggered, this,
                    &MainWindow::close);
   QObject::connect(ui->actionOled_Display, &QAction::triggered, this,
@@ -81,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   QObject::connect(ui->actionOther_Playlist, &QAction::triggered, this,
                    &MainWindow::openAddPlaylistDialog);
 
-  // pushbuttons for playing songs:
+  // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, _player,
                    &QMediaPlayer::play);
   QObject::connect(ui->pushButtonPause, &QPushButton::clicked, _player,
@@ -92,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
 MainWindow::~MainWindow() {
   delete ui;
-  delete _sqlq;
+  // delete _sqlq;
 }
 
 // header windows, the Dialog object pointed to by _dlgxxx is deleted
@@ -124,14 +131,14 @@ void MainWindow::openAddPlaylistDialog() {
 }
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no
-// sound) and 1.0 (=max volume):
+// sound) and 1.0 (=max volume)
 void MainWindow::setVolume(int level) {
   float audioLevel = static_cast<float>(level) / 100.0f;
   _audio->setVolume(audioLevel);
 }
 
 // converts milliseconds and returns a QString displaying the time in this
-// format "0:00:00":
+// format "0:00:00"
 const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
   int sec = (millisec / 1000) % 60;
   int min = (millisec / (60 * 1000)) % 60;
@@ -145,4 +152,85 @@ const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
     return timeExHr;
   else
     return timeInHr;
+}
+
+void MainWindow::fillTableWithDatabase(const QString &playlistName) {
+  // empty the current playlist
+  ui->tableWidgetCurrentPlaylist->clearContents();
+  ui->tableWidgetCurrentPlaylist->setRowCount(0);
+
+  // find the corresponding ID in the playlist
+  int playlistID = getPlaylistID(playlistName);
+
+  // leave function if no valid ID could be found
+  if (playlistID == -1) {
+    qDebug() << "no valid ID could be found";
+    return;
+  }
+
+  // create a query, and find in the database
+  QSqlQuery query;
+  query.prepare("SELECT Track.TraID, Track.TraName, Track.TraArtist, "
+                "Track.TraAlbum, Track.TraYear, "
+                "Track.TraNumber, Track.TraGenre, Track.TraDuration, "
+                "Track.TraBitrate, Track.TraSamplerate, "
+                "Track.TraChannels, Track.TraFileLocation "
+                "FROM Track "
+                "JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK "
+                "JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID "
+                "WHERE Playlist.PllID = :playlistID");
+  query.bindValue(":playlistID", playlistID);
+
+  if (!query.exec())
+    return;
+
+  // count the number of Tracks being found
+  int rowCount = 0;
+  while (query.next())
+    ++rowCount;
+
+  // question: is it useful to put the contents of the database directly into
+  // the tableWidget, or is it better to put its contents into a playlist
+  // object, create pointer versions of this list, in case special ways of
+  // sorting are needed, and display the playlist (pointer) object into the
+  // tableWidget? In other words the database is filtered through several
+  // objects: object which contains the data as sorted and stored in the
+  // database, other objects are filled with pointers to this object, if
+  // different sortings are needed, before it is displayed or edited? The
+  // database is just then updated, when a Playlist is being saved explicitly,
+  // or the program is terminated, in the destructor?
+
+  // set the table in mainwindow to the corresponding number of rows
+  ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);
+
+  // populate the table with data from query
+  query.seek(-1); // reset query to start position
+  int row = 0;
+  while (query.next()) {
+    for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
+         ++col) {
+      QTableWidgetItem *item =
+          new QTableWidgetItem(query.value(col + 1).toString());
+      ui->tableWidgetCurrentPlaylist->setItem(row, col, item);
+    }
+    ++row;
+  }
+
+  // customizing the looks
+  ui->tableWidgetCurrentPlaylist->resizeColumnsToContents();
+  ui->tableWidgetCurrentPlaylist->setAlternatingRowColors(true);
+  // ui->tableWidgetCurrentPlaylist->hideColumn(0);
+}
+
+int MainWindow::getPlaylistID(const QString &playlistName) {
+  QSqlQuery query;
+  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :name");
+  query.bindValue(":name", playlistName);
+
+  if (!query.exec())
+    return -1;
+  if (query.next())
+    return query.value(0).toInt();
+  else
+    return -1;
 }

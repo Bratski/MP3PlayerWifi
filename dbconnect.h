@@ -37,7 +37,8 @@ bool createConnection() {
                   "TraDuration INTEGER NOT NULL, "
                   "TraBitrate INTEGER NOT NULL, "
                   "TraSamplerate INTEGER NOT NULL, "
-                  "TraChannels INTEGER NOT NULL)")) {
+                  "TraChannels INTEGER NOT NULL, "
+                  "TraFileLocation	TEXT NOT NULL)")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create Track table: " +
                               query.lastError().text());
