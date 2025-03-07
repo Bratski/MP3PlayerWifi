@@ -55,18 +55,18 @@ private:
   // QSqlTableModel *_sqlq;
 
   // QString fill_SqlqWith =
-  //     "SELECT Track.TraID, Track.TraTitle, Track.TraArtist, Track.TraAlbum, "
-  //     "Track.TraYear, Track.TraNumber, "
-  //     "Track.TraGenre, Track.TraDuration, Track.TraBitrate, "
-  //     "Track.TraSamplerate, Track.TraChannels, Track.TraFileLocation, "
-  //     "Playlist.PllID, Playlist.PllName"
-  //     " JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK"
-  //     " JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID"
-  //     " WHERE Playlist.PllID = :playlistId";
+  //     "SELECT Track.TraID, Track.TraName, Track.TraNumber, Track.TraDuration,
+  //     " "Track.TraBitrate, " "Track.TraSamplerate, Track.TraChannels,
+  //     Track.TraFileLocation, " "Album.AlbName, Album.AlbYear, Artist.ArtName
+  //     " "FROM Track " "JOIN Album ON Track.TraAlbFK = Album.AlbID " "JOIN
+  //     Artist ON Album.AlbArtFK = Artist.ArtID " "JOIN TrackPlaylist ON
+  //     Track.TraID = TrackPlaylist.TraFK " "JOIN Playlist ON
+  //     TrackPlaylist.PllFK = Playlist.PllID " "WHERE Playlist.PllName =
+  //     :playlistName";
   QString playThisSong =
       "/home/bart/Music/Fridge/Happiness (Anniversary Edition)/07 - Drums Bass "
       "Sonics & Edits - Remastered.flac";
-  QString defaultPlaylistName = "Country";
+  QString defaultPlaylistName = "Americana";
   // QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch
   // "
   //                        "TV-show.mp3"; // just for testing

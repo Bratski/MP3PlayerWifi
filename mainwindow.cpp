@@ -170,15 +170,17 @@ void MainWindow::fillTableWithDatabase(const QString &playlistName) {
 
   // create a query, and find in the database
   QSqlQuery query;
-  query.prepare("SELECT Track.TraID, Track.TraName, Track.TraArtist, "
-                "Track.TraAlbum, Track.TraYear, "
-                "Track.TraNumber, Track.TraGenre, Track.TraDuration, "
-                "Track.TraBitrate, Track.TraSamplerate, "
-                "Track.TraChannels, Track.TraFileLocation "
-                "FROM Track "
-                "JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK "
-                "JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID "
-                "WHERE Playlist.PllID = :playlistID");
+  query.prepare(
+      "SELECT Track.TraID, Track.TraName, Track.TraNumber, Track.TraDuration, "
+      "Track.TraBitrate, "
+      "Track.TraSamplerate, Track.TraChannels, Track.TraFileLocation, "
+      "Album.AlbName, Album.AlbYear, Artist.ArtName "
+      "FROM Track "
+      "JOIN Album ON Track.TraAlbFK = Album.AlbID "
+      "JOIN Artist ON Album.AlbArtFK = Artist.ArtID "
+      "JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK "
+      "JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID "
+      "WHERE Playlist.PllID = :playlistID");
   query.bindValue(":playlistID", playlistID);
 
   if (!query.exec())

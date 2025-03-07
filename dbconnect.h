@@ -25,20 +25,41 @@ bool createConnection() {
   // Create tables if they don't exist already
   QSqlQuery query;
 
+  // Create the Artist table
+  if (!query.exec("CREATE TABLE IF NOT EXISTS Artist ("
+                  "ArtID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
+                  "ArtName TEXT NOT NULL)")) {
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to create Artist table: " +
+                              query.lastError().text());
+    return false;
+  }
+
+  // Create the Album table
+  if (!query.exec("CREATE TABLE IF NOT EXISTS Album ("
+                  "AlbID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
+                  "AlbName TEXT NOT NULL, "
+                  "AlbYear TEXT NOT NULL, "
+                  "AlbArtFK INTEGER NOT NULL, "
+                  "FOREIGN KEY(AlbArtFK) REFERENCES Artist(ArtID))")) {
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to create Album table: " +
+                              query.lastError().text());
+    return false;
+  }
+
   // Create the Track table
   if (!query.exec("CREATE TABLE IF NOT EXISTS Track ("
                   "TraID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
                   "TraName TEXT NOT NULL, "
-                  "TraArtist TEXT NOT NULL, "
-                  "TraAlbum TEXT NOT NULL, "
-                  "TraYear INTEGER NOT NULL, "
                   "TraNumber INTEGER NOT NULL, "
-                  "TraGenre TEXT NOT NULL, "
                   "TraDuration INTEGER NOT NULL, "
                   "TraBitrate INTEGER NOT NULL, "
                   "TraSamplerate INTEGER NOT NULL, "
                   "TraChannels INTEGER NOT NULL, "
-                  "TraFileLocation	TEXT NOT NULL)")) {
+                  "TraFileLocation TEXT NOT NULL, "
+                  "TraAlbFK INTEGER NOT NULL, "
+                  "FOREIGN KEY(TraAlbFK) REFERENCES Album(AlbID))")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create Track table: " +
                               query.lastError().text());
