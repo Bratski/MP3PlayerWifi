@@ -74,6 +74,7 @@ private:
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
   const QString convertMilliSecToTimeString(const qint64 &millisec);
+  const QString convertSecToTimeString(const qint64 &sec);
   void fillTableWithDatabase(const QString &playlistName);
   int getPlaylistID(const QString &playlistName);
 };

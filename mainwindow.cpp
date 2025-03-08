@@ -132,6 +132,22 @@ const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
     return timeInHr;
 }
 
+const QString MainWindow::convertSecToTimeString(const qint64 &sec)
+{
+    int seconds = sec % 60;
+    int min = (sec / 60) % 60;
+    int hr = (sec / (60 * 60 ));
+
+    QString timeExHr = QString::number(min).rightJustified(2, '0') + ":" +
+                       QString::number(seconds).rightJustified(2, '0');
+    QString timeInHr = QString::number(hr) + ":" + timeExHr;
+
+    if (!hr)
+        return timeExHr;
+    else
+        return timeInHr;
+}
+
 void MainWindow::fillTableWithDatabase(const QString &playlistName) {
   // empty the current playlist
   ui->tableWidgetCurrentPlaylist->clearContents();
