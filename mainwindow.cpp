@@ -19,28 +19,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->progressBarSong->setFormat(timeSong);
   ui->labelTotalTime->setText(timeList);
 
-  // not usefull for a TableWidget, only for TableView!
-  //_sqlq = new QSqlQueryModel(); // readonly
-  //_sqlq = new QSqlTableModel();   // read and write
-  //_sqlq->setQuery(fill_SqlqWith); // fill _sqlq with the database data, as
-  // described in the Qstring fill_SqlqWith
-
-  // // setting the _sqlq headers, only usefull with tableView, not with
-  // TableWidget _sqlq->setHeaderData(0, Qt::Horizontal, "Track ID");
-  // _sqlq->setHeaderData(1, Qt::Horizontal, "Title");
-  // _sqlq->setHeaderData(2, Qt::Horizontal, "Artist");
-  // _sqlq->setHeaderData(3, Qt::Horizontal, "Album");
-  // _sqlq->setHeaderData(4, Qt::Horizontal, "Year");
-  // _sqlq->setHeaderData(5, Qt::Horizontal, "Number");
-  // _sqlq->setHeaderData(6, Qt::Horizontal, "Genre");
-  // _sqlq->setHeaderData(7, Qt::Horizontal, "Duration");
-  // _sqlq->setHeaderData(8, Qt::Horizontal, "Bitrate");
-  // _sqlq->setHeaderData(9, Qt::Horizontal, "Samplerate");
-  // _sqlq->setHeaderData(10, Qt::Horizontal, "Channels");
-  // _sqlq->setHeaderData(11, Qt::Horizontal, "File Location");
-  // _sqlq->setHeaderData(12, Qt::Horizontal, "Playlist ID");
-  // _sqlq->setHeaderData(13, Qt::Horizontal, "Playlist Name");
-
   // filling the Table in MainWindow with database entries
   fillTableWithDatabase(defaultPlaylistName);
 
@@ -191,16 +169,17 @@ void MainWindow::fillTableWithDatabase(const QString &playlistName) {
   while (query.next())
     ++rowCount;
 
-  // question: is it useful to put the contents of the database directly into
-  // the tableWidget, or is it better to put its contents into a playlist
-  // object, create pointer versions of this list, in case special ways of
-  // sorting are needed, and display the playlist (pointer) object into the
-  // tableWidget? In other words the database is filtered through several
-  // objects: object which contains the data as sorted and stored in the
-  // database, other objects are filled with pointers to this object, if
-  // different sortings are needed, before it is displayed or edited? The
-  // database is just then updated, when a Playlist is being saved explicitly,
-  // or the program is terminated, in the destructor?
+  // question: is it useful to put the contents of the one playlist out of the
+  // database directly into the tableWidget, or is it better to put its contents
+  // into a playlist object, create pointer versions of this list, in case
+  // special ways of sorting are needed, and display the playlist (pointer)
+  // object into the tableWidget? In other words the database is filtered
+  // through several objects: object which contains the data as sorted and
+  // stored in the database, other objects are filled with pointers to this
+  // object, if different sortings are needed, before it is displayed or edited?
+  // The database is just then updated, when a Playlist is being saved
+  // explicitly, or the program is terminated, in the destructor? Or ask if the
+  // current list should be saved on exit?
 
   // set the table in mainwindow to the corresponding number of rows
   ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);

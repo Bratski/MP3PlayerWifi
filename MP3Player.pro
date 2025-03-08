@@ -10,6 +10,8 @@ CONFIG += c++17
 
 SOURCES += \
     #../Oled/OLEDTest/COled.cpp \
+    cplaylistcontainer.cpp \
+    ctrack.cpp \
     dialogaddplaylist.cpp \
     dialogmanagement.cpp \
     dialogprogress.cpp \
@@ -20,6 +22,8 @@ SOURCES += \
 
 HEADERS += \
     #../Oled/OLEDTest/COled.h \
+    cplaylistcontainer.h \
+    ctrack.h \
     dbconnect.h \
     dialogaddplaylist.h \
     dialogmanagement.h \
