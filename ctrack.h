@@ -26,6 +26,10 @@ public:
   CTrack() = default;
   CTrack(const int &id) : _TraID(id) {}
   void setTrackData(const QString &fileloc);
+  const QString &getArtist() const {return _TraArtist;}
+  const QString &getAlbum() const {return _TraAlbum;}
+  const QString &getGenre() const {return _TraGenre;}
+  const int &getYear() const {return _TraYear;}
 };
 
 #endif // CTRACK_H

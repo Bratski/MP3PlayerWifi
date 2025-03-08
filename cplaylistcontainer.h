@@ -3,24 +3,43 @@
 
 #include <vector>
 #include <QString>
+
+// for the random generator
+#include <random>
+
 #include "ctrack.h"
 
 using playlist_t = std::vector<CTrack>;
+using playlist_pt = std::vector<CTrack *>;
 
-class CplaylistContainer
+class CPlaylistContainer
 {
-    playlist_t _playlist;
+    playlist_t _playlist; // the playlist with objects as read from the database
+    playlist_pt _playlist_trackptr; // a vector with pointers, pointing to the tracks in the playlist
     int _PllID;
     QString _PllName;
 
 public:
-    CplaylistContainer() = default;
-    CplaylistContainer(const int &pllid, const QString &pllname): _PllID(pllid), _PllName(pllname) {}
+    enum class sort_t : u_int8_t {
+        random,
+        byArtist,
+        byAlbum,
+        byYear,
+        byGenre,
+        undoSort,
+        numberOfSortMethods
+    };
+    CPlaylistContainer() = default;
+    CPlaylistContainer(const int &pllid, const QString &pllname): _PllID(pllid), _PllName(pllname) {}
 
-    auto begin(){return _playlist.begin();}
-    auto end(){return _playlist.end();}
+    auto begin(){return _playlist_trackptr.begin();}
+    auto end(){return _playlist_trackptr.end();}
 
     void addTrack(CTrack &track);
+
+    void sortPlaylist(sort_t wayofsorting);
+
+    static const char *sortMethodsTXT[int(CPlaylistContainer::sort_t::numberOfSortMethods)];
 
 
 };

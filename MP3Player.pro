@@ -40,10 +40,14 @@ FORMS += \
     dialogsettings.ui \
     mainwindow.ui
 
+# to use the oled drivers
 INCLUDEPATH += /home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/Oled/OLEDTest
-
 LIBS += -L/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/Oled/OLEDTest/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -OledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
 
+# for the use of the tag libraries
+INCLUDEPATH += $$PWD/myTaglib
+DEPENDPATH += $$PWD/myTaglib
+LIBS += -L$$PWD/myTaglib -ltag
 
 QMAKE_CXXFLAGS += -Wall -Wextra -std=c++20
 QMAKE_LFLAGS += -Wl,-rpath,/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/Oled/OLEDTest/build/Debug
