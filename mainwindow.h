@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include "COled.h"
+#include "cplaylistcontainer.h"
+#include "ctrack.h"
 #include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
@@ -35,7 +37,8 @@ class MainWindow : public QMainWindow {
 
 public:
   MainWindow(QWidget *parent = nullptr, COled *oled = nullptr,
-             QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr);
+             QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr,
+             CPlaylistContainer *playlist = nullptr, CTrack *track = nullptr);
   ~MainWindow();
 
 public slots:
@@ -59,6 +62,8 @@ private:
   DialogSearch *_dlgSearch;
   DialogManagement *_dlgManagement;
   DialogAddPlaylist *_dlgAddPlaylist;
+  CPlaylistContainer *_playlist;
+  CTrack *_track;
   // QSqlQueryModel *_sqlq; // not able to edit a database, it's read only
   // QSqlTableModel *_sqlq;
 

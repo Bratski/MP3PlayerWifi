@@ -4,9 +4,10 @@
 // TODO read and save settings from a config file
 
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
-                       QAudioOutput *audio)
+                       QAudioOutput *audio, CPlaylistContainer *playlist,
+                       CTrack *track)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
-      _audio(audio) {
+      _audio(audio), _playlist(playlist), _track(track) {
   ui->setupUi(this);
 
   // setting default parameters and initialize
@@ -101,12 +102,12 @@ void MainWindow::openSearchDialog() {
 }
 
 void MainWindow::openManagementDialog() {
-  _dlgManagement = new DialogManagement(this);
+  _dlgManagement = new DialogManagement(this, _playlist);
   _dlgManagement->show();
 }
 
 void MainWindow::openAddPlaylistDialog() {
-  _dlgAddPlaylist = new DialogAddPlaylist(this);
+  _dlgAddPlaylist = new DialogAddPlaylist(this, _playlist);
   _dlgAddPlaylist->show();
 }
 

@@ -1,4 +1,6 @@
 #include "COled.h"
+#include "cplaylistcontainer.h"
+#include "ctrack.h"
 #include "dbconnect.h"
 #include "mainwindow.h"
 
@@ -14,6 +16,8 @@ int main(int argc, char *argv[]) {
   COled oled;               // for Oled Display
   QMediaPlayer player;      // for playing audiofiles
   QAudioOutput audioOutput; // needed for setting the audio output
+  CPlaylistContainer playlist;
+  CTrack track;
 
   // Set the players audio output:
   player.setAudioOutput(&audioOutput);
@@ -24,8 +28,8 @@ int main(int argc, char *argv[]) {
   }
 
   MainWindow w(
-      nullptr, &oled, &player,
-      &audioOutput); // passing all the objects as pointers to the main window
+      nullptr, &oled, &player, &audioOutput, &playlist,
+      &track); // passing all the objects as pointers to the main window
   w.show();
   return a.exec();
 }
