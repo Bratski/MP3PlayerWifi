@@ -5,16 +5,24 @@
 #include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
+
+// for the SQL Database management
 //#include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlQuery>
+
+// adding the dialog windows
 #include <dialogaddplaylist.h>
 #include <dialogmanagement.h>
 #include <dialogprogress.h>
 #include <dialogsearch.h>
 #include <dialogsettings.h>
 
+// to be able to play music files
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
+
+// to make it possible to extract artwork from the mp3-file
+#include <taglib/id3v2frame.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
