@@ -38,6 +38,7 @@ public:
     auto end(){return _playlist_ptr_mainwindow.end();}
 
     void addTrack(CTrack &track);
+    void clear(){_playlist.clear(), _playlist_ptr_filter.clear(), _playlist_ptr_mainwindow.clear();}
 
     void sortPlaylist(art_t wayofsorting);
     void filterPlaylist(art_t wayoffiltering, const QString &text);

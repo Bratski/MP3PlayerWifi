@@ -102,12 +102,12 @@ void MainWindow::openSearchDialog() {
 }
 
 void MainWindow::openManagementDialog() {
-  _dlgManagement = new DialogManagement(this, _playlist);
+  _dlgManagement = new DialogManagement(this);
   _dlgManagement->show();
 }
 
 void MainWindow::openAddPlaylistDialog() {
-  _dlgAddPlaylist = new DialogAddPlaylist(this, _playlist);
+  _dlgAddPlaylist = new DialogAddPlaylist(this);
   _dlgAddPlaylist->show();
 }
 
@@ -170,7 +170,7 @@ void MainWindow::fillTableWithDatabase(const QString &playlistName) {
       "SELECT Track.TraID, Track.TraName, Track.TraNumber, Track.TraDuration, "
       "Track.TraBitrate, "
       "Track.TraSamplerate, Track.TraChannels, Track.TraFileLocation, "
-      "Album.AlbName, Album.AlbYear, Artist.ArtName "
+      "Album.AlbName, Album.AlbYear, Artist.ArtName, Artist.ArtGenre "
       "FROM Track "
       "JOIN Album ON Track.TraAlbFK = Album.AlbID "
       "JOIN Artist ON Album.AlbArtFK = Artist.ArtID "
@@ -203,14 +203,57 @@ void MainWindow::fillTableWithDatabase(const QString &playlistName) {
   ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);
 
   // populate the table with data from query
+  QTableWidgetItem *item;
   query.seek(-1); // reset query to start position
   int row = 0;
   while (query.next()) {
     for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
          ++col) {
-      QTableWidgetItem *item =
-          new QTableWidgetItem(query.value(col + 1).toString());
-      ui->tableWidgetCurrentPlaylist->setItem(row, col, item);
+      switch (col) {
+      case 0:
+        item = new QTableWidgetItem(query.value(1).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 0, item);
+        break;
+      case 1:
+        item = new QTableWidgetItem(query.value(10).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 1, item);
+        break;
+      case 2:
+        item = new QTableWidgetItem(query.value(8).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 2, item);
+        break;
+      case 3:
+        item = new QTableWidgetItem(query.value(9).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 3, item);
+        break;
+      case 4:
+        item = new QTableWidgetItem(query.value(2).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 4, item);
+        break;
+      case 5:
+        item = new QTableWidgetItem(query.value(11).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 5, item);
+        break;
+      case 6:
+        item = new QTableWidgetItem(query.value(3).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 6, item);
+        break;
+      case 7:
+        item = new QTableWidgetItem(query.value(4).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 7, item);
+        break;
+      case 8:
+        item = new QTableWidgetItem(query.value(5).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 8, item);
+        break;
+      case 9:
+        item = new QTableWidgetItem(query.value(6).toString());
+        ui->tableWidgetCurrentPlaylist->setItem(row, 9, item);
+        break;
+
+      default:
+        break;
+      }
     }
     ++row;
   }

@@ -28,7 +28,8 @@ bool createConnection() {
   // Create the Artist table
   if (!query.exec("CREATE TABLE IF NOT EXISTS Artist ("
                   "ArtID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                  "ArtName TEXT NOT NULL)")) {
+                  "ArtName TEXT NOT NULL, "
+                  "ArtGenre TEXT NOT NULL)")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create Artist table: " +
                               query.lastError().text());
@@ -77,11 +78,12 @@ bool createConnection() {
   }
 
   // Create the TrackPlaylist table
-  if (!query.exec("CREATE TABLE IF NOT EXISTS TrackPlaylist ("
-                  "TraFK INTEGER NOT NULL, "
-                  "PllFK INTEGER NOT NULL, "
-                  "FOREIGN KEY(PllFK) REFERENCES Playlist(PllID), "
-                  "FOREIGN KEY(TraFK) REFERENCES Track(TraID))")) {
+  if (!query.exec(
+          "CREATE TABLE IF NOT EXISTS TrackPlaylist ("
+          "TraFK INTEGER NOT NULL, "
+          "PllFK INTEGER NOT NULL, "
+          "FOREIGN KEY(PllFK) REFERENCES Playlist(PllID) ON DELETE CASCADE, "
+          "FOREIGN KEY(TraFK) REFERENCES Track(TraID) ON DELETE CASCADE)")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create TrackPlaylist table: " +
                               query.lastError().text());

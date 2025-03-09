@@ -79,7 +79,7 @@ private:
   QString playThisSong =
       "/home/bart/Music/Fridge/Happiness (Anniversary Edition)/07 - Drums Bass "
       "Sonics & Edits - Remastered.flac";
-  QString defaultPlaylistName = "Americana";
+  QString defaultPlaylistName = "Seventies";
   // QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch
   // "
   //                        "TV-show.mp3"; // just for testing
