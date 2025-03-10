@@ -9,7 +9,7 @@
 #include <QSettings>
 
 // for the SQL Database management
-//#include <QtSql/QSqlTableModel>
+// #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlQuery>
 
 // adding the dialog windows
@@ -52,6 +52,9 @@ public slots:
   // player
   void setVolume(int level);
 
+  // table widget
+  void refreshTableWidgetCurrentPlaylist();
+
 private:
   Ui::MainWindow *ui;
   COled *_oled;
@@ -64,31 +67,15 @@ private:
   DialogAddPlaylist *_dlgAddPlaylist;
   CPlaylistContainer *_playlist;
   CTrack *_track;
-  // QSqlQueryModel *_sqlq; // not able to edit a database, it's read only
-  // QSqlTableModel *_sqlq;
 
-  // QString fill_SqlqWith =
-  //     "SELECT Track.TraID, Track.TraName, Track.TraNumber, Track.TraDuration,
-  //     " "Track.TraBitrate, " "Track.TraSamplerate, Track.TraChannels,
-  //     Track.TraFileLocation, " "Album.AlbName, Album.AlbYear, Artist.ArtName
-  //     " "FROM Track " "JOIN Album ON Track.TraAlbFK = Album.AlbID " "JOIN
-  //     Artist ON Album.AlbArtFK = Artist.ArtID " "JOIN TrackPlaylist ON
-  //     Track.TraID = TrackPlaylist.TraFK " "JOIN Playlist ON
-  //     TrackPlaylist.PllFK = Playlist.PllID " "WHERE Playlist.PllName =
-  //     :playlistName";
-  QString playThisSong =
-      "/home/bart/Music/Fridge/Happiness (Anniversary Edition)/07 - Drums Bass "
-      "Sonics & Edits - Remastered.flac";
-  QString defaultPlaylistName = "Seventies";
-  // QString playThisSong = "/home/bart/Music/Bart/calexico/mix/calexico - Dutch
-  // "
-  //                        "TV-show.mp3"; // just for testing
+  // for debugging
+  QString playThisSong = "/home/bart/Nextcloud/Music/Calexico/Aerocalexico/01 "
+                         "All The Pretty Horses.mp3";
+
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
   const QString convertMilliSecToTimeString(const qint64 &millisec);
   const QString convertSecToTimeString(const qint64 &sec);
-  void fillTableWithDatabase(const QString &playlistName);
-  int getPlaylistID(const QString &playlistName);
 };
 #endif // MAINWINDOW_H

@@ -3,6 +3,14 @@
 
 #include "cplaylistcontainer.h"
 #include <QDialog>
+#include <QMessageBox>
+#include <QDebug>
+
+// for the SQL Database management
+#include <QtSql/QSqlQuery>
+
+// for the Table Widget handling
+#include <QList>
 
 namespace Ui {
 class DialogManagement;
@@ -17,10 +25,12 @@ public:
   ~DialogManagement();
 
 public slots:
+  void openPlaylist();
 
 private:
   Ui::DialogManagement *ui;
   CPlaylistContainer *_playlist;
+  void readDatabase();
 };
 
 #endif // DIALOGMANAGEMENT_H

@@ -22,9 +22,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->progressBarSong->setFormat(timeSong);
   ui->labelTotalTime->setText(timeList);
 
-  // filling the Table in MainWindow with database entries
-  fillTableWithDatabase(defaultPlaylistName);
-
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
   // corresponding positions
@@ -80,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
 MainWindow::~MainWindow() {
   delete ui;
-  // delete _sqlq;
+
 }
 
 // header windows, the Dialog object pointed to by _dlgxxx is deleted
@@ -98,17 +95,22 @@ void MainWindow::openProgressDialog() {
 
 void MainWindow::openSearchDialog() {
   _dlgSearch = new DialogSearch(this);
-  _dlgSearch->show();
+  _dlgSearch->exec();
 }
 
 void MainWindow::openManagementDialog() {
-  _dlgManagement = new DialogManagement(this);
-  _dlgManagement->show();
+  _dlgManagement = new DialogManagement(this, _playlist);
+
+  // prepare a connection, in case the management dialog is closed, the
+  // tableWidgetCurrentPlaylist will be updated
+  connect(_dlgManagement, &QDialog::finished, this,
+          &MainWindow::refreshTableWidgetCurrentPlaylist);
+  _dlgManagement->exec();
 }
 
 void MainWindow::openAddPlaylistDialog() {
   _dlgAddPlaylist = new DialogAddPlaylist(this);
-  _dlgAddPlaylist->show();
+  _dlgAddPlaylist->exec();
 }
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no
@@ -116,6 +118,61 @@ void MainWindow::openAddPlaylistDialog() {
 void MainWindow::setVolume(int level) {
   float audioLevel = static_cast<float>(level) / 100.0f;
   _audio->setVolume(audioLevel);
+}
+
+void MainWindow::refreshTableWidgetCurrentPlaylist() {
+  // count the number of Tracks being found
+  int rowCount = _playlist->getNumberOfTracks();
+  // qDebug() << "row count: " << rowCount;
+
+  // empty the current playlist
+  ui->tableWidgetCurrentPlaylist->clearContents();
+
+  // set the table in mainwindow to the corresponding number of rows
+  ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);
+
+  // populate the table with data from query
+  QTableWidgetItem *item;
+
+  int row = 0;
+  for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
+    item = new QTableWidgetItem((*it)->getTitle());
+    ui->tableWidgetCurrentPlaylist->setItem(row, 0, item);
+
+    item = new QTableWidgetItem((*it)->getArtist());
+    ui->tableWidgetCurrentPlaylist->setItem(row, 1, item);
+
+    item = new QTableWidgetItem((*it)->getAlbum());
+    ui->tableWidgetCurrentPlaylist->setItem(row, 2, item);
+
+    item = new QTableWidgetItem(QString::number((*it)->getYear()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 3, item);
+
+    item = new QTableWidgetItem(QString::number((*it)->getNumber()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 4, item);
+
+    item = new QTableWidgetItem((*it)->getGenre());
+    ui->tableWidgetCurrentPlaylist->setItem(row, 5, item);
+
+    item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 6, item);
+
+    item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 7, item);
+
+    item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 8, item);
+
+    item = new QTableWidgetItem(QString::number((*it)->getChannels()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 9, item);
+
+    ++row;
+  }
+
+  // customizing the looks
+  ui->tableWidgetCurrentPlaylist->resizeColumnsToContents();
+  ui->tableWidgetCurrentPlaylist->setAlternatingRowColors(true);
+  // ui->tableWidgetCurrentPlaylist->hideColumn(0);
 }
 
 // converts milliseconds and returns a QString displaying the time in this
@@ -135,6 +192,8 @@ const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
     return timeInHr;
 }
 
+// converts seconds and returns a QString displaying the time in this
+// format "0:00:00"
 const QString MainWindow::convertSecToTimeString(const qint64 &sec) {
   int seconds = sec % 60;
   int min = (sec / 60) % 60;
@@ -150,129 +209,4 @@ const QString MainWindow::convertSecToTimeString(const qint64 &sec) {
     return timeInHr;
 }
 
-void MainWindow::fillTableWithDatabase(const QString &playlistName) {
-  // empty the current playlist
-  ui->tableWidgetCurrentPlaylist->clearContents();
-  ui->tableWidgetCurrentPlaylist->setRowCount(0);
 
-  // find the corresponding ID in the playlist
-  int playlistID = getPlaylistID(playlistName);
-
-  // leave function if no valid ID could be found
-  if (playlistID == -1) {
-    qDebug() << "no valid ID could be found";
-    return;
-  }
-
-  // create a query, and find in the database
-  QSqlQuery query;
-  query.prepare(
-      "SELECT Track.TraID, Track.TraName, Track.TraNumber, Track.TraDuration, "
-      "Track.TraBitrate, "
-      "Track.TraSamplerate, Track.TraChannels, Track.TraFileLocation, "
-      "Album.AlbName, Album.AlbYear, Artist.ArtName, Artist.ArtGenre "
-      "FROM Track "
-      "JOIN Album ON Track.TraAlbFK = Album.AlbID "
-      "JOIN Artist ON Album.AlbArtFK = Artist.ArtID "
-      "JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK "
-      "JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID "
-      "WHERE Playlist.PllID = :playlistID");
-  query.bindValue(":playlistID", playlistID);
-
-  if (!query.exec())
-    return;
-
-  // count the number of Tracks being found
-  int rowCount = 0;
-  while (query.next())
-    ++rowCount;
-
-  // question: is it useful to put the contents of the one playlist out of the
-  // database directly into the tableWidget, or is it better to put its contents
-  // into a playlist object, create pointer versions of this list, in case
-  // special ways of sorting are needed, and display the playlist (pointer)
-  // object into the tableWidget? In other words the database is filtered
-  // through several objects: object which contains the data as sorted and
-  // stored in the database, other objects are filled with pointers to this
-  // object, if different sortings are needed, before it is displayed or edited?
-  // The database is just then updated, when a Playlist is being saved
-  // explicitly, or the program is terminated, in the destructor? Or ask if the
-  // current list should be saved on exit?
-
-  // set the table in mainwindow to the corresponding number of rows
-  ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);
-
-  // populate the table with data from query
-  QTableWidgetItem *item;
-  query.seek(-1); // reset query to start position
-  int row = 0;
-  while (query.next()) {
-    for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
-         ++col) {
-      switch (col) {
-      case 0:
-        item = new QTableWidgetItem(query.value(1).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 0, item);
-        break;
-      case 1:
-        item = new QTableWidgetItem(query.value(10).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 1, item);
-        break;
-      case 2:
-        item = new QTableWidgetItem(query.value(8).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 2, item);
-        break;
-      case 3:
-        item = new QTableWidgetItem(query.value(9).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 3, item);
-        break;
-      case 4:
-        item = new QTableWidgetItem(query.value(2).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 4, item);
-        break;
-      case 5:
-        item = new QTableWidgetItem(query.value(11).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 5, item);
-        break;
-      case 6:
-        item = new QTableWidgetItem(query.value(3).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 6, item);
-        break;
-      case 7:
-        item = new QTableWidgetItem(query.value(4).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 7, item);
-        break;
-      case 8:
-        item = new QTableWidgetItem(query.value(5).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 8, item);
-        break;
-      case 9:
-        item = new QTableWidgetItem(query.value(6).toString());
-        ui->tableWidgetCurrentPlaylist->setItem(row, 9, item);
-        break;
-
-      default:
-        break;
-      }
-    }
-    ++row;
-  }
-
-  // customizing the looks
-  ui->tableWidgetCurrentPlaylist->resizeColumnsToContents();
-  ui->tableWidgetCurrentPlaylist->setAlternatingRowColors(true);
-  // ui->tableWidgetCurrentPlaylist->hideColumn(0);
-}
-
-int MainWindow::getPlaylistID(const QString &playlistName) {
-  QSqlQuery query;
-  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :name");
-  query.bindValue(":name", playlistName);
-
-  if (!query.exec())
-    return -1;
-  if (query.next())
-    return query.value(0).toInt();
-  else
-    return -1;
-}

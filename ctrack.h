@@ -42,6 +42,7 @@ public:
   // Method to set data from mp3-file-tag
   void setTrackData(const QString &fileloc);
 
+  // All the get-methods for the attributes
   const QString &getArtist() const { return _TraArtist; }
   const QString &getAlbum() const { return _TraAlbum; }
   const QString &getGenre() const { return _TraGenre; }

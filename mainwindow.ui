@@ -47,7 +47,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Album Track</string>
+          <string>Track</string>
          </property>
         </column>
         <column>
@@ -67,7 +67,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Sample Rate</string>
+          <string>Samplerate</string>
          </property>
         </column>
         <column>

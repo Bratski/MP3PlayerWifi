@@ -19,6 +19,12 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QTableWidget" name="tableWidgetPlaylists">
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>ID-Nr.</string>

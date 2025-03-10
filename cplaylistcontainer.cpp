@@ -6,10 +6,16 @@ const char *CPlaylistContainer::sortMethodsTXT[int(
     "by Genre", "undo Sort", "Title"};
 
 void CPlaylistContainer::addTrack(CTrack &track) {
-  _playlist.push_back(track);
-  _playlist_ptr_mainwindow.push_back(&track);
+  _playlist_obj_vector.push_back(track);
+
   // update the pointer vector:
-  // sortPlaylist(CPlaylistContainer::sort_t::undoSort);
+  sortPlaylist(CPlaylistContainer::art_t::undoSort);
+}
+
+void CPlaylistContainer::clear() {
+  _playlist_obj_vector.clear();
+  _playlist_ptr_filter_vector.clear();
+  _playlist_ptr_mainwindow_vector.clear();
 }
 
 void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
@@ -41,38 +47,39 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
   switch (wayofsorting) {
   case art_t::random:
     // sort the pointer-vector randomly
-    std::shuffle(_playlist_ptr_mainwindow.begin(),
-                 _playlist_ptr_mainwindow.end(), rng);
+    std::shuffle(_playlist_ptr_mainwindow_vector.begin(),
+                 _playlist_ptr_mainwindow_vector.end(), rng);
     break;
 
   case art_t::byArtist:
     // sort the pointer-vector by Artist name, alphabetically
-    std::sort(_playlist_ptr_mainwindow.begin(), _playlist_ptr_mainwindow.end(),
-              sortbyartist);
+    std::sort(_playlist_ptr_mainwindow_vector.begin(),
+              _playlist_ptr_mainwindow_vector.end(), sortbyartist);
     break;
   case art_t::byAlbum:
     // sort the pointer-vector by Artist name, alphabetically
-    std::sort(_playlist_ptr_mainwindow.begin(), _playlist_ptr_mainwindow.end(),
-              sortbyalbum);
+    std::sort(_playlist_ptr_mainwindow_vector.begin(),
+              _playlist_ptr_mainwindow_vector.end(), sortbyalbum);
     break;
 
   case art_t::byYear:
     // sort the pointer-vector by year
-    std::sort(_playlist_ptr_mainwindow.begin(), _playlist_ptr_mainwindow.end(),
-              sortbyyear);
+    std::sort(_playlist_ptr_mainwindow_vector.begin(),
+              _playlist_ptr_mainwindow_vector.end(), sortbyyear);
     break;
   case art_t::byGenre:
     // sort the pointer-vector by genre
-    std::sort(_playlist_ptr_mainwindow.begin(), _playlist_ptr_mainwindow.end(),
-              sortbygenre);
+    std::sort(_playlist_ptr_mainwindow_vector.begin(),
+              _playlist_ptr_mainwindow_vector.end(), sortbygenre);
     break;
   case art_t::undoSort:
     // clear the pointer vector
-    _playlist_ptr_mainwindow.clear();
+    _playlist_ptr_mainwindow_vector.clear();
     // fill the pointer vector with pointers to track objects in the _playlist
     // vector
-    for (auto &track : _playlist) {
-      _playlist_ptr_mainwindow.push_back(&track);
+    for (auto it = _playlist_obj_vector.begin();
+         it != _playlist_obj_vector.end(); ++it) {
+      _playlist_ptr_mainwindow_vector.push_back(&(*it));
     }
     break;
   default:
@@ -83,46 +90,46 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
 void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
                                         const QString &text) {
   // empty the search vector with pointers
-  _playlist_ptr_filter.clear();
+  _playlist_ptr_filter_vector.clear();
   switch (wayoffiltering) {
   case art_t::byTitle:
-    for (auto &track : _playlist) {
+    for (auto &track : _playlist_obj_vector) {
       // is the search text corresponding to the track title, the pointer of
       // that track is added to the ptr-filter vector
       if (track.getTitle() == text) {
-        _playlist_ptr_filter.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(&track);
       }
     }
     break;
   case art_t::byAlbum:
-    for (auto &track : _playlist) {
+    for (auto &track : _playlist_obj_vector) {
       // same for the track album
       if (track.getAlbum() == text) {
-        _playlist_ptr_filter.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(&track);
       }
     }
     break;
   case art_t::byArtist:
-    for (auto &track : _playlist) {
+    for (auto &track : _playlist_obj_vector) {
       // same for the track artist
       if (track.getArtist() == text) {
-        _playlist_ptr_filter.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(&track);
       }
     }
     break;
   case art_t::byGenre:
-    for (auto &track : _playlist) {
+    for (auto &track : _playlist_obj_vector) {
       // same for the track genre
       if (track.getGenre() == text) {
-        _playlist_ptr_filter.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(&track);
       }
     }
     break;
   case art_t::byYear:
-    for (auto &track : _playlist) {
+    for (auto &track : _playlist_obj_vector) {
       // same for the track year
       if (track.getYear() == text.toInt()) {
-        _playlist_ptr_filter.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(&track);
       }
     }
     break;
