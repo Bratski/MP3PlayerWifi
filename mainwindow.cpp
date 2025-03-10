@@ -16,9 +16,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
       static_cast<int>(_audio->volume() * 100));
-  _player->setSource(QUrl::fromLocalFile(
-      playThisSong)); // same time the artwork should be extracted from the
-                      // mp3-file and being shown in the artwork label
   ui->progressBarSong->setFormat(timeSong);
   ui->labelTotalTime->setText(timeList);
 
@@ -67,18 +64,19 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::openAddPlaylistDialog);
 
   // pushbuttons for playing songs
-  QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, _player,
-                   &QMediaPlayer::play);
+  QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
+                   &MainWindow::playSong);
   QObject::connect(ui->pushButtonPause, &QPushButton::clicked, _player,
                    &QMediaPlayer::pause);
   QObject::connect(ui->pushButtonStop, &QPushButton::clicked, _player,
                    &QMediaPlayer::stop);
+  QObject::connect(ui->pushButtonNext, &QPushButton::clicked, this,
+                   &MainWindow::playNext);
+  QObject::connect(ui->pushButtonPrevious, &QPushButton::clicked, this,
+                   &MainWindow::playPrevious);
 }
 
-MainWindow::~MainWindow() {
-  delete ui;
-
-}
+MainWindow::~MainWindow() { delete ui; }
 
 // header windows, the Dialog object pointed to by _dlgxxx is deleted
 // automatically when its parent object (the one referred to by this) is
@@ -118,6 +116,48 @@ void MainWindow::openAddPlaylistDialog() {
 void MainWindow::setVolume(int level) {
   float audioLevel = static_cast<float>(level) / 100.0f;
   _audio->setVolume(audioLevel);
+}
+
+void MainWindow::playSong()
+{
+    // check if one row has been selected, if yes, which one? If not return with
+    // error message
+    QList<QTableWidgetItem *> selectedItems = ui->tableWidgetCurrentPlaylist->selectedItems();
+
+    // if (selectedItems.size() != 2) {
+    //     QMessageBox msg;
+    //     msg.addButton("OK", QMessageBox::YesRole);
+    //     msg.setWindowTitle("Error");
+    //     msg.setIcon(QMessageBox::Warning);
+    //     msg.setText("Only 1 playlist at the time can be selected to be
+    //     opened!"); msg.exec(); return;
+    // }
+
+    // if no items in the table are selected start with the first track
+    if (selectedItems.empty() && _playlist->getNumberOfTracks() != 0)
+        index = 0;
+    else
+        index = selectedItems[0]->text().toInt();
+
+  // if so, pass the file location of that entry to the player source
+  playThisSong = (*_playlist)[index].getFileLocation();
+  _player->setSource(QUrl::fromLocalFile(playThisSong));
+
+  // start playing the song
+  _player->play();
+
+  // display the song title, samplerate and artwork in the main window info
+  // output
+}
+
+void MainWindow::playNext() {
+  if (_playlist->getNumberOfTracks() == 0)
+    return;
+}
+
+void MainWindow::playPrevious() {
+  if (_playlist->getNumberOfTracks() == 0)
+    return;
 }
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
@@ -173,6 +213,11 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   ui->tableWidgetCurrentPlaylist->resizeColumnsToContents();
   ui->tableWidgetCurrentPlaylist->setAlternatingRowColors(true);
   // ui->tableWidgetCurrentPlaylist->hideColumn(0);
+
+  // set the playlist name in the main window info output
+  ui->labelCurrentPlaylist->setText(_playlist->getPllName());
+  ui->labelTotalTime->setText(
+      convertSecToTimeString(_playlist->calculatePlaylistTotalTime()));
 }
 
 // converts milliseconds and returns a QString displaying the time in this
@@ -194,7 +239,7 @@ const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
 
 // converts seconds and returns a QString displaying the time in this
 // format "0:00:00"
-const QString MainWindow::convertSecToTimeString(const qint64 &sec) {
+const QString MainWindow::convertSecToTimeString(const int &sec) {
   int seconds = sec % 60;
   int min = (sec / 60) % 60;
   int hr = (sec / (60 * 60));
@@ -208,5 +253,3 @@ const QString MainWindow::convertSecToTimeString(const qint64 &sec) {
   else
     return timeInHr;
 }
-
-

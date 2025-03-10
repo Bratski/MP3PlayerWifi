@@ -5,6 +5,28 @@ const char *CPlaylistContainer::sortMethodsTXT[int(
     "Random",   "by Artist", "by Album", "by Year",
     "by Genre", "undo Sort", "Title"};
 
+const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
+  if (idx >= _playlist_ptr_mainwindow_vector.size()) {
+        throw std::out_of_range("index out of range");
+  }
+  return *_playlist_ptr_mainwindow_vector[idx];
+}
+
+CTrack &CPlaylistContainer::operator[](const size_t &idx) {
+  if (idx >= _playlist_ptr_mainwindow_vector.size()) {
+    throw std::out_of_range("index out of range");
+  }
+  return *_playlist_ptr_mainwindow_vector[idx];
+}
+
+int CPlaylistContainer::calculatePlaylistTotalTime() {
+  int totaltime = 0;
+  for (const auto &track : _playlist_obj_vector) {
+    totaltime += track.getDuration();
+  }
+  return totaltime;
+}
+
 void CPlaylistContainer::addTrack(CTrack &track) {
   _playlist_obj_vector.push_back(track);
 

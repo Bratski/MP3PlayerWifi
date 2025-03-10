@@ -9,7 +9,6 @@
 #include <QSettings>
 
 // for the SQL Database management
-// #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlQuery>
 
 // adding the dialog windows
@@ -51,6 +50,9 @@ public slots:
 
   // player
   void setVolume(int level);
+  void playSong();
+  void playNext();
+  void playPrevious();
 
   // table widget
   void refreshTableWidgetCurrentPlaylist();
@@ -68,14 +70,15 @@ private:
   CPlaylistContainer *_playlist;
   CTrack *_track;
 
-  // for debugging
-  QString playThisSong = "/home/bart/Nextcloud/Music/Calexico/Aerocalexico/01 "
-                         "All The Pretty Horses.mp3";
+
+  int index;
+  QString playThisSong; // = "/home/bart/Nextcloud/Music/Calexico/Aerocalexico/01 "
+                        // "All The Pretty Horses.mp3"; // for debugging
 
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
   const QString convertMilliSecToTimeString(const qint64 &millisec);
-  const QString convertSecToTimeString(const qint64 &sec);
+  const QString convertSecToTimeString(const int &sec);
 };
 #endif // MAINWINDOW_H

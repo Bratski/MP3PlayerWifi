@@ -13,8 +13,8 @@ using playlist_t = std::vector<CTrack>;
 using playlist_pt = std::vector<CTrack *>;
 
 class CPlaylistContainer {
-  playlist_t
-      _playlist_obj_vector; // the playlist with objects as read from the database
+  playlist_t _playlist_obj_vector; // the playlist with objects as read from the
+                                   // database
   playlist_pt
       _playlist_ptr_mainwindow_vector; // a vector with pointers, pointing to
                                        // the tracks in the playlist, what is
@@ -38,20 +38,24 @@ public:
     numberOfMethods
   };
   CPlaylistContainer() = default;
-  // CPlaylistContainer(const int &pllid, const QString &pllname)
-  //     : _PllID(pllid), _PllName(pllname) {}
 
+  // make it possible to get a track by the vector index, operator[] overload
+  const CTrack &operator[](const size_t &idx) const;
+  CTrack &operator[](const size_t &idx);
+
+  // making it possible to iterate through the different vectors
   auto begin() { return _playlist_obj_vector.begin(); }
   auto end() { return _playlist_obj_vector.end(); }
 
   auto beginPtr() { return _playlist_ptr_mainwindow_vector.begin(); }
   auto endPtr() { return _playlist_ptr_mainwindow_vector.end(); }
 
+  // some general info stats about the playlist
   int getNumberOfTracks() { return _playlist_obj_vector.size(); }
+  int calculatePlaylistTotalTime();
 
   void addTrack(CTrack &track);
   void clear();
-
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
 
