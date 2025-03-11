@@ -9,6 +9,7 @@ DialogManagement::DialogManagement(QWidget *parent,
   // initialize the window
   setWindowTitle("Playlist Management");
   readDatabase();
+  // ui->tableWidgetPlaylists->hideColumn(0);
 
   // setting the button connections
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
@@ -19,13 +20,20 @@ DialogManagement::DialogManagement(QWidget *parent,
                    &DialogManagement::addNewPlaylist);
   QObject::connect(ui->pushButtonDelete, &QPushButton::clicked, this,
                    &DialogManagement::deletePlaylist);
+
+  // event of an item has been edited in the table widget
+  QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemChanged, this,
+                   &DialogManagement::namePlaylistEdited);
 }
 
 DialogManagement::~DialogManagement() { delete ui; }
 
 void DialogManagement::openPlaylist() {
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(true);
   // check if one row has been selected, if yes, which one? If not return with
   // error message
+
   QList<QTableWidgetItem *> selectedItems =
       ui->tableWidgetPlaylists->selectedItems();
 
@@ -48,7 +56,6 @@ void DialogManagement::openPlaylist() {
 
   // fill the playlist object with the all the tracks data from the database
   // found at that particular playlist
-  // create a query, and find in the database
   QSqlQuery query;
   query.prepare(
       "SELECT Track.TraID, Track.TraName, Artist.ArtName, Album.AlbName, "
@@ -101,12 +108,15 @@ void DialogManagement::openPlaylist() {
     // qDebug() << "Added track:" << title << "by" << artist;
   }
 
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(false);
   // leave the dialog management and go back to mainwindow
   this->close();
 }
 
 void DialogManagement::addNewPlaylist() {
-  // get the name
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(true);
   QString name;
   name = ui->lineEditNewPlaylist->text();
 
@@ -123,12 +133,8 @@ void DialogManagement::addNewPlaylist() {
 
   // create a query, and check if name already exists in the database
   QSqlQuery query;
-  query.prepare(
-      "SELECT PllID FROM Playlist WHERE PllName = :PllName "); // how does a sql
-                                                               // string looks
-                                                               // like to create
-                                                               // a new
-                                                               // playlist?
+
+  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :PllName ");
   query.bindValue(":PllName", name);
 
   if (!query.exec())
@@ -153,9 +159,12 @@ void DialogManagement::addNewPlaylist() {
 
   // update the table
   readDatabase();
+  blockSignals(false);
 }
 
 void DialogManagement::deletePlaylist() {
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(true);
   // check if rows are selected in the table
   QList<QTableWidgetItem *> selectedItems =
       ui->tableWidgetPlaylists->selectedItems();
@@ -194,9 +203,61 @@ void DialogManagement::deletePlaylist() {
 
   // refresh the table
   readDatabase();
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(false);
+}
+
+void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
+  // If the flag is set, ignore the signal to avoid recursion
+  if (isEditing) {
+    return;
+  }
+
+  // Set the flag to true to prevent recursive calls
+  isEditing = true;
+  // get the edited name
+  QString name = item->text();
+
+  // get the database id, where the new name must be stored
+  int row = item->row();
+  int id = ui->tableWidgetPlaylists->item(row, 0)->text().toInt();
+
+  // check if the edited name already exists in the database
+  QSqlQuery query;
+  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :PllName ");
+  query.bindValue(":PllName", name);
+
+  if (!query.exec())
+    return;
+
+  if (query.first()) {
+    QMessageBox msg;
+    msg.addButton("OK", QMessageBox::YesRole);
+    msg.setWindowTitle("Error");
+    msg.setIcon(QMessageBox::Warning);
+    msg.setText("The playlist already exists, please change the name");
+    msg.exec();
+    readDatabase();
+    return;
+  }
+
+  // update the database at position id
+  query.prepare("UPDATE Playlist SET PllName = :PllName WHERE PllID = :PllID ");
+  query.bindValue(":PllID", id);
+  query.bindValue(":PllName", name);
+
+  if (!query.exec())
+    return;
+
+  // update the table
+  readDatabase();
+  // prevents interfering with the namePlaylistEdited function
+  isEditing = false;
 }
 
 void DialogManagement::readDatabase() {
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(true);
   // empty the list with playlists
   ui->tableWidgetPlaylists->clearContents();
   ui->tableWidgetPlaylists->setRowCount(0);
@@ -221,15 +282,19 @@ void DialogManagement::readDatabase() {
   query.seek(-1); // reset query to start position
   int row = 0;
   while (query.next()) {
-    for (int col = 0; col < ui->tableWidgetPlaylists->columnCount(); ++col) {
-      item = new QTableWidgetItem(query.value(col).toString());
-      ui->tableWidgetPlaylists->setItem(row, col, item);
-    }
+    item = new QTableWidgetItem(query.value(0).toString());
+    ui->tableWidgetPlaylists->setItem(row, 0, item);
+
+    item = new QTableWidgetItem(query.value(1).toString());
+    ui->tableWidgetPlaylists->setItem(row, 1, item);
+
     ++row;
   }
 
   // customizing the looks
   ui->tableWidgetPlaylists->resizeColumnsToContents();
   ui->tableWidgetPlaylists->setAlternatingRowColors(true);
-  // ui->tableWidgetCurrentPlaylist->hideColumn(0);
+
+  // prevents interfering with the namePlaylistEdited function
+  blockSignals(false);
 }

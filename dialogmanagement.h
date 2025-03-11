@@ -11,6 +11,8 @@
 
 // for the Table Widget handling
 #include <QList>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 
 namespace Ui {
 class DialogManagement;
@@ -28,10 +30,13 @@ public slots:
   void openPlaylist();
   void addNewPlaylist();
   void deletePlaylist();
+  void namePlaylistEdited(QTableWidgetItem *item);
 
 private:
   Ui::DialogManagement *ui;
   CPlaylistContainer *_playlist;
+
+  bool isEditing = false;
   void readDatabase();
 };
 
