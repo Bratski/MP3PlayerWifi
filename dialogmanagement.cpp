@@ -282,9 +282,10 @@ void DialogManagement::readDatabase() {
   query.seek(-1); // reset query to start position
   int row = 0;
   while (query.next()) {
+    // Playlist ID
     item = new QTableWidgetItem(query.value(0).toString());
     ui->tableWidgetPlaylists->setItem(row, 0, item);
-
+    // Playlist Name
     item = new QTableWidgetItem(query.value(1).toString());
     ui->tableWidgetPlaylists->setItem(row, 1, item);
 

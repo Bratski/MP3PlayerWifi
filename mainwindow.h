@@ -48,6 +48,12 @@ public slots:
   void openManagementDialog();
   void openAddPlaylistDialog();
 
+  void sortByAlbum();
+  void sortByYear();
+  void sortByArtist();
+  void sortByGenre();
+  void undoSort();
+
   // player
   void setVolume(int level);
   void playSong();

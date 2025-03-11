@@ -65,6 +65,18 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   QObject::connect(ui->actionOther_Playlist, &QAction::triggered, this,
                    &MainWindow::openAddPlaylistDialog);
 
+  // sort menu header
+  QObject::connect(ui->actionby_Album, &QAction::triggered, this,
+                   &MainWindow::sortByAlbum);
+  QObject::connect(ui->actionby_Album_Yer, &QAction::triggered, this,
+                   &MainWindow::sortByYear);
+  QObject::connect(ui->actionby_Artist, &QAction::triggered, this,
+                   &MainWindow::sortByArtist);
+  QObject::connect(ui->actionby_Genre, &QAction::triggered, this,
+                   &MainWindow::sortByGenre);
+  QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
+                   &MainWindow::undoSort);
+
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
                    &MainWindow::playSong);
@@ -115,6 +127,31 @@ void MainWindow::openManagementDialog() {
 void MainWindow::openAddPlaylistDialog() {
   _dlgAddPlaylist = new DialogAddPlaylist(this);
   _dlgAddPlaylist->exec();
+}
+
+void MainWindow::sortByAlbum() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::sortByYear() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::sortByArtist() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::sortByGenre() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::undoSort() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
+  refreshTableWidgetCurrentPlaylist();
 }
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no

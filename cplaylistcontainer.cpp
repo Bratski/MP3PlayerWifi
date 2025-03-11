@@ -47,13 +47,13 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
   // for the artists
   auto sortbyartist = [](const std::shared_ptr<CTrack> tr1,
                          const std::shared_ptr<CTrack> tr2) {
-    return tr1->getArtist() > tr2->getArtist();
+    return tr1->getArtist() < tr2->getArtist();
   };
 
   // for the albums
   auto sortbyalbum = [](const std::shared_ptr<CTrack> tr1,
                         const std::shared_ptr<CTrack> tr2) {
-    return tr1->getAlbum() > tr2->getAlbum();
+    return tr1->getAlbum() < tr2->getAlbum();
   };
 
   // for the album year
@@ -65,7 +65,7 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
   // for the genres
   auto sortbygenre = [](const std::shared_ptr<CTrack> tr1,
                         const std::shared_ptr<CTrack> tr2) {
-    return tr1->getGenre() > tr2->getGenre();
+    return tr1->getGenre() < tr2->getGenre();
   };
 
   switch (wayofsorting) {
