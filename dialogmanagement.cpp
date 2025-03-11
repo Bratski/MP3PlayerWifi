@@ -15,6 +15,10 @@ DialogManagement::DialogManagement(QWidget *parent,
                    &DialogManagement::close);
   QObject::connect(ui->pushButtonOpen, &QPushButton::clicked, this,
                    &DialogManagement::openPlaylist);
+  QObject::connect(ui->pushButtonAdd, &QPushButton::clicked, this,
+                   &DialogManagement::addNewPlaylist);
+  QObject::connect(ui->pushButtonDelete, &QPushButton::clicked, this,
+                   &DialogManagement::deletePlaylist);
 }
 
 DialogManagement::~DialogManagement() { delete ui; }
@@ -70,8 +74,6 @@ void DialogManagement::openPlaylist() {
     return;
   }
 
-
-
   // populate the _playlist with tracks from query
   int id, year, number, duration, bitrate, samplerate, channels;
   QString title, artist, album, genre, filelocation;
@@ -101,6 +103,97 @@ void DialogManagement::openPlaylist() {
 
   // leave the dialog management and go back to mainwindow
   this->close();
+}
+
+void DialogManagement::addNewPlaylist() {
+  // get the name
+  QString name;
+  name = ui->lineEditNewPlaylist->text();
+
+  // check if there is a name in the input field,
+  if (name.size() == 0) {
+    QMessageBox msg;
+    msg.addButton("OK", QMessageBox::YesRole);
+    msg.setWindowTitle("Error");
+    msg.setIcon(QMessageBox::Warning);
+    msg.setText("No valid name in the input field");
+    msg.exec();
+    return;
+  }
+
+  // create a query, and check if name already exists in the database
+  QSqlQuery query;
+  query.prepare(
+      "SELECT PllID FROM Playlist WHERE PllName = :PllName "); // how does a sql
+                                                               // string looks
+                                                               // like to create
+                                                               // a new
+                                                               // playlist?
+  query.bindValue(":PllName", name);
+
+  if (!query.exec())
+    return;
+
+  if (query.first()) {
+    QMessageBox msg;
+    msg.addButton("OK", QMessageBox::YesRole);
+    msg.setWindowTitle("Error");
+    msg.setIcon(QMessageBox::Warning);
+    msg.setText("The playlist already exists, please change the name");
+    msg.exec();
+    return;
+  }
+
+  // create the new playlist in the database
+  query.prepare("INSERT INTO Playlist (PllName) VALUES (:PllName) ");
+  query.bindValue(":PllName", name);
+
+  if (!query.exec())
+    return;
+
+  // update the table
+  readDatabase();
+}
+
+void DialogManagement::deletePlaylist() {
+  // check if rows are selected in the table
+  QList<QTableWidgetItem *> selectedItems =
+      ui->tableWidgetPlaylists->selectedItems();
+
+  // return if no entries are selected
+  if (selectedItems.size() == 0)
+    return;
+
+  // warning are you sure
+  QMessageBox msg;
+  msg.addButton("Yes", QMessageBox::YesRole);
+  msg.addButton("No", QMessageBox::NoRole);
+  msg.setWindowTitle("Delete?");
+  msg.setIcon(QMessageBox::Warning);
+  msg.setText("Are you sure to delete this playlist, inclusive its contents?");
+
+  // msg.exec() returns "3" if norole, "2" if yesrole
+  if (msg.exec() == 3) {
+    return;
+  }
+
+  // delete the selected rows from the database
+  QSqlQuery query;
+  QString name;
+
+  for (auto it = selectedItems.begin(); it != selectedItems.end(); ++it) {
+    if ((*it)->column() == 1) {
+      name = (*it)->text();
+      query.prepare("DELETE FROM Playlist WHERE PllName = :PllName ");
+      query.bindValue(":PllName", name);
+
+      if (!query.exec())
+        return;
+    }
+  }
+
+  // refresh the table
+  readDatabase();
 }
 
 void DialogManagement::readDatabase() {

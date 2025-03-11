@@ -85,5 +85,6 @@ private:
   void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
   // populate the table widget
   void refreshTableWidgetCurrentPlaylist();
+  void updateTrackInfoDisplay();
 };
 #endif // MAINWINDOW_H

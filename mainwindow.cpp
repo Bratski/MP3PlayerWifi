@@ -151,30 +151,39 @@ void MainWindow::playSong() {
 
   // display the song title, samplerate and artwork in the main window info
   // output
+  updateTrackInfoDisplay();
 }
 
 void MainWindow::playNext() {
   if (_playlist->getNumberOfTracks() == 0 ||
-      index == _playlist->getNumberOfTracks() - 1)
+      index == _playlist->getNumberOfTracks() - 1) {
+    _player->stop();
     return;
+  }
   index += 1;
   playThisSong = (*_playlist)[index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(playThisSong));
   _player->play();
+  updateTrackInfoDisplay();
 }
 
 void MainWindow::playPrevious() {
-  if (_playlist->getNumberOfTracks() == 0 || index == 0)
+  if (_playlist->getNumberOfTracks() == 0 || index == 0) {
+    _player->stop();
     return;
+  }
   index -= 1;
   playThisSong = (*_playlist)[index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(playThisSong));
   _player->play();
+  updateTrackInfoDisplay();
 }
 
 // making the pause button to toggle between pause and playing
 void MainWindow::togglePause() {
-  _player->isPlaying() ? _player->pause() : _player->play();
+  qint64 pos = _player->position();
+  if (pos > 0)
+    _player->isPlaying() ? _player->pause() : _player->play();
 }
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
@@ -240,6 +249,18 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   ui->labelTotalTime->setText(
       convertSecToTimeString(_playlist->calculatePlaylistTotalTime()));
+}
+
+void MainWindow::updateTrackInfoDisplay() {
+  // to make sure the index is not pointing to a non existing object
+  if (index >= _playlist->getNumberOfTracks() ||
+      _playlist->getNumberOfTracks() == 0) {
+    return;
+  }
+
+  ui->labelCurrentSong->setText((*_playlist)[index].getTitle());
+  ui->labelSampleRate->setText(
+      QString::number((*_playlist)[index].getSamplerate()));
 }
 
 // converts milliseconds and returns a QString displaying the time in this

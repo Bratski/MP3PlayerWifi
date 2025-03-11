@@ -2,9 +2,9 @@
 #define DIALOGMANAGEMENT_H
 
 #include "cplaylistcontainer.h"
+#include <QDebug>
 #include <QDialog>
 #include <QMessageBox>
-#include <QDebug>
 
 // for the SQL Database management
 #include <QtSql/QSqlQuery>
@@ -26,6 +26,8 @@ public:
 
 public slots:
   void openPlaylist();
+  void addNewPlaylist();
+  void deletePlaylist();
 
 private:
   Ui::DialogManagement *ui;
