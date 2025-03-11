@@ -3,6 +3,10 @@
 
 #include "cplaylistcontainer.h"
 #include <QDialog>
+#include <QMessageBox>
+
+// for the SQL Database management
+#include <QtSql/QSqlQuery>
 
 namespace Ui {
 class DialogAddPlaylist;
@@ -16,9 +20,13 @@ public:
                              CPlaylistContainer *playlist = nullptr);
   ~DialogAddPlaylist();
 
+public slots:
+  void addPlaylist();
+
 private:
   Ui::DialogAddPlaylist *ui;
   CPlaylistContainer *_playlist;
+  void readDatabase();
 };
 
 #endif // DIALOGADDPLAYLIST_H

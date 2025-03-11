@@ -125,7 +125,11 @@ void MainWindow::openManagementDialog() {
 }
 
 void MainWindow::openAddPlaylistDialog() {
-  _dlgAddPlaylist = new DialogAddPlaylist(this);
+  _dlgAddPlaylist = new DialogAddPlaylist(this, _playlist);
+  // prepare a connection, in case the management dialog is closed, the
+  // tableWidgetCurrentPlaylist will be updated
+  connect(_dlgAddPlaylist, &QDialog::finished, this,
+          &MainWindow::refreshTableWidgetCurrentPlaylist);
   _dlgAddPlaylist->exec();
 }
 
