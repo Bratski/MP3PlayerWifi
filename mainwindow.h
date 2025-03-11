@@ -7,6 +7,10 @@
 #include <QCoreApplication>
 #include <QMainWindow>
 #include <QSettings>
+#include <QFileDialog>
+
+// for the oled display update time periodically
+//#include <QTimer>
 
 // for the SQL Database management
 #include <QtSql/QSqlQuery>
@@ -47,6 +51,8 @@ public slots:
   void openSearchDialog();
   void openManagementDialog();
   void openAddPlaylistDialog();
+  void addMusicFile();
+  void saveToDatabase();
 
   void sortByAlbum();
   void sortByYear();
@@ -83,6 +89,7 @@ private:
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
+  //QTimer timer;
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);

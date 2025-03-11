@@ -49,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    [this](qint64 timeMS) {
                      timeSong = convertMilliSecToTimeString(timeMS);
                      ui->progressBarSong->setFormat(timeSong);
+                     // "timeMS % 10" reduces flickering in the Oled display
+                     if (!(timeMS % 10))
+                       _oled->updateTime(timeSong.toStdString());
                    });
 
   // header menu items
@@ -68,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // sort menu header
   QObject::connect(ui->actionby_Album, &QAction::triggered, this,
                    &MainWindow::sortByAlbum);
-  QObject::connect(ui->actionby_Album_Yer, &QAction::triggered, this,
+  QObject::connect(ui->actionby_Album_Year, &QAction::triggered, this,
                    &MainWindow::sortByYear);
   QObject::connect(ui->actionby_Artist, &QAction::triggered, this,
                    &MainWindow::sortByArtist);
@@ -76,6 +79,10 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::sortByGenre);
   QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
                    &MainWindow::undoSort);
+  QObject::connect(ui->actionFile, &QAction::triggered, this,
+                   &MainWindow::addMusicFile);
+  QObject::connect(ui->actionSave_Playlist, &QAction::triggered, this,
+                   &MainWindow::saveToDatabase);
 
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
@@ -131,6 +138,38 @@ void MainWindow::openAddPlaylistDialog() {
   connect(_dlgAddPlaylist, &QDialog::finished, this,
           &MainWindow::refreshTableWidgetCurrentPlaylist);
   _dlgAddPlaylist->exec();
+}
+
+void MainWindow::addMusicFile() {
+  // open standard file browser
+  QString filter = "Mp3 Files (*.mp3);; Flac Files (*.flac)";
+  QString fileLocation = QFileDialog::getOpenFileName(
+      this, "Open a file", qApp->applicationDirPath(),
+      //"/home/bart/Nextcloud/CPlusPlusProjects/qtgui/MP3PlayerWorking",
+      filter);
+
+  // only if the string fileLocation contains data
+  if (fileLocation.size()) {
+    // add the track to the playlist
+    CTrack newtrack;
+    newtrack.setTrackData(fileLocation);
+    _playlist->addTrack(newtrack);
+    refreshTableWidgetCurrentPlaylist();
+  } else
+    QMessageBox::warning(this, "Error", "File could not be opened");
+}
+
+void MainWindow::saveToDatabase() {
+    // check if the playlist has a name, if so check if the name is already in the database
+
+    // create a query string
+
+    // bind the values to eachother
+
+    // execute the query for each track
+
+    // return message if all did went well, or did not
+
 }
 
 void MainWindow::sortByAlbum() {
@@ -201,7 +240,7 @@ void MainWindow::playNext() {
     _player->stop();
     return;
   }
-  index += 1;
+  ++index;
   playThisSong = (*_playlist)[index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(playThisSong));
   _player->play();
@@ -213,7 +252,7 @@ void MainWindow::playPrevious() {
     _player->stop();
     return;
   }
-  index -= 1;
+  --index;
   playThisSong = (*_playlist)[index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(playThisSong));
   _player->play();
@@ -298,10 +337,14 @@ void MainWindow::updateTrackInfoDisplay() {
       _playlist->getNumberOfTracks() == 0) {
     return;
   }
+  QString title = (*_playlist)[index].getTitle();
+  QString album = (*_playlist)[index].getAlbum();
+  QString artist = (*_playlist)[index].getArtist();
 
-  ui->labelCurrentSong->setText((*_playlist)[index].getTitle());
-  ui->labelSampleRate->setText(
-      QString::number((*_playlist)[index].getSamplerate()));
+  ui->labelCurrentSong->setText(title);
+  ui->labelcurrentArtist->setText(artist);
+  _oled->updateSong(title.toStdString(), artist.toStdString(),
+                    album.toStdString());
 }
 
 // converts milliseconds and returns a QString displaying the time in this

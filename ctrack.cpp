@@ -11,6 +11,7 @@ void CTrack::setTrackData(const QString &fileloc) {
     _TraTitle = tag->title().toCString();
     _TraAlbum = tag->album().toCString();
     _TraArtist = tag->artist().toCString();
+    _TraYear = tag->year();
     _TraGenre = tag->genre().toCString();
     _TraBitrate = properties->bitrate();
     _TraChannels = properties->channels();

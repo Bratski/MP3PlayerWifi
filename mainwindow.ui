@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="4">
+    <item row="0" column="0" colspan="5">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QTableWidget" name="tableWidgetCurrentPlaylist">
@@ -143,67 +143,6 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="2" rowspan="2">
-     <layout class="QVBoxLayout" name="verticalLayout_6">
-      <item>
-       <widget class="QLabel" name="labelCurrentPlaylist">
-        <property name="text">
-         <string>Current Playlist</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelCurrentSong">
-        <property name="text">
-         <string>Current Song Playing</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelTotalTime">
-        <property name="text">
-         <string>Total Time</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelSampleRate">
-        <property name="text">
-         <string>Sample Rate</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="3" rowspan="2">
-     <layout class="QVBoxLayout" name="verticalLayout_7">
-      <item>
-       <widget class="QLabel" name="labelArtWork">
-        <property name="text">
-         <string>Artwork Album</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout_4">
-      <item>
-       <widget class="QLabel" name="labelVolume">
-        <property name="text">
-         <string>Volume</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="horizontalSliderVolume">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item row="1" column="1" rowspan="2">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -257,6 +196,99 @@
       </item>
      </layout>
     </item>
+    <item row="1" column="2" rowspan="2">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_pll">
+        <property name="text">
+         <string>Current Playlist:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_cuso">
+        <property name="text">
+         <string>Current Song:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cuar">
+        <property name="text">
+         <string>Current Artist:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labeltoti">
+        <property name="text">
+         <string>Total Time:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="3" rowspan="2">
+     <layout class="QVBoxLayout" name="verticalLayout_6">
+      <item>
+       <widget class="QLabel" name="labelCurrentPlaylist">
+        <property name="text">
+         <string>Playlist Name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelCurrentSong">
+        <property name="text">
+         <string> Song Name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelcurrentArtist">
+        <property name="text">
+         <string>Artist Name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelTotalTime">
+        <property name="text">
+         <string>Total Time</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="4" rowspan="2">
+     <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <widget class="QLabel" name="labelArtWork">
+        <property name="text">
+         <string>Artwork Album</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QLabel" name="labelVolume">
+        <property name="text">
+         <string>Volume</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="horizontalSliderVolume">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -265,7 +297,7 @@
      <x>0</x>
      <y>0</y>
      <width>1025</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
@@ -303,7 +335,7 @@
     </property>
     <addaction name="actionby_Artist"/>
     <addaction name="actionby_Album"/>
-    <addaction name="actionby_Album_Yer"/>
+    <addaction name="actionby_Album_Year"/>
     <addaction name="actionby_Genre"/>
     <addaction name="actionundo_Sort"/>
    </widget>
@@ -435,7 +467,7 @@
     <string>by Artist</string>
    </property>
   </action>
-  <action name="actionby_Album_Yer">
+  <action name="actionby_Album_Year">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::MailForward"/>
    </property>
