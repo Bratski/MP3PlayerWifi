@@ -7,7 +7,7 @@ const char *CPlaylistContainer::sortMethodsTXT[int(
 
 const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
   if (idx >= _playlist_ptr_mainwindow_vector.size()) {
-        throw std::out_of_range("index out of range");
+    throw std::out_of_range("index out of range");
   }
   return *_playlist_ptr_mainwindow_vector[idx];
 }
@@ -29,9 +29,7 @@ int CPlaylistContainer::calculatePlaylistTotalTime() {
 
 void CPlaylistContainer::addTrack(CTrack &track) {
   _playlist_obj_vector.push_back(track);
-
-  // update the pointer vector:
-  sortPlaylist(CPlaylistContainer::art_t::undoSort);
+  _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(track));
 }
 
 void CPlaylistContainer::clear() {
@@ -47,22 +45,26 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
 
   // defining the sorting criteria
   // for the artists
-  auto sortbyartist = [](const CTrack *tr1, const CTrack *tr2) {
+  auto sortbyartist = [](const std::shared_ptr<CTrack> tr1,
+                         const std::shared_ptr<CTrack> tr2) {
     return tr1->getArtist() > tr2->getArtist();
   };
 
   // for the albums
-  auto sortbyalbum = [](const CTrack *tr1, const CTrack *tr2) {
+  auto sortbyalbum = [](const std::shared_ptr<CTrack> tr1,
+                        const std::shared_ptr<CTrack> tr2) {
     return tr1->getAlbum() > tr2->getAlbum();
   };
 
   // for the album year
-  auto sortbyyear = [](const CTrack *tr1, const CTrack *tr2) {
+  auto sortbyyear = [](const std::shared_ptr<CTrack> tr1,
+                       const std::shared_ptr<CTrack> tr2) {
     return tr1->getYear() > tr2->getYear();
   };
 
   // for the genres
-  auto sortbygenre = [](const CTrack *tr1, const CTrack *tr2) {
+  auto sortbygenre = [](const std::shared_ptr<CTrack> tr1,
+                        const std::shared_ptr<CTrack> tr2) {
     return tr1->getGenre() > tr2->getGenre();
   };
 
@@ -101,7 +103,7 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
     // vector
     for (auto it = _playlist_obj_vector.begin();
          it != _playlist_obj_vector.end(); ++it) {
-      _playlist_ptr_mainwindow_vector.push_back(&(*it));
+      _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(*it));
     }
     break;
   default:
@@ -119,7 +121,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
       // is the search text corresponding to the track title, the pointer of
       // that track is added to the ptr-filter vector
       if (track.getTitle() == text) {
-        _playlist_ptr_filter_vector.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
     break;
@@ -127,7 +129,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     for (auto &track : _playlist_obj_vector) {
       // same for the track album
       if (track.getAlbum() == text) {
-        _playlist_ptr_filter_vector.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
     break;
@@ -135,7 +137,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     for (auto &track : _playlist_obj_vector) {
       // same for the track artist
       if (track.getArtist() == text) {
-        _playlist_ptr_filter_vector.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
     break;
@@ -143,7 +145,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     for (auto &track : _playlist_obj_vector) {
       // same for the track genre
       if (track.getGenre() == text) {
-        _playlist_ptr_filter_vector.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
     break;
@@ -151,7 +153,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     for (auto &track : _playlist_obj_vector) {
       // same for the track year
       if (track.getYear() == text.toInt()) {
-        _playlist_ptr_filter_vector.push_back(&track);
+        _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
     break;

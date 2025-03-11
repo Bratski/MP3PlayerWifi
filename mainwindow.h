@@ -53,11 +53,10 @@ public slots:
   void playSong();
   void playNext();
   void playPrevious();
-
-  // table widget
-  void refreshTableWidgetCurrentPlaylist();
+  void togglePause();
 
 private:
+  // pointers
   Ui::MainWindow *ui;
   COled *_oled;
   QMediaPlayer *_player;
@@ -70,15 +69,21 @@ private:
   CPlaylistContainer *_playlist;
   CTrack *_track;
 
-
+  // attributes
   int index;
-  QString playThisSong; // = "/home/bart/Nextcloud/Music/Calexico/Aerocalexico/01 "
-                        // "All The Pretty Horses.mp3"; // for debugging
-
+  QString
+      playThisSong; // = "/home/bart/Nextcloud/Music/Calexico/Aerocalexico/01 "
+                    // "All The Pretty Horses.mp3"; // for debugging
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
+
+  // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
   const QString convertSecToTimeString(const int &sec);
+  // detect if a song has finished playing
+  void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
+  // populate the table widget
+  void refreshTableWidgetCurrentPlaylist();
 };
 #endif // MAINWINDOW_H

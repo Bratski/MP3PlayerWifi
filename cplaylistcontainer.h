@@ -7,10 +7,12 @@
 // for the random generator
 #include <random>
 
+// for shared pointers
 #include "ctrack.h"
+#include <memory>
 
 using playlist_t = std::vector<CTrack>;
-using playlist_pt = std::vector<CTrack *>;
+using playlist_pt = std::vector<std::shared_ptr<CTrack>>;
 
 class CPlaylistContainer {
   playlist_t _playlist_obj_vector; // the playlist with objects as read from the

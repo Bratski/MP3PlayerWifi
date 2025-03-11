@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
       static_cast<int>(_audio->volume() * 100));
   ui->progressBarSong->setFormat(timeSong);
   ui->labelTotalTime->setText(timeList);
+  ui->tableWidgetCurrentPlaylist->hideColumn(0);
+  ui->tableWidgetCurrentPlaylist->hideColumn(11);
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -66,14 +68,18 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
                    &MainWindow::playSong);
-  QObject::connect(ui->pushButtonPause, &QPushButton::clicked, _player,
-                   &QMediaPlayer::pause);
+  QObject::connect(ui->pushButtonPause, &QPushButton::clicked, this,
+                   &MainWindow::togglePause);
   QObject::connect(ui->pushButtonStop, &QPushButton::clicked, _player,
                    &QMediaPlayer::stop);
   QObject::connect(ui->pushButtonNext, &QPushButton::clicked, this,
                    &MainWindow::playNext);
   QObject::connect(ui->pushButtonPrevious, &QPushButton::clicked, this,
                    &MainWindow::playPrevious);
+
+  // connect the media status changed signal to handle end of media
+  connect(_player, &QMediaPlayer::mediaStatusChanged, this,
+          &MainWindow::handleMediaStatusChanged);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -118,29 +124,26 @@ void MainWindow::setVolume(int level) {
   _audio->setVolume(audioLevel);
 }
 
-void MainWindow::playSong()
-{
-    // check if one row has been selected, if yes, which one? If not return with
-    // error message
-    QList<QTableWidgetItem *> selectedItems = ui->tableWidgetCurrentPlaylist->selectedItems();
+void MainWindow::playSong() {
+  // check if one row has been selected, if yes, which one? If not return with
+  // error message
+  QList<QTableWidgetItem *> selectedItems =
+      ui->tableWidgetCurrentPlaylist->selectedItems();
 
-    // if (selectedItems.size() != 2) {
-    //     QMessageBox msg;
-    //     msg.addButton("OK", QMessageBox::YesRole);
-    //     msg.setWindowTitle("Error");
-    //     msg.setIcon(QMessageBox::Warning);
-    //     msg.setText("Only 1 playlist at the time can be selected to be
-    //     opened!"); msg.exec(); return;
-    // }
+  // if no items in the table are selected, and the playlist is not empty, start
+  // with the first track
+  if (selectedItems.empty() && _playlist->getNumberOfTracks() >= 1)
+    index = 0;
 
-    // if no items in the table are selected start with the first track
-    if (selectedItems.empty() && _playlist->getNumberOfTracks() != 0)
-        index = 0;
-    else
-        index = selectedItems[0]->text().toInt();
+  // if any items are selected, pick the first row of the selected items
+  if (!selectedItems.empty()) {
+    index = selectedItems[0]->row();
+  }
 
-  // if so, pass the file location of that entry to the player source
-  playThisSong = (*_playlist)[index].getFileLocation();
+  // pass the file location of that entry to the player source
+  if (_playlist->getNumberOfTracks() >= 1)
+    playThisSong = (*_playlist)[index].getFileLocation();
+
   _player->setSource(QUrl::fromLocalFile(playThisSong));
 
   // start playing the song
@@ -151,13 +154,27 @@ void MainWindow::playSong()
 }
 
 void MainWindow::playNext() {
-  if (_playlist->getNumberOfTracks() == 0)
+  if (_playlist->getNumberOfTracks() == 0 ||
+      index == _playlist->getNumberOfTracks() - 1)
     return;
+  index += 1;
+  playThisSong = (*_playlist)[index].getFileLocation();
+  _player->setSource(QUrl::fromLocalFile(playThisSong));
+  _player->play();
 }
 
 void MainWindow::playPrevious() {
-  if (_playlist->getNumberOfTracks() == 0)
+  if (_playlist->getNumberOfTracks() == 0 || index == 0)
     return;
+  index -= 1;
+  playThisSong = (*_playlist)[index].getFileLocation();
+  _player->setSource(QUrl::fromLocalFile(playThisSong));
+  _player->play();
+}
+
+// making the pause button to toggle between pause and playing
+void MainWindow::togglePause() {
+  _player->isPlaying() ? _player->pause() : _player->play();
 }
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
@@ -176,35 +193,41 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
 
   int row = 0;
   for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
-    item = new QTableWidgetItem((*it)->getTitle());
+    item = new QTableWidgetItem(QString::number((*it)->getID()));
     ui->tableWidgetCurrentPlaylist->setItem(row, 0, item);
 
-    item = new QTableWidgetItem((*it)->getArtist());
+    item = new QTableWidgetItem((*it)->getTitle());
     ui->tableWidgetCurrentPlaylist->setItem(row, 1, item);
 
-    item = new QTableWidgetItem((*it)->getAlbum());
+    item = new QTableWidgetItem((*it)->getArtist());
     ui->tableWidgetCurrentPlaylist->setItem(row, 2, item);
 
-    item = new QTableWidgetItem(QString::number((*it)->getYear()));
+    item = new QTableWidgetItem((*it)->getAlbum());
     ui->tableWidgetCurrentPlaylist->setItem(row, 3, item);
 
-    item = new QTableWidgetItem(QString::number((*it)->getNumber()));
+    item = new QTableWidgetItem(QString::number((*it)->getYear()));
     ui->tableWidgetCurrentPlaylist->setItem(row, 4, item);
 
-    item = new QTableWidgetItem((*it)->getGenre());
+    item = new QTableWidgetItem(QString::number((*it)->getNumber()));
     ui->tableWidgetCurrentPlaylist->setItem(row, 5, item);
 
-    item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
+    item = new QTableWidgetItem((*it)->getGenre());
     ui->tableWidgetCurrentPlaylist->setItem(row, 6, item);
 
-    item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
+    item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
     ui->tableWidgetCurrentPlaylist->setItem(row, 7, item);
 
-    item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
+    item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
     ui->tableWidgetCurrentPlaylist->setItem(row, 8, item);
 
-    item = new QTableWidgetItem(QString::number((*it)->getChannels()));
+    item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
     ui->tableWidgetCurrentPlaylist->setItem(row, 9, item);
+
+    item = new QTableWidgetItem(QString::number((*it)->getChannels()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 10, item);
+
+    item = new QTableWidgetItem(((*it)->getFileLocation()));
+    ui->tableWidgetCurrentPlaylist->setItem(row, 11, item);
 
     ++row;
   }
@@ -212,7 +235,6 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   // customizing the looks
   ui->tableWidgetCurrentPlaylist->resizeColumnsToContents();
   ui->tableWidgetCurrentPlaylist->setAlternatingRowColors(true);
-  // ui->tableWidgetCurrentPlaylist->hideColumn(0);
 
   // set the playlist name in the main window info output
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
@@ -252,4 +274,10 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
     return timeExHr;
   else
     return timeInHr;
+}
+
+// if a song has detected as ended, the next one is started
+void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+  if (status == QMediaPlayer::EndOfMedia)
+    playNext();
 }
