@@ -19,7 +19,7 @@ void DialogAddPlaylist::addPlaylist() {
 
   // get the playlist name from the selected table widget item
   QString name = ui->tableWidgetDatabase->currentItem()->text();
-  qDebug() << "name: " << name;
+  // qDebug() << "name: " << name;
 
   // add the playlist object with the all the tracks data from the database
   // found at that particular playlist
@@ -51,28 +51,41 @@ void DialogAddPlaylist::addPlaylist() {
   // populate the _playlist with tracks from query
   int id, year, number, duration, bitrate, samplerate, channels;
   QString title, artist, album, genre, filelocation;
+  bool doubleTrack = false;
   while (query.next()) {
 
     id = query.value(0).toInt();
-    title = query.value(1).toString();
-    artist = query.value(2).toString();
-    album = query.value(3).toString();
-    year = query.value(4).toInt();
-    number = query.value(5).toInt();
-    genre = query.value(6).toString();
-    duration = query.value(7).toInt();
-    bitrate = query.value(8).toInt();
-    samplerate = query.value(9).toInt();
-    channels = query.value(10).toInt();
-    filelocation = query.value(11).toString();
 
-    CTrack newtrack(id, title, artist, album, year, number, genre, duration,
-                    bitrate, samplerate, channels, filelocation);
+    // check if tracks are already available in the playlist, to avoid
+    // duplicates
+    for (auto it = _playlist->begin(); it != _playlist->end(); ++it) {
+      if (id == it->getID()) {
+        doubleTrack = true;
+      }
+    }
 
-    _playlist->addTrack(newtrack);
+    if (!doubleTrack) {
+      title = query.value(1).toString();
+      artist = query.value(2).toString();
+      album = query.value(3).toString();
+      year = query.value(4).toInt();
+      number = query.value(5).toInt();
+      genre = query.value(6).toString();
+      duration = query.value(7).toInt();
+      bitrate = query.value(8).toInt();
+      samplerate = query.value(9).toInt();
+      channels = query.value(10).toInt();
+      filelocation = query.value(11).toString();
 
-    // Debug output for each track
-    qDebug() << "Added track:" << title << "by" << artist;
+      CTrack newtrack(id, title, artist, album, year, number, genre, duration,
+                      bitrate, samplerate, channels, filelocation);
+
+      _playlist->addTrack(newtrack);
+
+      // Debug output for each track
+      // qDebug() << "Added track:" << title << "by" << artist;
+    }
+    doubleTrack = false;
   }
   // leave the dialog management and go back to mainwindow
   this->close();

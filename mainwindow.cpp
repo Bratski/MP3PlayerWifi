@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 // TODO read and save settings from a config file for _defaultID(last playlist)
-// volume etc...
+// volume, OLED settings etc...
 
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
-                   &MainWindow::playSong);
+                   &MainWindow::playSongs);
   QObject::connect(ui->pushButtonPause, &QPushButton::clicked, this,
                    &MainWindow::togglePause);
   QObject::connect(ui->pushButtonStop, &QPushButton::clicked, _player,
@@ -99,6 +99,17 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::playNext);
   QObject::connect(ui->pushButtonPrevious, &QPushButton::clicked, this,
                    &MainWindow::playPrevious);
+
+  // QtableWidget events
+  QObject::connect(ui->tableWidgetCurrentPlaylist,
+                   &QTableWidget::itemDoubleClicked, this,
+                   &MainWindow::playOneSong);
+
+  // Checkbox events
+  QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::checkStateChanged, this,
+                   &MainWindow::setRepeat);
+  QObject::connect(ui->checkBoxPlayRandom, &QCheckBox::checkStateChanged, this,
+                   &MainWindow::setRandom);
 
   // connect the media status changed signal to handle end of media
   connect(_player, &QMediaPlayer::mediaStatusChanged, this,
@@ -165,93 +176,10 @@ void MainWindow::addMusicFile() {
 }
 
 void MainWindow::saveToDatabase() {
-
-  // check if the current playlist has a name, not necessary default name =
-  // "Your Playlist", in the management a new playlist is only accepted with a
-  // name. Therefore it is not possible to have a playlist without a name.
-
-  // find the corresponding ID to the name in the database
-  QString name = _playlist->getPllName();
-  int id = getPlaylistID(name);
-
-  if (id == -1 || _playlist->getNumberOfTracks() == 0)
-    return; // playlist not in db, or no tracks in the playlist
-
-  // Method 1: the object vector has to be synchronised to the ptr
-  // vector
-
-  // Method 2: only the objects, to which the
-  // pointers in the pointer vector are pointing at, must be saved to the
-  // database, probably the most efficient way to do this, because no track
-  // objects have to be moved around, copied or deleted
-
-  // create a query string
-  QSqlQuery query;
-
-  // method 2
-  for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
-
-    qDebug() << "artist: " << (*it)->getArtist();
-    // for one track:
-    // Insert or update artists
-    query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
-                  "VALUES (:artName, :artGenre) "
-                  "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
-    query.bindValue(":artName", (*it)->getArtist());
-    query.bindValue(":artGenre", (*it)->getGenre());
-    if (!query.exec())
-      qDebug() << "error artist";
-
-    // Insert or update albums
-    query.prepare(
-        "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) VALUES (:albName, "
-        ":albYear, (SELECT ArtID FROM Artist WHERE ArtName = :artName)) ON "
-        "CONFLICT(AlbName, AlbArtFK) DO UPDATE SET AlbYear = :albYear ");
-    query.bindValue(":albName", (*it)->getAlbum());
-    query.bindValue(":albYear", (*it)->getYear());
-    query.bindValue(
-        ":artName",
-        (*it)->getArtist()); // Reuse the artist name to get the ArtID
-    if (!query.exec())
-      qDebug() << "error album";
-
-    // Insert or update track
-    query.prepare(
-        "INSERT INTO Track (TraName, TraNumber, TraDuration, TraBitrate, "
-        "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) VALUES "
-        "(:traTitle, :traNumber, :traDuration, :traBitrate, :traSamplerate, "
-        ":traChannels, :traFileLocation, (SELECT AlbID FROM Album WHERE "
-        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO UPDATE SET "
-        "TraNumber = :traNumber, TraDuration = :traDuration, TraBitrate = "
-        ":traBitrate, TraSamplerate = :traSamplerate, TraChannels = "
-        ":traChannels, TraFileLocation = :traFileLocation ");
-    query.bindValue(":traTitle", (*it)->getTitle());
-    query.bindValue(":traNumber", (*it)->getNumber());
-    query.bindValue(":traDuration", (*it)->getDuration());
-    query.bindValue(":traBitrate", (*it)->getBitrate());
-    query.bindValue(":traSamplerate", (*it)->getSamplerate());
-    query.bindValue(":traChannels", (*it)->getChannels());
-    query.bindValue(":traFileLocation", (*it)->getFileLocation());
-    query.bindValue(":albName",
-                    (*it)->getAlbum()); // Reuse the album name to get the AlbID
-    if (!query.exec())
-      qDebug() << "error track";
-
-    // associate the track with the playlist
-    query.prepare(
-        "INSERT INTO TrackPlaylist (TraFK, PllFK) VALUES ((SELECT TraID FROM "
-        "Track WHERE TraName = :traTitle), (SELECT PllID FROM Playlist WHERE "
-        "PllName = :pllName)) ON CONFLICT(TraFK, PllFK) DO NOTHING ");
-    query.bindValue(
-        ":traTitle",
-        (*it)->getTitle()); // Reuse the track title to get the TraID
-    query.bindValue(":pllName",
-                    name); // Reuse the playlist name to get the PllID
-    if (!query.exec())
-      qDebug() << "error playlist";
+  if (!_playlist->savePlaylistToDatabase()) {
+    QMessageBox::warning(this, "Error",
+                         "The playlist could not be saved to the database");
   }
-
-  // return message if all went well, or some errors occured
 }
 
 void MainWindow::sortByAlbum() {
@@ -286,7 +214,7 @@ void MainWindow::setVolume(int level) {
   _audio->setVolume(audioLevel);
 }
 
-void MainWindow::playSong() {
+void MainWindow::playSongs() {
   // check if one row has been selected, if yes, which one? If not return with
   // error message
   QList<QTableWidgetItem *> selectedItems =
@@ -314,13 +242,18 @@ void MainWindow::playSong() {
   // display the song title, samplerate and artwork in the main window info
   // output
   updateTrackInfoDisplay();
+  _playall = true;
 }
 
 void MainWindow::playNext() {
   if (_playlist->getNumberOfTracks() == 0 ||
       _index == _playlist->getNumberOfTracks() - 1) {
-    _player->stop();
-    return;
+    if (_repeat)
+      _index = -1;
+    else {
+      _player->stop();
+      return;
+    }
   }
   ++_index;
   _playThisSong = (*_playlist)[_index].getFileLocation();
@@ -346,6 +279,36 @@ void MainWindow::togglePause() {
   qint64 pos = _player->position();
   if (pos > 0)
     _player->isPlaying() ? _player->pause() : _player->play();
+}
+
+void MainWindow::playOneSong(QTableWidgetItem *item) {
+  // take the row number of the selected item
+  _index = item->row();
+
+  // pass the file location of that entry to the player source
+  if (_playlist->getNumberOfTracks() >= 1)
+    _playThisSong = (*_playlist)[_index].getFileLocation();
+
+  _player->setSource(QUrl::fromLocalFile(_playThisSong));
+
+  // start playing the song
+  _player->play();
+
+  // display the song title, samplerate and artwork in the main window info
+  // output
+  updateTrackInfoDisplay();
+  _playall = false;
+}
+
+// sort the playlist randomly, for shuffle mode
+void MainWindow::setRandom(bool state) {
+  if (state) {
+    _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
+    refreshTableWidgetCurrentPlaylist();
+  } else {
+    _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
+    refreshTableWidgetCurrentPlaylist();
+  }
 }
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
@@ -463,24 +426,14 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
     return timeInHr;
 }
 
-// if a song has detected as ended, the next one is started
+// if a song has detected as ended, the next one is started if bool _playall is
+// set true
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-  if (status == QMediaPlayer::EndOfMedia)
-    playNext();
-}
-
-// to find the corresponding playlist ID to the name
-int MainWindow::getPlaylistID(const QString &playlistName) {
-  QSqlQuery query;
-  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :name");
-  query.bindValue(":name", playlistName);
-
-  if (!query.exec())
-    return -1;
-  if (query.next())
-    return query.value(0).toInt();
-  else
-    return -1;
+  if (status == QMediaPlayer::EndOfMedia) {
+    _player->stop();
+    if (_playall)
+      playNext();
+  }
 }
 
 // open first (default) playlist in the database-table "playlist" on start up:

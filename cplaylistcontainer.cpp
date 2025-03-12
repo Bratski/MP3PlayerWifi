@@ -212,3 +212,81 @@ bool CPlaylistContainer::fillPlaylistWithDatabaseTracks() {
   }
   return true;
 }
+
+bool CPlaylistContainer::savePlaylistToDatabase() {
+  // create a query
+  QSqlQuery query;
+
+  // iterate through the pointer vector
+  for (auto it = _playlist_ptr_mainwindow_vector.begin();
+       it != _playlist_ptr_mainwindow_vector.end(); ++it) {
+
+    qDebug() << "artist: " << (*it)->getArtist();
+    // for one track:
+    // Insert or update artists
+    query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
+                  "VALUES (:artName, :artGenre) "
+                  "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
+    query.bindValue(":artName", (*it)->getArtist());
+    query.bindValue(":artGenre", (*it)->getGenre());
+    if (!query.exec()) {
+      qDebug() << "error artist";
+      return false;
+    }
+
+    // Insert or update albums
+    query.prepare(
+        "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) VALUES (:albName, "
+        ":albYear, (SELECT ArtID FROM Artist WHERE ArtName = :artName)) ON "
+        "CONFLICT(AlbName, AlbArtFK) DO UPDATE SET AlbYear = :albYear ");
+    query.bindValue(":albName", (*it)->getAlbum());
+    query.bindValue(":albYear", (*it)->getYear());
+    query.bindValue(
+        ":artName",
+        (*it)->getArtist()); // Reuse the artist name to get the ArtID
+    if (!query.exec()) {
+      qDebug() << "error album";
+      return false;
+    }
+
+    // Insert or update track
+    query.prepare(
+        "INSERT INTO Track (TraName, TraNumber, TraDuration, TraBitrate, "
+        "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) VALUES "
+        "(:traTitle, :traNumber, :traDuration, :traBitrate, :traSamplerate, "
+        ":traChannels, :traFileLocation, (SELECT AlbID FROM Album WHERE "
+        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO UPDATE SET "
+        "TraNumber = :traNumber, TraDuration = :traDuration, TraBitrate = "
+        ":traBitrate, TraSamplerate = :traSamplerate, TraChannels = "
+        ":traChannels, TraFileLocation = :traFileLocation ");
+    query.bindValue(":traTitle", (*it)->getTitle());
+    query.bindValue(":traNumber", (*it)->getNumber());
+    query.bindValue(":traDuration", (*it)->getDuration());
+    query.bindValue(":traBitrate", (*it)->getBitrate());
+    query.bindValue(":traSamplerate", (*it)->getSamplerate());
+    query.bindValue(":traChannels", (*it)->getChannels());
+    query.bindValue(":traFileLocation", (*it)->getFileLocation());
+    query.bindValue(":albName",
+                    (*it)->getAlbum()); // Reuse the album name to get the AlbID
+    if (!query.exec()) {
+      qDebug() << "error track";
+      return false;
+    }
+    // associate the track with the playlist
+    query.prepare(
+        "INSERT INTO TrackPlaylist (TraFK, PllFK) VALUES ((SELECT TraID FROM "
+        "Track WHERE TraName = :traTitle), (SELECT PllID FROM Playlist WHERE "
+        "PllName = :pllName)) ON CONFLICT(TraFK, PllFK) DO NOTHING ");
+    query.bindValue(
+        ":traTitle",
+        (*it)->getTitle()); // Reuse the track title to get the TraID
+    query.bindValue(":pllName",
+                    _PllName); // Reuse the playlist name to get the PllID
+    if (!query.exec()) {
+      qDebug() << "error playlist";
+      return false;
+    }
+  }
+
+  return true;
+}

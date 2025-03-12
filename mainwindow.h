@@ -42,7 +42,7 @@ public:
   ~MainWindow();
 
 public slots:
-  // header
+  // header functions
   void openSettingsDialog();
   void openProgressDialog();
   void openSearchDialog();
@@ -51,18 +51,22 @@ public slots:
   void addMusicFile();
   void saveToDatabase();
 
+  // header sort methods
   void sortByAlbum();
   void sortByYear();
   void sortByArtist();
   void sortByGenre();
   void undoSort();
 
-  // player
+  // player functions
   void setVolume(int level);
-  void playSong();
+  void playSongs();
   void playNext();
   void playPrevious();
   void togglePause();
+  void playOneSong(QTableWidgetItem *item);
+  void setRepeat(bool state) { _repeat = state; }
+  void setRandom(bool state);
 
 private:
   // pointers
@@ -86,6 +90,8 @@ private:
   float _startVolume = 0.2; // setting the start volume to 20%
   int _defaultPlaylistID =
       1; // first entry in the playlist table in the sql database
+  bool _repeat = false;
+  bool _playall = false;
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
@@ -95,7 +101,6 @@ private:
   // populate the table widget
   void refreshTableWidgetCurrentPlaylist();
   void updateTrackInfoDisplay();
-  int getPlaylistID(const QString &playlistName);
   void readDataBasePlaylist();
 };
 #endif // MAINWINDOW_H
