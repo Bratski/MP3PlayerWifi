@@ -103,5 +103,6 @@ private:
   void refreshTableWidgetCurrentPlaylist();
   void updateTrackInfoDisplay();
   void readDataBasePlaylist();
+  void closingProcedure();
 };
 #endif // MAINWINDOW_H

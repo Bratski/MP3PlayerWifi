@@ -116,7 +116,10 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
           &MainWindow::handleMediaStatusChanged);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  closingProcedure();
+  delete ui;
+}
 
 // header windows, the Dialog object pointed to by _dlgxxx is deleted
 // automatically when its parent object (the one referred to by this) is
@@ -450,4 +453,21 @@ void MainWindow::readDataBasePlaylist() {
     _playlist->setPllName(query.value(1).toString());
     _playlist->fillPlaylistWithDatabaseTracks();
   }
+}
+
+void MainWindow::closingProcedure() {
+  // on exit, asking if the current playlist should be saved
+  QMessageBox msg;
+  msg.addButton("Yes", QMessageBox::YesRole);
+  msg.addButton("No", QMessageBox::NoRole);
+  msg.setWindowTitle("Save Playlist?");
+  msg.setIcon(QMessageBox::Warning);
+  msg.setText("Do you want to save the current playlist?");
+
+  // msg.exec() returns "3" if norole, "2" if yesrole
+  if (msg.exec() == 3) {
+    return;
+  }
+  if (_playlist->savePlaylistToDatabase())
+    qDebug() << "playlist saved";
 }
