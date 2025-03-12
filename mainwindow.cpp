@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// TODO read and save settings from a config file
+// TODO read and save settings from a config file for _defaultID(last playlist)
+// volume etc...
 
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
@@ -12,15 +13,17 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
   // setting default parameters and initialize
   setWindowTitle("Bratskis MP3 Player Nitro");
-  _audio->setVolume(startVolume);
+  _audio->setVolume(_startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
       static_cast<int>(_audio->volume() * 100));
-  ui->progressBarSong->setFormat(timeSong);
-  ui->labelTotalTime->setText(timeList);
+  ui->progressBarSong->setFormat(_timeSong);
+  ui->labelTotalTime->setText(_timeList);
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
   ui->tableWidgetCurrentPlaylist->hideColumn(11);
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
+  readDataBasePlaylist();
+  refreshTableWidgetCurrentPlaylist();
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -48,11 +51,11 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // reading the time and display it in the progress bar
   QObject::connect(_player, &QMediaPlayer::positionChanged, ui->progressBarSong,
                    [this](qint64 timeMS) {
-                     timeSong = convertMilliSecToTimeString(timeMS);
-                     ui->progressBarSong->setFormat(timeSong);
+                     _timeSong = convertMilliSecToTimeString(timeMS);
+                     ui->progressBarSong->setFormat(_timeSong);
                      // "timeMS % 10" reduces flickering in the Oled display
                      if (!(timeMS % 10))
-                       _oled->updateTime(timeSong.toStdString());
+                       _oled->updateTime(_timeSong.toStdString());
                    });
 
   // header menu items
@@ -171,8 +174,8 @@ void MainWindow::saveToDatabase() {
   QString name = _playlist->getPllName();
   int id = getPlaylistID(name);
 
-  if (id == -1)
-    return; // playlist not in db, create a new one
+  if (id == -1 || _playlist->getNumberOfTracks() == 0)
+    return; // playlist not in db, or no tracks in the playlist
 
   // Method 1: the object vector has to be synchronised to the ptr
   // vector
@@ -188,6 +191,7 @@ void MainWindow::saveToDatabase() {
   // method 2
   for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
 
+    qDebug() << "artist: " << (*it)->getArtist();
     // for one track:
     // Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
@@ -195,37 +199,32 @@ void MainWindow::saveToDatabase() {
                   "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
     query.bindValue(":artName", (*it)->getArtist());
     query.bindValue(":artGenre", (*it)->getGenre());
-    query.exec();
+    if (!query.exec())
+      qDebug() << "error artist";
 
     // Insert or update albums
     query.prepare(
-        "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) "
-        "VALUES (:albName, :albYear, (SELECT ArtID FROM Artist WHERE ArtName = "
-        ":artName)) "
-        "ON CONFLICT(AlbName) DO UPDATE SET AlbYear = :albYear, AlbArtFK = "
-        "(SELECT ArtID FROM Artist WHERE ArtName = :artName));");
+        "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) VALUES (:albName, "
+        ":albYear, (SELECT ArtID FROM Artist WHERE ArtName = :artName)) ON "
+        "CONFLICT(AlbName, AlbArtFK) DO UPDATE SET AlbYear = :albYear ");
     query.bindValue(":albName", (*it)->getAlbum());
     query.bindValue(":albYear", (*it)->getYear());
     query.bindValue(
         ":artName",
         (*it)->getArtist()); // Reuse the artist name to get the ArtID
-    query.exec();
+    if (!query.exec())
+      qDebug() << "error album";
 
     // Insert or update track
     query.prepare(
         "INSERT INTO Track (TraName, TraNumber, TraDuration, TraBitrate, "
-        "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) "
-        "VALUES (:traTitle, :traNumber, :traDuration, :traBitrate, "
-        ":traSamplerate, :traChannels, :traFileLocation, (SELECT AlbID FROM "
-        "Album WHERE AlbName = :albName)) "
-        "ON CONFLICT(TraName) DO UPDATE SET "
-        "TraNumber = :traNumber, "
-        "TraDuration = :traDuration, "
-        "TraBitrate = :traBitrate, "
-        "TraSamplerate = :traSamplerate, "
-        "TraChannels = :traChannels, "
-        "TraFileLocation = :traFileLocation, "
-        "TraAlbFK = (SELECT AlbID FROM Album WHERE AlbName = :albName);");
+        "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) VALUES "
+        "(:traTitle, :traNumber, :traDuration, :traBitrate, :traSamplerate, "
+        ":traChannels, :traFileLocation, (SELECT AlbID FROM Album WHERE "
+        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO UPDATE SET "
+        "TraNumber = :traNumber, TraDuration = :traDuration, TraBitrate = "
+        ":traBitrate, TraSamplerate = :traSamplerate, TraChannels = "
+        ":traChannels, TraFileLocation = :traFileLocation ");
     query.bindValue(":traTitle", (*it)->getTitle());
     query.bindValue(":traNumber", (*it)->getNumber());
     query.bindValue(":traDuration", (*it)->getDuration());
@@ -235,20 +234,21 @@ void MainWindow::saveToDatabase() {
     query.bindValue(":traFileLocation", (*it)->getFileLocation());
     query.bindValue(":albName",
                     (*it)->getAlbum()); // Reuse the album name to get the AlbID
-    query.exec();
+    if (!query.exec())
+      qDebug() << "error track";
 
     // associate the track with the playlist
     query.prepare(
-        "INSERT INTO TrackPlaylist (TraFK, PllFK) "
-        "VALUES ((SELECT TraID FROM Track WHERE TraName = :traTitle), (SELECT "
-        "PllID FROM Playlist WHERE PllName = :pllName)) "
-        "ON CONFLICT(TraFK, PllFK) DO NOTHING;");
+        "INSERT INTO TrackPlaylist (TraFK, PllFK) VALUES ((SELECT TraID FROM "
+        "Track WHERE TraName = :traTitle), (SELECT PllID FROM Playlist WHERE "
+        "PllName = :pllName)) ON CONFLICT(TraFK, PllFK) DO NOTHING ");
     query.bindValue(
         ":traTitle",
         (*it)->getTitle()); // Reuse the track title to get the TraID
     query.bindValue(":pllName",
                     name); // Reuse the playlist name to get the PllID
-    query.exec();
+    if (!query.exec())
+      qDebug() << "error playlist";
   }
 
   // return message if all went well, or some errors occured
@@ -295,18 +295,18 @@ void MainWindow::playSong() {
   // if no items in the table are selected, and the playlist is not empty, start
   // with the first track
   if (selectedItems.empty() && _playlist->getNumberOfTracks() >= 1)
-    index = 0;
+    _index = 0;
 
   // if any items are selected, pick the first row of the selected items
   if (!selectedItems.empty()) {
-    index = selectedItems[0]->row();
+    _index = selectedItems[0]->row();
   }
 
   // pass the file location of that entry to the player source
   if (_playlist->getNumberOfTracks() >= 1)
-    playThisSong = (*_playlist)[index].getFileLocation();
+    _playThisSong = (*_playlist)[_index].getFileLocation();
 
-  _player->setSource(QUrl::fromLocalFile(playThisSong));
+  _player->setSource(QUrl::fromLocalFile(_playThisSong));
 
   // start playing the song
   _player->play();
@@ -318,25 +318,25 @@ void MainWindow::playSong() {
 
 void MainWindow::playNext() {
   if (_playlist->getNumberOfTracks() == 0 ||
-      index == _playlist->getNumberOfTracks() - 1) {
+      _index == _playlist->getNumberOfTracks() - 1) {
     _player->stop();
     return;
   }
-  ++index;
-  playThisSong = (*_playlist)[index].getFileLocation();
-  _player->setSource(QUrl::fromLocalFile(playThisSong));
+  ++_index;
+  _playThisSong = (*_playlist)[_index].getFileLocation();
+  _player->setSource(QUrl::fromLocalFile(_playThisSong));
   _player->play();
   updateTrackInfoDisplay();
 }
 
 void MainWindow::playPrevious() {
-  if (_playlist->getNumberOfTracks() == 0 || index == 0) {
+  if (_playlist->getNumberOfTracks() == 0 || _index == 0) {
     _player->stop();
     return;
   }
-  --index;
-  playThisSong = (*_playlist)[index].getFileLocation();
-  _player->setSource(QUrl::fromLocalFile(playThisSong));
+  --_index;
+  _playThisSong = (*_playlist)[_index].getFileLocation();
+  _player->setSource(QUrl::fromLocalFile(_playThisSong));
   _player->play();
   updateTrackInfoDisplay();
 }
@@ -415,13 +415,13 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
 
 void MainWindow::updateTrackInfoDisplay() {
   // to make sure the index is not pointing to a non existing object
-  if (index >= _playlist->getNumberOfTracks() ||
+  if (_index >= _playlist->getNumberOfTracks() ||
       _playlist->getNumberOfTracks() == 0) {
     return;
   }
-  QString title = (*_playlist)[index].getTitle();
-  QString album = (*_playlist)[index].getAlbum();
-  QString artist = (*_playlist)[index].getArtist();
+  QString title = (*_playlist)[_index].getTitle();
+  QString album = (*_playlist)[_index].getAlbum();
+  QString artist = (*_playlist)[_index].getArtist();
 
   ui->labelCurrentSong->setText(title);
   ui->labelcurrentArtist->setText(artist);
@@ -481,4 +481,20 @@ int MainWindow::getPlaylistID(const QString &playlistName) {
     return query.value(0).toInt();
   else
     return -1;
+}
+
+// open first (default) playlist in the database-table "playlist" on start up:
+void MainWindow::readDataBasePlaylist() {
+  QSqlQuery query;
+  query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist WHERE "
+                "PllID = :id ");
+  query.bindValue(":id", _defaultPlaylistID);
+
+  if (!query.exec())
+    return;
+  if (query.next()) {
+    _playlist->setPllID(query.value(0).toInt());
+    _playlist->setPllName(query.value(1).toString());
+    _playlist->fillPlaylistWithDatabaseTracks();
+  }
 }

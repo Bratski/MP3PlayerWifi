@@ -11,6 +11,9 @@
 #include "ctrack.h"
 #include <memory>
 
+// for the SQL Database management
+#include <QtSql/QSqlQuery>
+
 using playlist_t = std::vector<CTrack>;
 using playlist_pt = std::vector<std::shared_ptr<CTrack>>;
 
@@ -26,7 +29,7 @@ class CPlaylistContainer {
                                    // tracks in the playlist, needed for the
                                    // search and filter function
   int _PllID;
-  QString _PllName = "Your Playlist";
+  QString _PllName;
 
 public:
   enum class art_t : u_int8_t {
@@ -60,6 +63,7 @@ public:
   void clear();
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
+  bool fillPlaylistWithDatabaseTracks();
 
   static const char
       *sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];

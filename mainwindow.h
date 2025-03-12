@@ -9,9 +9,6 @@
 #include <QMainWindow>
 #include <QSettings>
 
-// for the oled display update time periodically
-//#include <QTimer>
-
 // for the SQL Database management
 #include <QtSql/QSqlQuery>
 
@@ -82,14 +79,13 @@ private:
   CTrack *_track;
 
   // attributes
-  int index;
-  QString
-      playThisSong; // = "/home/bart/Nextcloud/Music/Calexico/Aerocalexico/01 "
-                    // "All The Pretty Horses.mp3"; // for debugging
-  QString timeSong = "Time Song";
-  QString timeList = "Total Time";
-  float startVolume = 0.2; // setting the start volume to 20%
-  // QTimer timer;
+  int _index;
+  QString _playThisSong;
+  QString _timeSong = "Time Song";
+  QString _timeList = "Total Time";
+  float _startVolume = 0.2; // setting the start volume to 20%
+  int _defaultPlaylistID =
+      1; // first entry in the playlist table in the sql database
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
@@ -100,5 +96,6 @@ private:
   void refreshTableWidgetCurrentPlaylist();
   void updateTrackInfoDisplay();
   int getPlaylistID(const QString &playlistName);
+  void readDataBasePlaylist();
 };
 #endif // MAINWINDOW_H

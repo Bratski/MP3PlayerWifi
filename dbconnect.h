@@ -28,7 +28,7 @@ bool createConnection() {
   // Create the Artist table
   if (!query.exec("CREATE TABLE IF NOT EXISTS Artist ("
                   "ArtID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                  "ArtName TEXT NOT NULL, "
+                  "ArtName TEXT NOT NULL UNIQUE, "
                   "ArtGenre TEXT NOT NULL)")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create Artist table: " +
@@ -42,7 +42,8 @@ bool createConnection() {
                   "AlbName TEXT NOT NULL, "
                   "AlbYear TEXT NOT NULL, "
                   "AlbArtFK INTEGER NOT NULL, "
-                  "FOREIGN KEY(AlbArtFK) REFERENCES Artist(ArtID))")) {
+                  "FOREIGN KEY(AlbArtFK) REFERENCES Artist(ArtID), "
+                  "UNIQUE (AlbName, AlbArtFK))")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create Album table: " +
                               query.lastError().text());
@@ -60,7 +61,8 @@ bool createConnection() {
                   "TraChannels INTEGER NOT NULL, "
                   "TraFileLocation TEXT NOT NULL, "
                   "TraAlbFK INTEGER NOT NULL, "
-                  "FOREIGN KEY(TraAlbFK) REFERENCES Album(AlbID))")) {
+                  "FOREIGN KEY(TraAlbFK) REFERENCES Album(AlbID), "
+                  "UNIQUE (TraName, TraAlbFK))")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create Track table: " +
                               query.lastError().text());
@@ -83,11 +85,40 @@ bool createConnection() {
           "TraFK INTEGER NOT NULL, "
           "PllFK INTEGER NOT NULL, "
           "FOREIGN KEY(PllFK) REFERENCES Playlist(PllID) ON DELETE CASCADE, "
-          "FOREIGN KEY(TraFK) REFERENCES Track(TraID) ON DELETE CASCADE)")) {
+          "FOREIGN KEY(TraFK) REFERENCES Track(TraID) ON DELETE CASCADE, "
+          "UNIQUE (TraFK, PllFK))")) {
     QMessageBox::critical(nullptr, "Database Error",
                           "Failed to create TrackPlaylist table: " +
                               query.lastError().text());
     return false;
+  }
+
+  // Create the default playlist table "Default Playlist"
+  QString name = "Default Playlist";
+
+  // create a query, and check if name already exists in the database
+  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :PllName ");
+  query.bindValue(":PllName", name);
+
+  if (!query.exec()) {
+    QMessageBox::critical(nullptr, "Database Error",
+                          "could not execute search playlist name: " +
+                              query.lastError().text());
+    return false;
+  }
+
+  // create the new playlist in the database, if the playlist is not existing
+  if (!query.first()) {
+    query.prepare("INSERT INTO Playlist (PllName) VALUES (:PllName) ");
+    query.bindValue(":PllName", name);
+
+    if (!query.exec()) {
+      QMessageBox::critical(
+          nullptr, "Database Error",
+          "Failed to create default playlist in the Playlist table: " +
+              query.lastError().text());
+      return false;
+    }
   }
 
   qDebug() << "Database and tables created successfully!";
