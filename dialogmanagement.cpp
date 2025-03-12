@@ -34,25 +34,26 @@ void DialogManagement::openPlaylist() {
   // check if one row has been selected, if yes, which one? If not return with
   // error message
 
-  QList<QTableWidgetItem *> selectedItems =
-      ui->tableWidgetPlaylists->selectedItems();
+ QList<QTableWidgetSelectionRange> selectedRanges = ui->tableWidgetPlaylists->selectedRanges();
 
-  if (selectedItems.size() != 2) {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Error");
-    msg.setIcon(QMessageBox::Warning);
-    msg.setText("Only 1 playlist at the time can be selected to be opened!");
-    msg.exec();
+  if (selectedRanges.size() != 1) {
+    QMessageBox::warning(
+        this, "Error",
+        "Only 1 playlist at the time can be selected to be opened!");
     return;
   }
+
+  // get the items at the selected row
+  int selectedRow = selectedRanges.first().topRow();
+  QTableWidgetItem *idItem = ui->tableWidgetPlaylists->item(selectedRow, 0); // Column 0 (ID)
+  QTableWidgetItem *nameItem = ui->tableWidgetPlaylists->item(selectedRow, 1); // Column 1 (Name)
 
   // empty the playlist
   _playlist->clear();
 
-  // extract the PllID and PllName and set the _playlist name and id
-  _playlist->setPllID(selectedItems[0]->text().toInt());
-  _playlist->setPllName(selectedItems[1]->text());
+  // extract the PllID and PllName from the items and set the _playlist name and id
+  _playlist->setPllID(idItem->text().toInt());
+  _playlist->setPllName(nameItem->text());
 
   // fill the playlist with the database tracks
   _playlist->fillPlaylistWithDatabaseTracks();
@@ -71,12 +72,7 @@ void DialogManagement::addNewPlaylist() {
 
   // check if there is a name in the input field,
   if (name.size() == 0) {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Error");
-    msg.setIcon(QMessageBox::Warning);
-    msg.setText("No valid name in the input field");
-    msg.exec();
+    QMessageBox::warning(this, "Error", "No valid name in the input field");
     return;
   }
 
@@ -90,12 +86,8 @@ void DialogManagement::addNewPlaylist() {
     return;
 
   if (query.first()) {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Error");
-    msg.setIcon(QMessageBox::Warning);
-    msg.setText("The playlist already exists, please change the name");
-    msg.exec();
+    QMessageBox::warning(this, "Error",
+                         "The playlist already exists, please change the name");
     return;
   }
 
@@ -103,8 +95,11 @@ void DialogManagement::addNewPlaylist() {
   query.prepare("INSERT INTO Playlist (PllName) VALUES (:PllName) ");
   query.bindValue(":PllName", name);
 
-  if (!query.exec())
+  if (!query.exec()) {
+    QMessageBox::warning(this, "Error",
+                         "Error creating new Playlist in the Database");
     return;
+  }
 
   // update the table
   readDatabase();
@@ -114,44 +109,63 @@ void DialogManagement::addNewPlaylist() {
 void DialogManagement::deletePlaylist() {
   // prevents interfering with the namePlaylistEdited function
   blockSignals(true);
+
   // check if rows are selected in the table
-  QList<QTableWidgetItem *> selectedItems =
-      ui->tableWidgetPlaylists->selectedItems();
-
-  // return if no entries are selected
-  if (selectedItems.size() == 0)
-    return;
-
-  // warning are you sure
-  QMessageBox msg;
-  msg.addButton("Yes", QMessageBox::YesRole);
-  msg.addButton("No", QMessageBox::NoRole);
-  msg.setWindowTitle("Delete?");
-  msg.setIcon(QMessageBox::Warning);
-  msg.setText("Are you sure to delete this playlist, inclusive its contents?");
-
-  // msg.exec() returns "3" if norole, "2" if yesrole
-  if (msg.exec() == 3) {
-    return;
-  }
+  QList<QTableWidgetSelectionRange> selectedRanges =
+      ui->tableWidgetPlaylists->selectedRanges();
 
   // delete the selected rows from the database
   QSqlQuery query;
-  QString name;
 
-  for (auto it = selectedItems.begin(); it != selectedItems.end(); ++it) {
-    if ((*it)->column() == 1) {
-      name = (*it)->text();
+  // Iterate through each selected range
+  for (const QTableWidgetSelectionRange &range : selectedRanges) {
+    // Iterate through each row in the range
+    for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
+      // Access the items in the row
+      QTableWidgetItem *idItem =
+          ui->tableWidgetPlaylists->item(row, 0); // Column 0 (ID)
+      QTableWidgetItem *nameItem =
+          ui->tableWidgetPlaylists->item(row, 1); // Column 1 (Name)
+
+      // Get the ID and Name
+      int id = idItem->text().toInt();
+      QString name = nameItem->text();
+
+      // if the playlist is currently opened in the main window or is the first
+      // entry in the database, it can not be deleted
+      if (name == _playlist->getPllName() || id == 1) {
+        QMessageBox::warning(this, "Error",
+                             "The current playlist cannot be deleted!");
+        return;
+      }
+
+      // warning are you sure
+      QMessageBox msg;
+      msg.addButton("Yes", QMessageBox::YesRole);
+      msg.addButton("No", QMessageBox::NoRole);
+      msg.setWindowTitle("Delete?");
+      msg.setIcon(QMessageBox::Warning);
+      msg.setText(
+          "Are you sure to delete this playlist, inclusive its contents?");
+
+      // msg.exec() returns "3" if norole, "2" if yesrole
+      if (msg.exec() == 3) {
+        return;
+      }
+      // creating the deletion query
       query.prepare("DELETE FROM Playlist WHERE PllName = :PllName ");
       query.bindValue(":PllName", name);
 
-      if (!query.exec())
+      // deleting the database playlist entry
+      if (!query.exec()) {
+        QMessageBox::warning(this, "Error", "Error removing Playlists!");
         return;
+      }
     }
   }
-
   // refresh the table
   readDatabase();
+
   // prevents interfering with the namePlaylistEdited function
   blockSignals(false);
 }
@@ -176,16 +190,14 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
   query.prepare("SELECT PllID FROM Playlist WHERE PllName = :PllName ");
   query.bindValue(":PllName", name);
 
-  if (!query.exec())
+  if (!query.exec()) {
+    QMessageBox::warning(this, "Error",
+                         "Error checking the Playlist name in the Database");
     return;
-
+  }
   if (query.first()) {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Error");
-    msg.setIcon(QMessageBox::Warning);
-    msg.setText("The playlist already exists, please change the name");
-    msg.exec();
+    QMessageBox::warning(this, "Error",
+                         "The playlist already exists, please change the name");
     readDatabase();
     return;
   }
@@ -195,8 +207,12 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
   query.bindValue(":PllID", id);
   query.bindValue(":PllName", name);
 
-  if (!query.exec())
+  if (!query.exec()) {
+    QMessageBox::warning(
+        this, "Error",
+        "Error updating name in the Playlist name in the Database");
     return;
+  }
 
   // update the table
   readDatabase();
@@ -215,8 +231,11 @@ void DialogManagement::readDatabase() {
   QSqlQuery query;
   query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist ");
 
-  if (!query.exec())
+  if (!query.exec()) {
+    QMessageBox::warning(this, "Error",
+                         "Error selecting the Playlist name in the Database");
     return;
+  }
 
   // count the number of Playlists being found
   int rowCount = 0;

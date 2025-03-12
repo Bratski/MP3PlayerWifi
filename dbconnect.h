@@ -93,33 +93,38 @@ bool createConnection() {
     return false;
   }
 
-  // Create the default playlist table "Default Playlist"
-  QString name = "Default Playlist";
+  // Create the default playlist table, at least one empty playlist is available
+  // Step 1: Check if the playlist with the given ID exists
+  QString playlistName = "default Playlist";
+  int playlistID = 1;
 
-  // create a query, and check if name already exists in the database
-  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :PllName ");
-  query.bindValue(":PllName", name);
+  query.prepare("SELECT PllID FROM Playlist WHERE PllID = :PllID");
+  query.bindValue(":PllID", playlistID);
 
   if (!query.exec()) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "could not execute search playlist name: " +
-                              query.lastError().text());
-    return false;
-  }
-
-  // create the new playlist in the database, if the playlist is not existing
-  if (!query.first()) {
-    query.prepare("INSERT INTO Playlist (PllName) VALUES (:PllName) ");
-    query.bindValue(":PllName", name);
-
-    if (!query.exec()) {
-      QMessageBox::critical(
-          nullptr, "Database Error",
-          "Failed to create default playlist in the Playlist table: " +
-              query.lastError().text());
+      QMessageBox::critical(nullptr, "Database Error",
+                            "Failed to execute query: " + query.lastError().text());
       return false;
-    }
   }
+
+  if (query.next()) {
+      // Playlist already exists
+      qDebug() << "Playlist with ID" << playlistID << "already exists.";
+      return true;
+  }
+
+  // Step 2: Insert a new playlist with the specified ID
+  query.prepare("INSERT INTO Playlist (PllID, PllName) VALUES (:PllID, :PllName)");
+  query.bindValue(":PllID", playlistID); // Explicitly set the PllID
+  query.bindValue(":PllName", playlistName);
+
+  if (!query.exec()) {
+      QMessageBox::critical(nullptr, "Database Error",
+                            "Failed to insert playlist: " + query.lastError().text());
+      return false;
+  }
+
+
 
   qDebug() << "Database and tables created successfully!";
   return true;

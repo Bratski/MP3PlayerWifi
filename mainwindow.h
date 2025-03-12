@@ -26,6 +26,8 @@
 // to make it possible to extract artwork from the mp3-file
 #include <taglib/id3v2frame.h>
 
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -83,15 +85,14 @@ private:
   CTrack *_track;
 
   // attributes
-  int _index;
+  int _index = 0;
   QString _playThisSong;
   QString _timeSong = "Time Song";
   QString _timeList = "Total Time";
   float _startVolume = 0.2; // setting the start volume to 20%
-  int _defaultPlaylistID =
-      1; // first entry in the playlist table in the sql database
   bool _repeat = false;
   bool _playall = false;
+  int _defaultPlaylistID = 1; // at startup open the first playlist in the database by default
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
