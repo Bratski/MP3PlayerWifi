@@ -26,7 +26,7 @@ class CPlaylistContainer {
                                    // tracks in the playlist, needed for the
                                    // search and filter function
   int _PllID;
-  QString _PllName;
+  QString _PllName = "Your Playlist";
 
 public:
   enum class art_t : u_int8_t {

@@ -32,4 +32,5 @@ int main(int argc, char *argv[]) {
       &track); // passing all the objects as pointers to the main window
   w.show();
   return a.exec();
+  // has the database to be properly closed?
 }

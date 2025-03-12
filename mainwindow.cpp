@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->labelTotalTime->setText(timeList);
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
   ui->tableWidgetCurrentPlaylist->hideColumn(11);
+  ui->labelCurrentPlaylist->setText(_playlist->getPllName());
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -133,6 +134,7 @@ void MainWindow::openManagementDialog() {
 
 void MainWindow::openAddPlaylistDialog() {
   _dlgAddPlaylist = new DialogAddPlaylist(this, _playlist);
+
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
   connect(_dlgAddPlaylist, &QDialog::finished, this,
@@ -160,16 +162,96 @@ void MainWindow::addMusicFile() {
 }
 
 void MainWindow::saveToDatabase() {
-    // check if the playlist has a name, if so check if the name is already in the database
 
-    // create a query string
+  // check if the current playlist has a name, not necessary default name =
+  // "Your Playlist", in the management a new playlist is only accepted with a
+  // name. Therefore it is not possible to have a playlist without a name.
 
-    // bind the values to eachother
+  // find the corresponding ID to the name in the database
+  QString name = _playlist->getPllName();
+  int id = getPlaylistID(name);
 
-    // execute the query for each track
+  if (id == -1)
+    return; // playlist not in db, create a new one
 
-    // return message if all did went well, or did not
+  // Method 1: the object vector has to be synchronised to the ptr
+  // vector
 
+  // Method 2: only the objects, to which the
+  // pointers in the pointer vector are pointing at, must be saved to the
+  // database, probably the most efficient way to do this, because no track
+  // objects have to be moved around, copied or deleted
+
+  // create a query string
+  QSqlQuery query;
+
+  // method 2
+  for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
+
+    // for one track:
+    // Insert or update artists
+    query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
+                  "VALUES (:artName, :artGenre) "
+                  "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
+    query.bindValue(":artName", (*it)->getArtist());
+    query.bindValue(":artGenre", (*it)->getGenre());
+    query.exec();
+
+    // Insert or update albums
+    query.prepare(
+        "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) "
+        "VALUES (:albName, :albYear, (SELECT ArtID FROM Artist WHERE ArtName = "
+        ":artName)) "
+        "ON CONFLICT(AlbName) DO UPDATE SET AlbYear = :albYear, AlbArtFK = "
+        "(SELECT ArtID FROM Artist WHERE ArtName = :artName));");
+    query.bindValue(":albName", (*it)->getAlbum());
+    query.bindValue(":albYear", (*it)->getYear());
+    query.bindValue(
+        ":artName",
+        (*it)->getArtist()); // Reuse the artist name to get the ArtID
+    query.exec();
+
+    // Insert or update track
+    query.prepare(
+        "INSERT INTO Track (TraName, TraNumber, TraDuration, TraBitrate, "
+        "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) "
+        "VALUES (:traTitle, :traNumber, :traDuration, :traBitrate, "
+        ":traSamplerate, :traChannels, :traFileLocation, (SELECT AlbID FROM "
+        "Album WHERE AlbName = :albName)) "
+        "ON CONFLICT(TraName) DO UPDATE SET "
+        "TraNumber = :traNumber, "
+        "TraDuration = :traDuration, "
+        "TraBitrate = :traBitrate, "
+        "TraSamplerate = :traSamplerate, "
+        "TraChannels = :traChannels, "
+        "TraFileLocation = :traFileLocation, "
+        "TraAlbFK = (SELECT AlbID FROM Album WHERE AlbName = :albName);");
+    query.bindValue(":traTitle", (*it)->getTitle());
+    query.bindValue(":traNumber", (*it)->getNumber());
+    query.bindValue(":traDuration", (*it)->getDuration());
+    query.bindValue(":traBitrate", (*it)->getBitrate());
+    query.bindValue(":traSamplerate", (*it)->getSamplerate());
+    query.bindValue(":traChannels", (*it)->getChannels());
+    query.bindValue(":traFileLocation", (*it)->getFileLocation());
+    query.bindValue(":albName",
+                    (*it)->getAlbum()); // Reuse the album name to get the AlbID
+    query.exec();
+
+    // associate the track with the playlist
+    query.prepare(
+        "INSERT INTO TrackPlaylist (TraFK, PllFK) "
+        "VALUES ((SELECT TraID FROM Track WHERE TraName = :traTitle), (SELECT "
+        "PllID FROM Playlist WHERE PllName = :pllName)) "
+        "ON CONFLICT(TraFK, PllFK) DO NOTHING;");
+    query.bindValue(
+        ":traTitle",
+        (*it)->getTitle()); // Reuse the track title to get the TraID
+    query.bindValue(":pllName",
+                    name); // Reuse the playlist name to get the PllID
+    query.exec();
+  }
+
+  // return message if all went well, or some errors occured
 }
 
 void MainWindow::sortByAlbum() {
@@ -385,4 +467,18 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
   if (status == QMediaPlayer::EndOfMedia)
     playNext();
+}
+
+// to find the corresponding playlist ID to the name
+int MainWindow::getPlaylistID(const QString &playlistName) {
+  QSqlQuery query;
+  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :name");
+  query.bindValue(":name", playlistName);
+
+  if (!query.exec())
+    return -1;
+  if (query.next())
+    return query.value(0).toInt();
+  else
+    return -1;
 }

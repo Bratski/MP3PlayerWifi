@@ -5,9 +5,9 @@
 #include "cplaylistcontainer.h"
 #include "ctrack.h"
 #include <QCoreApplication>
+#include <QFileDialog>
 #include <QMainWindow>
 #include <QSettings>
-#include <QFileDialog>
 
 // for the oled display update time periodically
 //#include <QTimer>
@@ -89,7 +89,7 @@ private:
   QString timeSong = "Time Song";
   QString timeList = "Total Time";
   float startVolume = 0.2; // setting the start volume to 20%
-  //QTimer timer;
+  // QTimer timer;
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
@@ -99,5 +99,6 @@ private:
   // populate the table widget
   void refreshTableWidgetCurrentPlaylist();
   void updateTrackInfoDisplay();
+  int getPlaylistID(const QString &playlistName);
 };
 #endif // MAINWINDOW_H

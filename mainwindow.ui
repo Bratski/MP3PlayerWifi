@@ -240,7 +240,7 @@
       <item>
        <widget class="QLabel" name="labelCurrentSong">
         <property name="text">
-         <string> Song Name</string>
+         <string>Song Name</string>
         </property>
        </widget>
       </item>
@@ -297,7 +297,7 @@
      <x>0</x>
      <y>0</y>
      <width>1025</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
