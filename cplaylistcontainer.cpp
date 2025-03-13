@@ -237,8 +237,21 @@ bool CPlaylistContainer::fillPlaylistWithDatabaseTracks() {
 }
 
 bool CPlaylistContainer::savePlaylistToDatabase() {
+
   // create a query
   QSqlQuery query;
+
+  // in case the playlist has been emptied
+  if (_playlist_ptr_mainwindow_vector.empty()) {
+    // clear the database entries for that playlist
+    query.prepare("DELETE FROM TrackPlaylist WHERE PllFK = :pllID ");
+    query.bindValue(":pllID", _PllID);
+    if (!query.exec()) {
+      qDebug() << "error deleting tracks from the playlist";
+      return false;
+    }
+    return true;
+  }
 
   // iterate through the pointer vector
   for (auto it = _playlist_ptr_mainwindow_vector.begin();

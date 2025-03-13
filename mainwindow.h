@@ -5,6 +5,7 @@
 #include "cplaylistcontainer.h"
 #include "ctrack.h"
 #include <QCoreApplication>
+#include <QDir>
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QSettings>
@@ -50,6 +51,7 @@ public slots:
   void openManagementDialog();
   void openAddPlaylistDialog();
   void addMusicFile();
+  void addMusicFolder();
   void saveToDatabase();
   void deleteTrack();
   void deletePlaylist();
@@ -95,6 +97,9 @@ private:
   bool _playall = false;
   int _defaultPlaylistID =
       1; // at startup open the first playlist in the database by default
+  std::vector<QString>
+      _detectedMusicFiles; // vector with all file paths for the add music
+                           // folder functionality
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
@@ -106,5 +111,6 @@ private:
   void updateTrackInfoDisplay();
   void readDataBasePlaylist();
   void closingProcedure();
+  void processFolder(const QString &path);
 };
 #endif // MAINWINDOW_H

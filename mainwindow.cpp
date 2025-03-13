@@ -73,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::openAddPlaylistDialog);
   QObject::connect(ui->actionAddFile, &QAction::triggered, this,
                    &MainWindow::addMusicFile);
+  QObject::connect(ui->actionAddFolder, &QAction::triggered, this,
+                   &MainWindow::addMusicFolder);
   QObject::connect(ui->actionSave_Playlist, &QAction::triggered, this,
                    &MainWindow::saveToDatabase);
   QObject::connect(ui->actionDeleteTrack, &QAction::triggered, this,
@@ -180,6 +182,36 @@ void MainWindow::addMusicFile() {
     refreshTableWidgetCurrentPlaylist();
   } else
     QMessageBox::warning(this, "Error", "File could not be opened");
+}
+
+void MainWindow::addMusicFolder() {
+  // open standard file browser, and get a selected directory
+  QString folder = QFileDialog::getExistingDirectory(
+      this, "Open folder", qApp->applicationDirPath());
+
+  // only if the folder contains data
+  if (folder.size()) {
+    // process the folder, how to navigate through the directory and its
+    // subdirectories?
+
+    // to be sure the vector with music files is empty
+    _detectedMusicFiles.clear();
+
+    processFolder(folder); // a recursive function, filling up the vector
+                           // _detectedMusicFiles
+
+    // only if the vector is not empty, the tracks can be added to the current
+    // playlist
+    if (!_detectedMusicFiles.empty()) {
+      // inserting all the detected files in the playlist
+      for (const auto &filepath : _detectedMusicFiles) {
+        CTrack newtrack;
+        newtrack.setTrackData(filepath);
+        _playlist->addTrack(newtrack);
+      }
+      refreshTableWidgetCurrentPlaylist();
+    }
+  }
 }
 
 void MainWindow::saveToDatabase() {
@@ -546,5 +578,36 @@ void MainWindow::closingProcedure() {
   if (db.isOpen()) {
     db.close(); // Close the database connection
     qDebug() << "Database connection closed";
+  }
+}
+
+void MainWindow::processFolder(const QString &path) {
+  QDir dir(path);
+  if (!dir.exists()) {
+    qDebug() << "Directory does not exist:" << path;
+    return;
+  }
+
+  // Get all files and directories in the current directory
+  const QFileInfoList entries =
+      dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+  for (const QFileInfo &entry : entries) {
+    if (entry.isDir()) {
+      // Recursively process subdirectories
+      processFolder(entry.absoluteFilePath());
+    } else if (entry.isFile()) {
+      QString filefound = entry.absoluteFilePath();
+      QString fileExtension4 = filefound.right(
+          4); // get the last 4 characters of the filefound string
+      QString fileExtension5 = filefound.right(
+          5); // get the last 5 characters of the filefound string
+      // Process files, only add the file path to the vector
+      // _detectedMusicFiles, if it has a .mp3 or .flac extension
+      if (fileExtension4 == ".mp3" || fileExtension5 == ".flac") {
+        qDebug() << "File:" << entry.absoluteFilePath();
+        _detectedMusicFiles.push_back(filefound);
+      }
+    }
   }
 }
