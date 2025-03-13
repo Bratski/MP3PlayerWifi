@@ -581,6 +581,8 @@ void MainWindow::closingProcedure() {
   }
 }
 
+
+// a recursive function to go through all the subdirectories and collect all the music files
 void MainWindow::processFolder(const QString &path) {
   QDir dir(path);
   if (!dir.exists()) {

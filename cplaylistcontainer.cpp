@@ -5,6 +5,7 @@ const char *CPlaylistContainer::sortMethodsTXT[int(
     "Random",   "by Artist", "by Album", "by Year",
     "by Genre", "undo Sort", "Title"};
 
+// const operator[] overload
 const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
   if (idx >= _playlist_ptr_mainwindow_vector.size()) {
     throw std::out_of_range("index out of range");
@@ -12,6 +13,7 @@ const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
   return *_playlist_ptr_mainwindow_vector[idx];
 }
 
+// non-const operator[] overload
 CTrack &CPlaylistContainer::operator[](const size_t &idx) {
   if (idx >= _playlist_ptr_mainwindow_vector.size()) {
     throw std::out_of_range("index out of range");
@@ -236,6 +238,8 @@ bool CPlaylistContainer::readPlaylistFromDatabase() {
   return true;
 }
 
+
+// TODO if a lot of entries are to be saved, it demands a lot of CPU power, some sort of progress bar is needed
 bool CPlaylistContainer::writePlaylistToDatabase() {
 
   // create a query
