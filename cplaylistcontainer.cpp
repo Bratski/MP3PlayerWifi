@@ -32,6 +32,29 @@ void CPlaylistContainer::addTrack(CTrack &track) {
   _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(track));
 }
 
+void CPlaylistContainer::removeTrack(int &id) {
+  // method 1
+  // track object is removed from the vector, if lambda track returns true
+  // auto it1 = [id](CTrack &track) { return id == track.getID(); };
+  // auto it2 = std::remove_if(_playlist_obj_vector.begin(),
+  //                           _playlist_obj_vector.end(), it1);
+  // _playlist_obj_vector.erase(it2, _playlist_obj_vector.end());
+
+  // method 2
+  // iterate through the vector and delete on corresponding ids
+  for (auto it = _playlist_obj_vector.begin(); it != _playlist_obj_vector.end();
+       ++it) {
+    if (id == it->getID()) {
+      _playlist_obj_vector.erase(it);
+      break; // no duplicates are allowed, so it is ok to stop the operation, in
+      // case the track has been found
+    }
+  }
+
+  // synchronise the pointer vector with the object vector
+  sortPlaylist(art_t::undoSort);
+}
+
 void CPlaylistContainer::clear() {
   _playlist_obj_vector.clear();
   _playlist_ptr_filter_vector.clear();

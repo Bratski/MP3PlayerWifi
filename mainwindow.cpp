@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::close);
   QObject::connect(ui->actionOled_Display, &QAction::triggered, this,
                    &MainWindow::openSettingsDialog);
-  QObject::connect(ui->actionFolder, &QAction::triggered, this,
+  QObject::connect(ui->actionAddFolder, &QAction::triggered, this,
                    &MainWindow::openProgressDialog);
   QObject::connect(ui->actionSearchfilter, &QAction::triggered, this,
                    &MainWindow::openSearchDialog);
@@ -71,6 +71,14 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::openManagementDialog);
   QObject::connect(ui->actionOther_Playlist, &QAction::triggered, this,
                    &MainWindow::openAddPlaylistDialog);
+  QObject::connect(ui->actionAddFile, &QAction::triggered, this,
+                   &MainWindow::addMusicFile);
+  QObject::connect(ui->actionSave_Playlist, &QAction::triggered, this,
+                   &MainWindow::saveToDatabase);
+  QObject::connect(ui->actionDeleteTrack, &QAction::triggered, this,
+                   &MainWindow::deleteTrack);
+  QObject::connect(ui->actionDeletePlaylist, &QAction::triggered, this,
+                   &MainWindow::deletePlaylist);
 
   // sort menu header
   QObject::connect(ui->actionby_Album, &QAction::triggered, this,
@@ -83,10 +91,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::sortByGenre);
   QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
                    &MainWindow::undoSort);
-  QObject::connect(ui->actionFile, &QAction::triggered, this,
-                   &MainWindow::addMusicFile);
-  QObject::connect(ui->actionSave_Playlist, &QAction::triggered, this,
-                   &MainWindow::saveToDatabase);
 
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
@@ -183,6 +187,44 @@ void MainWindow::saveToDatabase() {
     QMessageBox::warning(this, "Error",
                          "The playlist could not be saved to the database");
   }
+}
+
+void MainWindow::deleteTrack() {
+  // check if rows are selected in the table
+
+  // create a list of the selected range
+  const QList<QTableWidgetSelectionRange> selectedRanges =
+      ui->tableWidgetCurrentPlaylist->selectedRanges();
+
+  // if no rows are selected leave the deleteTrack function
+  if (!selectedRanges.size())
+    return;
+
+  // iterate through the range
+  for (const auto &range : selectedRanges) {
+    // iterate through the rows in one range
+    for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
+      // get the item with the song id from that row
+      QTableWidgetItem *idItem =
+          ui->tableWidgetCurrentPlaylist->item(row, 0); // Column 0 (ID)
+
+      // Get the song ID
+      int id = idItem->text().toInt();
+
+      qDebug() << "id: " << id;
+
+      // delete that song from the playlist vector
+      _playlist->removeTrack(id);
+    }
+  }
+
+  // refresh the table
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::deletePlaylist() {
+  _playlist->clear();
+  refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByAlbum() {
@@ -471,7 +513,7 @@ void MainWindow::closingProcedure() {
   if (_playlist->savePlaylistToDatabase())
     qDebug() << "playlist saved";
 
-  // Cleaning tables
+  // Cleaning tables, remove orphaned tracks, albums and artists
   QSqlQuery query;
 
   // Clean the Track table

@@ -51,6 +51,8 @@ public slots:
   void openAddPlaylistDialog();
   void addMusicFile();
   void saveToDatabase();
+  void deleteTrack();
+  void deletePlaylist();
 
   // header sort methods
   void sortByAlbum();

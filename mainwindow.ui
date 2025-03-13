@@ -312,16 +312,16 @@
     <property name="title">
      <string>Add </string>
     </property>
-    <addaction name="actionFile"/>
-    <addaction name="actionFolder"/>
+    <addaction name="actionAddFile"/>
+    <addaction name="actionAddFolder"/>
     <addaction name="actionOther_Playlist"/>
    </widget>
    <widget class="QMenu" name="menuRemove">
     <property name="title">
      <string>Remove</string>
     </property>
-    <addaction name="actionSong"/>
-    <addaction name="actionPlaylist"/>
+    <addaction name="actionDeleteTrack"/>
+    <addaction name="actionDeletePlaylist"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -360,39 +360,6 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionOpen">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
-   </property>
-   <property name="text">
-    <string>Open Playlist</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionSave">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
-   </property>
-   <property name="text">
-    <string>Save Playlist</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionSaveAs">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::DocumentSaveAs"/>
-   </property>
-   <property name="text">
-    <string>Save Playlist as</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
-   </property>
-  </action>
   <action name="actionExit">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
@@ -404,7 +371,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionFile">
+  <action name="actionAddFile">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
    </property>
@@ -415,7 +382,7 @@
     <string>Ctrl+F</string>
    </property>
   </action>
-  <action name="actionFolder">
+  <action name="actionAddFolder">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
    </property>
@@ -437,7 +404,7 @@
     <string>Ctrl+P</string>
    </property>
   </action>
-  <action name="actionSong">
+  <action name="actionDeleteTrack">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::EditDelete"/>
    </property>
@@ -448,7 +415,7 @@
     <string>Del</string>
    </property>
   </action>
-  <action name="actionPlaylist">
+  <action name="actionDeletePlaylist">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::ListRemove"/>
    </property>
@@ -492,14 +459,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
-   </property>
-  </action>
-  <action name="actionRotary_Encoder">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::SystemReboot"/>
-   </property>
-   <property name="text">
-    <string>Rotary Encoder</string>
    </property>
   </action>
   <action name="actionundo_Sort">
@@ -549,17 +508,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
-   </property>
-  </action>
-  <action name="actionExport">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::ImageLoading"/>
-   </property>
-   <property name="text">
-    <string>Export</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionSave_Playlist">

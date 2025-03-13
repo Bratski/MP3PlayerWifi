@@ -1,15 +1,17 @@
 #ifndef CPLAYLISTCONTAINER_H
 #define CPLAYLISTCONTAINER_H
 
-#include <QString>
-#include <vector>
-
 // for the random generator
 #include <random>
 
 // for shared pointers
 #include "ctrack.h"
 #include <memory>
+
+// for vector managment
+#include <QString>
+#include <algorithm>
+#include <vector>
 
 // for the SQL Database management
 #include <QtSql/QSqlQuery>
@@ -60,6 +62,7 @@ public:
   int calculatePlaylistTotalTime();
 
   void addTrack(CTrack &track);
+  void removeTrack(int &id);
   void clear();
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
