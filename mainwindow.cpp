@@ -531,6 +531,7 @@ void MainWindow::readDataBasePlaylist() {
 
 void MainWindow::closingProcedure() {
   // on exit, asking if the current playlist should be saved
+  // TODO, only if changes have been made!
   QMessageBox msg;
   msg.addButton("Yes", QMessageBox::YesRole);
   msg.addButton("No", QMessageBox::NoRole);
