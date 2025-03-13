@@ -540,11 +540,10 @@ void MainWindow::closingProcedure() {
   msg.setText("Do you want to save the current playlist?");
 
   // msg.exec() returns "3" if norole, "2" if yesrole
-  if (msg.exec() == 3) {
-    return;
+  if (msg.exec() == 2) {
+    if (_playlist->writePlaylistToDatabase())
+      qDebug() << "playlist saved";
   }
-  if (_playlist->writePlaylistToDatabase())
-    qDebug() << "playlist saved";
 
   // Cleaning tables, remove orphaned tracks, albums and artists
   QSqlQuery query;
