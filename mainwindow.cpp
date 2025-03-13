@@ -215,7 +215,7 @@ void MainWindow::addMusicFolder() {
 }
 
 void MainWindow::saveToDatabase() {
-  if (!_playlist->savePlaylistToDatabase()) {
+  if (!_playlist->writePlaylistToDatabase()) {
     QMessageBox::warning(this, "Error",
                          "The playlist could not be saved to the database");
   }
@@ -525,7 +525,7 @@ void MainWindow::readDataBasePlaylist() {
   if (query.next()) {
     _playlist->setPllID(query.value(0).toInt());
     _playlist->setPllName(query.value(1).toString());
-    _playlist->fillPlaylistWithDatabaseTracks();
+    _playlist->readPlaylistFromDatabase();
   }
 }
 
@@ -543,7 +543,7 @@ void MainWindow::closingProcedure() {
   if (msg.exec() == 3) {
     return;
   }
-  if (_playlist->savePlaylistToDatabase())
+  if (_playlist->writePlaylistToDatabase())
     qDebug() << "playlist saved";
 
   // Cleaning tables, remove orphaned tracks, albums and artists

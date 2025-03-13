@@ -185,7 +185,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   }
 }
 
-bool CPlaylistContainer::fillPlaylistWithDatabaseTracks() {
+bool CPlaylistContainer::readPlaylistFromDatabase() {
   // fill the playlist object with the all the tracks data from the database
   // found at that particular playlist
   QSqlQuery query;
@@ -236,7 +236,7 @@ bool CPlaylistContainer::fillPlaylistWithDatabaseTracks() {
   return true;
 }
 
-bool CPlaylistContainer::savePlaylistToDatabase() {
+bool CPlaylistContainer::writePlaylistToDatabase() {
 
   // create a query
   QSqlQuery query;

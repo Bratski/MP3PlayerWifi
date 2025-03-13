@@ -56,7 +56,7 @@ void DialogManagement::openPlaylist() {
   _playlist->setPllName(nameItem->text());
 
   // fill the playlist with the database tracks
-  _playlist->fillPlaylistWithDatabaseTracks();
+  _playlist->readPlaylistFromDatabase();
 
   // prevents interfering with the namePlaylistEdited function
   blockSignals(false);

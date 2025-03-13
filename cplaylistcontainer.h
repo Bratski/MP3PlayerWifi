@@ -66,8 +66,8 @@ public:
   void clear();
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
-  bool fillPlaylistWithDatabaseTracks();
-  bool savePlaylistToDatabase();
+  bool readPlaylistFromDatabase();
+  bool writePlaylistToDatabase();
 
   static const char
       *sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];
