@@ -470,4 +470,39 @@ void MainWindow::closingProcedure() {
   }
   if (_playlist->savePlaylistToDatabase())
     qDebug() << "playlist saved";
+
+  // Cleaning tables
+  QSqlQuery query;
+
+  // Clean the Track table
+  if (!query.exec("DELETE FROM Track WHERE TraID NOT IN (SELECT TraFK FROM "
+                  "TrackPlaylist) ")) {
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to clean Track table: " +
+                              query.lastError().text());
+  }
+
+  // Clean the Album table
+  if (!query.exec("DELETE FROM Album WHERE AlbID NOT IN (SELECT TraAlbFK FROM "
+                  "Track) ")) {
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to clean Album table: " +
+                              query.lastError().text());
+  }
+
+  // Clean the Artist table
+  if (!query.exec("DELETE FROM Artist WHERE ArtID NOT IN (SELECT AlbArtFK FROM "
+                  "Album) ")) {
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to clean Artist table: " +
+                              query.lastError().text());
+  }
+
+  // closing the database
+  QSqlDatabase db =
+      QSqlDatabase::database(); // Get the default database connection
+  if (db.isOpen()) {
+    db.close(); // Close the database connection
+    qDebug() << "Database connection closed";
+  }
 }

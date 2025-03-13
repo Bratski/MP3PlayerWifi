@@ -102,29 +102,30 @@ bool createConnection() {
   query.bindValue(":PllID", playlistID);
 
   if (!query.exec()) {
-      QMessageBox::critical(nullptr, "Database Error",
-                            "Failed to execute query: " + query.lastError().text());
-      return false;
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to execute query: " +
+                              query.lastError().text());
+    return false;
   }
 
   if (query.next()) {
-      // Playlist already exists
-      qDebug() << "Playlist with ID" << playlistID << "already exists.";
-      return true;
+    // Playlist already exists
+    qDebug() << "Playlist with ID" << playlistID << "already exists.";
+    return true;
   }
 
   // Step 2: Insert a new playlist with the specified ID
-  query.prepare("INSERT INTO Playlist (PllID, PllName) VALUES (:PllID, :PllName)");
+  query.prepare(
+      "INSERT INTO Playlist (PllID, PllName) VALUES (:PllID, :PllName)");
   query.bindValue(":PllID", playlistID); // Explicitly set the PllID
   query.bindValue(":PllName", playlistName);
 
   if (!query.exec()) {
-      QMessageBox::critical(nullptr, "Database Error",
-                            "Failed to insert playlist: " + query.lastError().text());
-      return false;
+    QMessageBox::critical(nullptr, "Database Error",
+                          "Failed to insert playlist: " +
+                              query.lastError().text());
+    return false;
   }
-
-
 
   qDebug() << "Database and tables created successfully!";
   return true;

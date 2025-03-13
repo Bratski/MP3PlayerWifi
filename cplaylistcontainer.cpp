@@ -221,7 +221,7 @@ bool CPlaylistContainer::savePlaylistToDatabase() {
   for (auto it = _playlist_ptr_mainwindow_vector.begin();
        it != _playlist_ptr_mainwindow_vector.end(); ++it) {
 
-    qDebug() << "artist: " << (*it)->getArtist();
+    // qDebug() << "artist: " << (*it)->getArtist();
     // for one track:
     // Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "

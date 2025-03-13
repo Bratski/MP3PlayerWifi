@@ -10,6 +10,7 @@
 #include <QSettings>
 
 // for the SQL Database management
+#include <QSqlError>
 #include <QtSql/QSqlQuery>
 
 // adding the dialog windows
@@ -25,8 +26,6 @@
 
 // to make it possible to extract artwork from the mp3-file
 #include <taglib/id3v2frame.h>
-
-
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -92,7 +91,8 @@ private:
   float _startVolume = 0.2; // setting the start volume to 20%
   bool _repeat = false;
   bool _playall = false;
-  int _defaultPlaylistID = 1; // at startup open the first playlist in the database by default
+  int _defaultPlaylistID =
+      1; // at startup open the first playlist in the database by default
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
