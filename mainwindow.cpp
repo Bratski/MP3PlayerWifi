@@ -99,8 +99,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::playSongs);
   QObject::connect(ui->pushButtonPause, &QPushButton::clicked, this,
                    &MainWindow::togglePause);
-  QObject::connect(ui->pushButtonStop, &QPushButton::clicked, _player,
-                   &QMediaPlayer::stop);
+  QObject::connect(ui->pushButtonStop, &QPushButton::clicked, this,
+                   &MainWindow::stopPlaying);
   QObject::connect(ui->pushButtonNext, &QPushButton::clicked, this,
                    &MainWindow::playNext);
   QObject::connect(ui->pushButtonPrevious, &QPushButton::clicked, this,
@@ -292,8 +292,13 @@ void MainWindow::setVolume(int level) {
 }
 
 void MainWindow::playSongs() {
-  // check if one row has been selected, if yes, which one? If not return with
-  // error message
+
+  // if the playlist is empty do nothing
+  if (_playlist->getNumberOfTracks() == 0)
+    return;
+
+  // check if one row has been selected, if yes, which one?
+
   QList<QTableWidgetItem *> selectedItems =
       ui->tableWidgetCurrentPlaylist->selectedItems();
 
@@ -323,27 +328,46 @@ void MainWindow::playSongs() {
 }
 
 void MainWindow::playNext() {
-  if (_playlist->getNumberOfTracks() == 0 ||
-      _index == _playlist->getNumberOfTracks() - 1) {
+  // check if playlist is empty or the player is playing
+  if (_playlist->getNumberOfTracks() == 0 || !_player->isPlaying())
+    return;
+
+  // check if the index is pointing to the last song
+  if (_index >= _playlist->getNumberOfTracks() - 1) {
+    // if repeat all is enabled, start at the beginning, put the index to 0,
+    // which occurs at the ++_index;
     if (_repeat)
       _index = -1;
+    // if repeat all is disabled, stop playing and stop going to play the next
+    // song, reset the index to 0
     else {
       _player->stop();
+      _index = 0;
       return;
     }
   }
+  // set the index to the next song
   ++_index;
+
+  // get the filelocation at that index
   _playThisSong = (*_playlist)[_index].getFileLocation();
+  // set the player to play that file
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
+  // starts playing the song
   _player->play();
+  // updates the song information output to user
   updateTrackInfoDisplay();
 }
 
 void MainWindow::playPrevious() {
-  if (_playlist->getNumberOfTracks() == 0 || _index == 0) {
-    _player->stop();
+  // check if the playlist is empty or the player is not playing or the index is
+  // already set to the first song in the list
+  if (_playlist->getNumberOfTracks() == 0 || !_player->isPlaying() ||
+      _index <= 0) {
     return;
   }
+
+  // as non of them is the case, than the player can switch to the previous song
   --_index;
   _playThisSong = (*_playlist)[_index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
@@ -356,6 +380,20 @@ void MainWindow::togglePause() {
   qint64 pos = _player->position();
   if (pos > 0)
     _player->isPlaying() ? _player->pause() : _player->play();
+}
+
+void MainWindow::stopPlaying() {
+  // stop the player
+  _player->stop();
+
+  // clear the infos of the current song in the display
+  ui->labelCurrentSong->clear();
+  ui->labelArtWork->clear();
+  ui->labelcurrentArtist->clear();
+  _oled->turnOff();
+
+  // set the index back to 0
+  _index = 0;
 }
 
 void MainWindow::playOneSong(QTableWidgetItem *item) {
@@ -531,7 +569,7 @@ void MainWindow::readDataBasePlaylist() {
 
 void MainWindow::closingProcedure() {
   // on exit, asking if the current playlist should be saved
-  // TODO, only if changes have been made!
+  // TODO, only if changes have been made! some kind of progress bar needed!
   QMessageBox msg;
   msg.addButton("Yes", QMessageBox::YesRole);
   msg.addButton("No", QMessageBox::NoRole);
@@ -581,8 +619,8 @@ void MainWindow::closingProcedure() {
   }
 }
 
-
-// a recursive function to go through all the subdirectories and collect all the music files
+// a recursive function to go through all the subdirectories and collect all the
+// music files
 void MainWindow::processFolder(const QString &path) {
   QDir dir(path);
   if (!dir.exists()) {

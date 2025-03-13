@@ -238,8 +238,8 @@ bool CPlaylistContainer::readPlaylistFromDatabase() {
   return true;
 }
 
-
-// TODO if a lot of entries are to be saved, it demands a lot of CPU power, some sort of progress bar is needed
+// TODO if a lot of entries are to be saved, it demands a lot of CPU power, some
+// sort of progress bar is needed
 bool CPlaylistContainer::writePlaylistToDatabase() {
 
   // create a query
@@ -255,6 +255,17 @@ bool CPlaylistContainer::writePlaylistToDatabase() {
       return false;
     }
     return true;
+  }
+
+  // clear the database entries for that playlist first, otherwise the tracks
+  // will be added to the playlist, as far as they arent already in the database
+  // available, isnt there some sychronize function, as alternative, it might be
+  // more efficient?
+  query.prepare("DELETE FROM TrackPlaylist WHERE PllFK = :pllID ");
+  query.bindValue(":pllID", _PllID);
+  if (!query.exec()) {
+    qDebug() << "error deleting tracks from the playlist";
+    return false;
   }
 
   // iterate through the pointer vector

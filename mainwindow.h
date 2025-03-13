@@ -69,6 +69,7 @@ public slots:
   void playNext();
   void playPrevious();
   void togglePause();
+  void stopPlaying();
   void playOneSong(QTableWidgetItem *item);
   void setRepeat(bool state) { _repeat = state; }
   void setRandom(bool state);
