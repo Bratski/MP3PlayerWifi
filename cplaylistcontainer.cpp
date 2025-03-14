@@ -49,13 +49,19 @@ void CPlaylistContainer::removeTrack(int &id) {
     if (id == it->getID()) {
       _playlist_obj_vector.erase(it);
       break; // no duplicates are allowed, so it is ok to stop the operation,
-      // in case the track has been found
+      // in case the track has been found, how to be sure the track id is always
+      // unique? Impossible? because you have to compare every time if the id is
+      // already in use by the database. How to make a difference between
+      // manually and database added tracks to the playlist vector? How to
+      // design a key for that?
     }
   }
 
   // because of the id problem (Tracks not coming out of the database have an id
-  // of 0) Tracks will be deleted by rowNumber from the tablewidget at index
-  // position in the vector
+  // of none, garbage probably) Tracks will be deleted by rowNumber from the
+  // tablewidget at index position in the vector, bad idea!!, because after each
+  // deletion, the rowNumber doesnt correspond to the next entry to be
+  // deleted in the vector!
   //_playlist_obj_vector.erase(_playlist_obj_vector.begin() + (rowNumber));
 
   // synchronise the pointer vector with the object vector

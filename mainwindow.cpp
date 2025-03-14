@@ -232,7 +232,8 @@ void MainWindow::saveToDatabase() {
 }
 
 void MainWindow::deleteTrack() {
-  // check if rows are selected in the table
+  qDebug() << "number of tracks in the list: "
+           << _playlist->getNumberOfTracks();
 
   // create a list of the selected range
   const QList<QTableWidgetSelectionRange> selectedRanges =
@@ -261,6 +262,8 @@ void MainWindow::deleteTrack() {
   }
 
   // refresh the table
+  qDebug() << "number of tracks in the list: "
+           << _playlist->getNumberOfTracks();
   refreshTableWidgetCurrentPlaylist();
 }
 
