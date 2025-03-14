@@ -53,7 +53,9 @@ void CPlaylistContainer::removeTrack(int &id) {
       // unique? Impossible? because you have to compare every time if the id is
       // already in use by the database. How to make a difference between
       // manually and database added tracks to the playlist vector? How to
-      // design a key for that?
+      // design a key for that? Maybe turn the id into a string?
+      // "key+incrementing number" where key determines its origin: database or
+      // manually added?
     }
   }
 
