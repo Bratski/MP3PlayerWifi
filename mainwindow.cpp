@@ -177,7 +177,12 @@ void MainWindow::addMusicFile() {
   if (fileLocation.size()) {
     // add the track to the playlist
     CTrack newtrack;
-    newtrack.setTrackData(fileLocation);
+    // how to make sure the track id is unique, is not already in use by a track
+    // coming from the database? not from tracks which already are have come
+    // from the db, but also for tracks which might be added from the database
+    // in the future?
+    ++_trackID;
+    newtrack.setTrackData(fileLocation, _trackID);
     _playlist->addTrack(newtrack);
     refreshTableWidgetCurrentPlaylist();
   } else
@@ -206,7 +211,12 @@ void MainWindow::addMusicFolder() {
       // inserting all the detected files in the playlist
       for (const auto &filepath : _detectedMusicFiles) {
         CTrack newtrack;
-        newtrack.setTrackData(filepath);
+        // how to make sure the track id is unique, is not already in use by a
+        // track coming from the database? not from tracks which already are
+        // have come from the db, but also for tracks which might be added from
+        // the database in the future?
+        ++_trackID;
+        newtrack.setTrackData(filepath, _trackID);
         _playlist->addTrack(newtrack);
       }
       refreshTableWidgetCurrentPlaylist();

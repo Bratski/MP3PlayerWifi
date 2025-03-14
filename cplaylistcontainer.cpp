@@ -48,10 +48,15 @@ void CPlaylistContainer::removeTrack(int &id) {
        ++it) {
     if (id == it->getID()) {
       _playlist_obj_vector.erase(it);
-      break; // no duplicates are allowed, so it is ok to stop the operation, in
-      // case the track has been found
+      break; // no duplicates are allowed, so it is ok to stop the operation,
+      // in case the track has been found
     }
   }
+
+  // because of the id problem (Tracks not coming out of the database have an id
+  // of 0) Tracks will be deleted by rowNumber from the tablewidget at index
+  // position in the vector
+  //_playlist_obj_vector.erase(_playlist_obj_vector.begin() + (rowNumber));
 
   // synchronise the pointer vector with the object vector
   sortPlaylist(art_t::undoSort);

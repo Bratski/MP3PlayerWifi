@@ -101,6 +101,7 @@ private:
   std::vector<QString>
       _detectedMusicFiles; // vector with all file paths for the add music
                            // folder functionality
+  int _trackID = 0; // to be able to give manually added tracks a unique id
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);

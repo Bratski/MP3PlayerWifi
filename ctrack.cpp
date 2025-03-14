@@ -1,6 +1,6 @@
 #include "ctrack.h"
 
-void CTrack::setTrackData(const QString &fileloc) {
+void CTrack::setTrackData(const QString &fileloc, int &id) {
   // setting the file location reference and converting from QString to C-String
   TagLib::FileRef file(fileloc.toStdString().c_str());
 
@@ -8,6 +8,7 @@ void CTrack::setTrackData(const QString &fileloc) {
     TagLib::Tag *tag = file.tag();
     TagLib::AudioProperties *properties = file.audioProperties();
 
+    _TraID = id;
     _TraTitle = tag->title().toCString();
     _TraAlbum = tag->album().toCString();
     _TraArtist = tag->artist().toCString();

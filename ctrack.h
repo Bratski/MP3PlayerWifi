@@ -40,7 +40,7 @@ public:
         _TraFileLocation(filelocation) {}
 
   // Method to set data from mp3-file-tag
-  void setTrackData(const QString &fileloc);
+  void setTrackData(const QString &fileloc, int &id);
 
   // All the get-methods for the attributes
   const QString &getArtist() const { return _TraArtist; }

@@ -62,7 +62,14 @@ public:
   int calculatePlaylistTotalTime();
 
   void addTrack(CTrack &track);
-  void removeTrack(int &id);
+  void removeTrack(int &id); // dangerous, because tracks, which are added
+  // manually, not coming out of the database, have a default id of 0! may give
+  // them a unique id when added, but has to be different from track ids coming
+  // from the database!
+  // void removeTrack(int &rowNumber); // better to use index, premisse is,
+  // index or row
+  // number(?) of the tablewidget is synchronouos
+  // to the index of the playlist vector??
   void clear();
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
