@@ -63,8 +63,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::close);
   QObject::connect(ui->actionOled_Display, &QAction::triggered, this,
                    &MainWindow::openSettingsDialog);
-  QObject::connect(ui->actionAddFolder, &QAction::triggered, this,
-                   &MainWindow::openProgressDialog);
   QObject::connect(ui->actionSearchfilter, &QAction::triggered, this,
                    &MainWindow::openSearchDialog);
   QObject::connect(ui->actionManagement, &QAction::triggered, this,
@@ -137,7 +135,14 @@ void MainWindow::openSettingsDialog() {
 
 void MainWindow::openProgressDialog() {
   _dlgProgess = new DialogProgress(this);
+
+  connect(_playlist, &CPlaylistContainer::sendProgress, _dlgProgess,
+          &DialogProgress::receiveProgress);
+  connect(_playlist, &CPlaylistContainer::ProgressReady, _dlgProgess,
+          &DialogProgress::close);
+
   _dlgProgess->show();
+  QApplication::processEvents(); // Force GUI update
 }
 
 void MainWindow::openSearchDialog() {
@@ -182,8 +187,11 @@ void MainWindow::addMusicFile() {
     // from the db, but also for tracks which might be added from the database
     // in the future?
     ++_trackID;
-    newtrack.setTrackData(fileLocation, _trackID);
+    QString id = "F" + QString::number(_trackID); // to identify its origin from
+                                                  // FILE added to the database
+    newtrack.setTrackData(fileLocation, id);
     _playlist->addTrack(newtrack);
+    _playlistChanged = true;
     refreshTableWidgetCurrentPlaylist();
   } else
     QMessageBox::warning(this, "Error", "File could not be opened");
@@ -216,19 +224,27 @@ void MainWindow::addMusicFolder() {
         // have come from the db, but also for tracks which might be added from
         // the database in the future?
         ++_trackID;
-        newtrack.setTrackData(filepath, _trackID);
+        QString id =
+            "F" + QString::number(_trackID); // to identify its origin from
+                                             // FILE added to the database
+        newtrack.setTrackData(filepath, id);
         _playlist->addTrack(newtrack);
+        _playlistChanged = true;
       }
       refreshTableWidgetCurrentPlaylist();
     }
-  }
+  } else
+    QMessageBox::warning(this, "Error", "Files could not be opened");
 }
 
-void MainWindow::saveToDatabase() {
+bool MainWindow::saveToDatabase() {
+  openProgressDialog();
   if (!_playlist->writePlaylistToDatabase()) {
     QMessageBox::warning(this, "Error",
                          "The playlist could not be saved to the database");
+    return false;
   }
+  return true;
 }
 
 void MainWindow::deleteTrack() {
@@ -252,12 +268,13 @@ void MainWindow::deleteTrack() {
           ui->tableWidgetCurrentPlaylist->item(row, 0); // Column 0 (ID)
 
       // Get the song ID
-      int id = idItem->text().toInt();
+      QString id = idItem->text();
 
       qDebug() << "id: " << id;
 
       // delete that song from the playlist vector
       _playlist->removeTrack(id);
+      _playlistChanged = true;
     }
   }
 
@@ -274,21 +291,25 @@ void MainWindow::deletePlaylist() {
 
 void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
+  _playlistChanged = true;
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
+  _playlistChanged = true;
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
+  _playlistChanged = true;
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
+  _playlistChanged = true;
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -315,8 +336,8 @@ void MainWindow::playSongs() {
   QList<QTableWidgetItem *> selectedItems =
       ui->tableWidgetCurrentPlaylist->selectedItems();
 
-  // if no items in the table are selected, and the playlist is not empty, start
-  // with the first track
+  // if no items in the table are selected, and the playlist is not empty,
+  // start with the first track
   if (selectedItems.empty() && _playlist->getNumberOfTracks() >= 1)
     _index = 0;
 
@@ -373,14 +394,15 @@ void MainWindow::playNext() {
 }
 
 void MainWindow::playPrevious() {
-  // check if the playlist is empty or the player is not playing or the index is
-  // already set to the first song in the list
+  // check if the playlist is empty or the player is not playing or the index
+  // is already set to the first song in the list
   if (_playlist->getNumberOfTracks() == 0 || !_player->isPlaying() ||
       _index <= 0) {
     return;
   }
 
-  // as non of them is the case, than the player can switch to the previous song
+  // as non of them is the case, than the player can switch to the previous
+  // song
   --_index;
   _playThisSong = (*_playlist)[_index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
@@ -455,7 +477,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
 
   int row = 0;
   for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
-    item = new QTableWidgetItem(QString::number((*it)->getID()));
+    item = new QTableWidgetItem((*it)->getID());
     ui->tableWidgetCurrentPlaylist->setItem(row, 0, item);
 
     item = new QTableWidgetItem((*it)->getTitle());
@@ -554,8 +576,8 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
     return timeInHr;
 }
 
-// if a song has detected as ended, the next one is started if bool _playall is
-// set true
+// if a song has detected as ended, the next one is started if bool _playall
+// is set true
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
   if (status == QMediaPlayer::EndOfMedia) {
     _player->stop();
@@ -582,19 +604,26 @@ void MainWindow::readDataBasePlaylist() {
 
 void MainWindow::closingProcedure() {
   // on exit, asking if the current playlist should be saved
-  // TODO, only if changes have been made! some kind of progress bar needed!
+  // TODO,  some kind of progress bar needed!
   QMessageBox msg;
   msg.addButton("Yes", QMessageBox::YesRole);
   msg.addButton("No", QMessageBox::NoRole);
   msg.setWindowTitle("Save Playlist?");
   msg.setIcon(QMessageBox::Warning);
-  msg.setText("Do you want to save the current playlist?");
+  msg.setText("Do you want to save the changes to the playlist?");
 
-  // msg.exec() returns "3" if norole, "2" if yesrole
-  if (msg.exec() == 2) {
-    if (_playlist->writePlaylistToDatabase())
-      qDebug() << "playlist saved";
+  // only ask to save the playlist to database, if the playlist has been edited
+  // (_playlistChanged is set true)
+  if (_playlistChanged) {
+    // msg.exec() returns "3" if norole, "2" if yesrole
+    if (msg.exec() == 2) {
+      if (saveToDatabase())
+        qDebug() << "playlist saved";
+    }
   }
+
+  // stop playing
+  stopPlaying();
 
   // Cleaning tables, remove orphaned tracks, albums and artists
   QSqlQuery query;
@@ -632,8 +661,8 @@ void MainWindow::closingProcedure() {
   }
 }
 
-// a recursive function to go through all the subdirectories and collect all the
-// music files
+// a recursive function to go through all the subdirectories and collect all
+// the music files
 void MainWindow::processFolder(const QString &path) {
   QDir dir(path);
   if (!dir.exists()) {

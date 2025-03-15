@@ -49,12 +49,12 @@ void DialogAddPlaylist::addPlaylist() {
   }
 
   // populate the _playlist with tracks from query
-  int id, year, number, duration, bitrate, samplerate, channels;
-  QString title, artist, album, genre, filelocation;
+  int year, number, duration, bitrate, samplerate, channels;
+  QString id, title, artist, album, genre, filelocation;
   bool doubleTrack = false;
   while (query.next()) {
 
-    id = query.value(0).toInt();
+    id = query.value(0).toString();
 
     // check if tracks are already available in the playlist, to avoid
     // duplicates

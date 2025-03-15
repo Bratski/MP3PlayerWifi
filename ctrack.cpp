@@ -1,6 +1,6 @@
 #include "ctrack.h"
 
-void CTrack::setTrackData(const QString &fileloc, int &id) {
+void CTrack::setTrackData(const QString &fileloc, const QString &id) {
   // setting the file location reference and converting from QString to C-String
   TagLib::FileRef file(fileloc.toStdString().c_str());
 

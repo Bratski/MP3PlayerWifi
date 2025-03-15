@@ -111,6 +111,7 @@ bool createConnection() {
   if (query.next()) {
     // Playlist already exists
     qDebug() << "Playlist with ID" << playlistID << "already exists.";
+    qDebug() << "Database and tables created successfully!";
     return true;
   }
 

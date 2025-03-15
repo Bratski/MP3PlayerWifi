@@ -9,7 +9,7 @@
 #include <taglib/tag.h>
 
 class CTrack {
-  int _TraID;
+  QString _TraID;
   QString _TraTitle;
   QString _TraArtist;
   QString _TraAlbum;
@@ -27,7 +27,7 @@ public:
   // CTrack() = default;
 
   // Ctor for the sql table input
-  CTrack(const int &id = 0, const QString &title = "Unknown",
+  CTrack(const QString &id = 0, const QString &title = "Unknown",
          const QString &artist = "Unknown", const QString &album = "Unknown",
          const int &year = 0, const int &number = 0,
          const QString &genre = "Unknown", const int &duration = 0,
@@ -40,7 +40,7 @@ public:
         _TraFileLocation(filelocation) {}
 
   // Method to set data from mp3-file-tag
-  void setTrackData(const QString &fileloc, int &id);
+  void setTrackData(const QString &fileloc, const QString &id);
 
   // All the get-methods for the attributes
   const QString &getArtist() const { return _TraArtist; }
@@ -48,7 +48,7 @@ public:
   const QString &getGenre() const { return _TraGenre; }
   const QString &getTitle() const { return _TraTitle; }
   const QString &getFileLocation() const { return _TraFileLocation; }
-  const int &getID() const { return _TraID; }
+  const QString &getID() const { return _TraID; }
   const int &getNumber() const { return _TraNumber; }
   const int &getDuration() const { return _TraDuration; }
   const int &getBitrate() const { return _TraBitrate; }

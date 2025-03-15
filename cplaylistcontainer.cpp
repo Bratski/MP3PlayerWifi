@@ -34,7 +34,7 @@ void CPlaylistContainer::addTrack(CTrack &track) {
   _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(track));
 }
 
-void CPlaylistContainer::removeTrack(int &id) {
+void CPlaylistContainer::removeTrack(const QString &id) {
   // method 1
   // track object is removed from the vector, if lambda track returns true
   // auto it1 = [id](CTrack &track) { return id == track.getID(); };
@@ -223,11 +223,14 @@ bool CPlaylistContainer::readPlaylistFromDatabase() {
   }
 
   // populate the _playlist with tracks from query
-  int id, year, number, duration, bitrate, samplerate, channels;
-  QString title, artist, album, genre, filelocation;
+  int year, number, duration, bitrate, samplerate, channels;
+  QString id, title, artist, album, genre, filelocation;
   while (query.next()) {
 
-    id = query.value(0).toInt();
+    id =
+        "D" +
+        query.value(0)
+            .toString(); // to identify its origin, a "D" from DATABASE is added
     title = query.value(1).toString();
     artist = query.value(2).toString();
     album = query.value(3).toString();
@@ -257,6 +260,7 @@ bool CPlaylistContainer::writePlaylistToDatabase() {
 
   // create a query
   QSqlQuery query;
+  tracknr = 0;
 
   // in case the playlist has been emptied
   if (_playlist_ptr_mainwindow_vector.empty()) {
@@ -287,7 +291,9 @@ bool CPlaylistContainer::writePlaylistToDatabase() {
 
     // qDebug() << "artist: " << (*it)->getArtist();
     // for one track:
-    // Insert or update artists
+    ++tracknr;
+    emit sendProgress(tracknr);
+    //  Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
                   "VALUES (:artName, :artGenre) "
                   "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
@@ -351,6 +357,6 @@ bool CPlaylistContainer::writePlaylistToDatabase() {
       return false;
     }
   }
-
+  emit ProgressReady();
   return true;
 }

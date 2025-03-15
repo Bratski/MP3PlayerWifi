@@ -52,7 +52,7 @@ public slots:
   void openAddPlaylistDialog();
   void addMusicFile();
   void addMusicFolder();
-  void saveToDatabase();
+  bool saveToDatabase();
   void deleteTrack();
   void deletePlaylist();
 
@@ -96,6 +96,7 @@ private:
   float _startVolume = 0.2; // setting the start volume to 20%
   bool _repeat = false;
   bool _playall = false;
+  bool _playlistChanged = false;
   int _defaultPlaylistID =
       1; // at startup open the first playlist in the database by default
   std::vector<QString>
