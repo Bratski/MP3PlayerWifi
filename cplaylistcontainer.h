@@ -40,8 +40,6 @@ class CPlaylistContainer : public QObject { // for progress bar functionality
   int tracknr;
 
 public:
-  // explicit CPlaylistContainer(QObject *parent = nullptr)
-  //     : QObject(parent) {} // for progress bar functionality
   enum class art_t : u_int8_t {
     random,
     byArtist,

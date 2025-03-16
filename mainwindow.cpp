@@ -237,14 +237,10 @@ void MainWindow::addMusicFolder() {
     QMessageBox::warning(this, "Error", "Files could not be opened");
 }
 
-bool MainWindow::saveToDatabase() {
+void MainWindow::saveToDatabase() {
   openProgressDialog();
-  if (!_playlist->writePlaylistToDatabase()) {
-    QMessageBox::warning(this, "Error",
-                         "The playlist could not be saved to the database");
-    return false;
-  }
-  return true;
+  if (_playlist->writePlaylistToDatabase())
+    _playlistChanged = false;
 }
 
 void MainWindow::deleteTrack() {
@@ -472,7 +468,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   // set the table in mainwindow to the corresponding number of rows
   ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);
 
-  // populate the table with data from query
+  // populate the table with data from the track vector (playlist)
   QTableWidgetItem *item;
 
   int row = 0;
@@ -612,13 +608,13 @@ void MainWindow::closingProcedure() {
   msg.setIcon(QMessageBox::Warning);
   msg.setText("Do you want to save the changes to the playlist?");
 
-  // only ask to save the playlist to database, if the playlist has been edited
+  // only ask to save the playlist to database, if the playlist has been
+  // edited
   // (_playlistChanged is set true)
   if (_playlistChanged) {
     // msg.exec() returns "3" if norole, "2" if yesrole
     if (msg.exec() == 2) {
-      if (saveToDatabase())
-        qDebug() << "playlist saved";
+      (saveToDatabase());
     }
   }
 

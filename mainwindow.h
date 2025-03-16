@@ -4,6 +4,7 @@
 #include "COled.h"
 #include "cplaylistcontainer.h"
 #include "ctrack.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileDialog>
@@ -52,7 +53,7 @@ public slots:
   void openAddPlaylistDialog();
   void addMusicFile();
   void addMusicFolder();
-  bool saveToDatabase();
+  void saveToDatabase();
   void deleteTrack();
   void deletePlaylist();
 

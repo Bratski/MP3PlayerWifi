@@ -356,7 +356,10 @@ bool CPlaylistContainer::writePlaylistToDatabase() {
       qDebug() << "error playlist";
       return false;
     }
+    qDebug() << "Track " << (*it)->getTitle() << " saved";
   }
+
+  qDebug() << "Playlist saved in database";
   emit ProgressReady();
   return true;
 }

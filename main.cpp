@@ -3,6 +3,7 @@
 #include "ctrack.h"
 #include "dbconnect.h"
 #include "mainwindow.h"
+//#include "threadsavedatabase.h"
 
 #include <QApplication>
 #include <QtMultimedia/QAudioOutput>
@@ -18,6 +19,7 @@ int main(int argc, char *argv[]) {
   QAudioOutput audioOutput; // needed for setting the audio output
   CPlaylistContainer playlist;
   CTrack track;
+  // CThreadsavedatabase savedbthread(&playlist);
 
   // Set the players audio output:
   player.setAudioOutput(&audioOutput);
