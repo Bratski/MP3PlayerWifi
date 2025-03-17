@@ -31,8 +31,13 @@ DialogManagement::DialogManagement(QWidget *parent,
 DialogManagement::~DialogManagement() { delete ui; }
 
 void DialogManagement::openPlaylist() {
-  // prevents interfering with the namePlaylistEdited function
-  blockSignals(true);
+  // If the flag is set, ignore the signal to avoid recursion
+  if (isEditing) {
+    return;
+  }
+
+  // Set the flag to true to prevent recursive calls
+  isEditing = true;
   // check if one row has been selected, if yes, which one? If not return with
   // error message
 
@@ -43,6 +48,7 @@ void DialogManagement::openPlaylist() {
     QMessageBox::warning(
         this, "Error",
         "Only 1 playlist at the time can be selected to be opened!");
+    isEditing = false;
     return;
   }
 
@@ -67,41 +73,61 @@ void DialogManagement::openPlaylist() {
                             Qt::QueuedConnection, _playlist, &success);
 
   // prevents interfering with the namePlaylistEdited function
-  blockSignals(false);
+  isEditing = false;
+
   // leave the dialog management and go back to mainwindow
   this->close();
 }
 
 void DialogManagement::addNewPlaylist() {
-  // prevents interfering with the namePlaylistEdited function
-  blockSignals(true);
+  // If the flag is set, ignore the signal to avoid recursion
+  if (isEditing) {
+    return;
+  }
+
+  // Set the flag to true to prevent recursive calls
+  isEditing = true;
+
   QString name;
   name = ui->lineEditNewPlaylist->text();
 
   // check if there is a name in the input field,
   if (name.size() == 0) {
     QMessageBox::warning(this, "Error", "No valid name in the input field");
+    isEditing = false;
     return;
   }
 
   bool success = false;
+  bool doubleName = false;
   // add a new playlist with the name to the database
   QMetaObject::invokeMethod(_worker, "addNewPlaylist",
-                            Qt::BlockingQueuedConnection, name, &success);
+                            Qt::BlockingQueuedConnection, name, &success,
+                            &doubleName);
 
   if (success) {
     qDebug() << "adding the name playlist " << name << " successfully";
-
-    // update the table
-    readDatabase();
   }
-  blockSignals(false);
+  if (doubleName) {
+    QMessageBox::warning(this, "Error",
+                         "Name already in use, choose another name");
+  }
+
+  // prevents interfering with the namePlaylistEdited function
+  isEditing = false;
+
+  // update the table
+  readDatabase();
 }
 
 void DialogManagement::deletePlaylist() {
-  // prevents interfering with the namePlaylistEdited function
-  blockSignals(true);
+  // If the flag is set, ignore the signal to avoid recursion
+  if (isEditing) {
+    return;
+  }
 
+  // Set the flag to true to prevent recursive calls
+  isEditing = true;
   // check if rows are selected in the table
   QList<QTableWidgetSelectionRange> selectedRanges =
       ui->tableWidgetPlaylists->selectedRanges();
@@ -127,6 +153,7 @@ void DialogManagement::deletePlaylist() {
       if (name == _playlist->getPllName() || id == 1) {
         QMessageBox::warning(this, "Error",
                              "The current playlist cannot be deleted!");
+        isEditing = false;
         return;
       }
 
@@ -136,25 +163,27 @@ void DialogManagement::deletePlaylist() {
       msg.addButton("No", QMessageBox::NoRole);
       msg.setWindowTitle("Delete?");
       msg.setIcon(QMessageBox::Warning);
-      msg.setText(
-          "Are you sure to delete this playlist, inclusive its contents?");
+      msg.setText("Are you sure to delete this playlist: " + name +
+                  " inclusive its contents?");
 
       // msg.exec() returns "3" if norole, "2" if yesrole
       if (msg.exec() == 3) {
+        isEditing = false;
         return;
       }
 
       bool success = false;
       // delete the playlist from the database
-      QMetaObject::invokeMethod(_worker, "deletePlaylist", Qt::QueuedConnection,
-                                name, &success);
+      QMetaObject::invokeMethod(_worker, "deletePlaylist",
+                                Qt::BlockingQueuedConnection, name, &success);
     }
   }
-  // refresh the table
-  readDatabase();
 
   // prevents interfering with the namePlaylistEdited function
-  blockSignals(false);
+  isEditing = false;
+
+  // refresh the table
+  readDatabase();
 }
 
 void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
@@ -173,26 +202,38 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
   int id = ui->tableWidgetPlaylists->item(row, 0)->text().toInt();
 
   bool success = false;
+  bool doubleName = false;
   // update the database
   QMetaObject::invokeMethod(_worker, "updatePlaylistInDatabase",
-                            Qt::QueuedConnection, name, id, &success);
+                            Qt::QueuedConnection, name, id, &success,
+                            &doubleName);
+
+  if (doubleName) {
+    QMessageBox::warning(this, "Error",
+                         "Name already in use, choose another name");
+  }
+  // prevents interfering with the namePlaylistEdited function
+  isEditing = false;
 
   // update the table
   readDatabase();
-
-  // prevents interfering with the namePlaylistEdited function
-  isEditing = false;
 }
 
 void DialogManagement::readDatabase() {
-  // prevents interfering with the namePlaylistEdited function
-  blockSignals(true);
+  // If the flag is set, ignore the signal to avoid recursion
+  if (isEditing) {
+    return;
+  }
+
+  // Set the flag to true to prevent recursive calls
+  isEditing = true;
   std::vector<QString> playlistsInDatabase;
 
   // empty the list with playlists
   ui->tableWidgetPlaylists->clearContents();
   ui->tableWidgetPlaylists->setRowCount(0);
   playlistsInDatabase.clear();
+  qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
 
   bool success = false;
   // find in the database
@@ -200,36 +241,37 @@ void DialogManagement::readDatabase() {
                             Qt::BlockingQueuedConnection, &playlistsInDatabase,
                             &success);
 
-  // count the number of Playlists being found
-  int rowCount = playlistsInDatabase.size() - 1;
+  if (success) {
+    // count the number of Playlists being found
+    int rowCount = (playlistsInDatabase.size() / 2);
 
-  qDebug() << "rowCount: " << rowCount;
-  // set the table in Dialog Management to the corresponding number of rows
-  ui->tableWidgetPlaylists->setRowCount(rowCount);
+    qDebug() << "rowCount: " << rowCount;
+    // set the table in Dialog Management to the corresponding number of rows
+    ui->tableWidgetPlaylists->setRowCount(rowCount);
 
-  // populate the table with data from query
-  QTableWidgetItem *item;
+    // populate the table with data from query
+    QTableWidgetItem *item;
 
-  int row = 0;
-  for (size_t i = 0; i < playlistsInDatabase.size(); ++i) {
+    int row = 0;
+    for (size_t i = 0; i < playlistsInDatabase.size(); ++i) {
 
-    // Playlist ID
-    if (i % 2 == 0) {
-      item = new QTableWidgetItem(playlistsInDatabase[i]);
-      ui->tableWidgetPlaylists->setItem(row, 0, item);
+      // Playlist ID
+      if (i % 2 == 0) {
+        item = new QTableWidgetItem(playlistsInDatabase[i]);
+        ui->tableWidgetPlaylists->setItem(row, 0, item);
+      }
+      // Playlist Name
+      else {
+        item = new QTableWidgetItem(playlistsInDatabase[i]);
+        ui->tableWidgetPlaylists->setItem(row, 1, item);
+        ++row;
+      }
     }
-    // Playlist Name
-    else {
-      item = new QTableWidgetItem(playlistsInDatabase[i]);
-      ui->tableWidgetPlaylists->setItem(row, 1, item);
-      ++row;
-    }
+
+    // customizing the looks
+    ui->tableWidgetPlaylists->resizeColumnsToContents();
+    ui->tableWidgetPlaylists->setAlternatingRowColors(true);
   }
-
-  // customizing the looks
-  ui->tableWidgetPlaylists->resizeColumnsToContents();
-  ui->tableWidgetPlaylists->setAlternatingRowColors(true);
-
   // prevents interfering with the namePlaylistEdited function
-  blockSignals(false);
+  isEditing = false;
 }

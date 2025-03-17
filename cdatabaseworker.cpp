@@ -200,7 +200,8 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
   return;
 }
 
-void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success) {
+void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success,
+                                     bool *doubleName) {
   // create a query, and check if name already exists in the database
   QSqlQuery query;
 
@@ -213,9 +214,9 @@ void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success) {
   }
 
   if (query.first()) {
-    QMessageBox::warning(nullptr, "Error",
-                         "The playlist already exists, please change the name");
+    qDebug() << "The playlist already exists, please change the name";
     *success = false;
+    *doubleName = true;
     return;
   }
 
@@ -224,8 +225,7 @@ void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success) {
   query.bindValue(":PllName", name);
 
   if (!query.exec()) {
-    QMessageBox::warning(nullptr, "Error",
-                         "Error creating new Playlist in the Database");
+    qDebug() << "Error creating new Playlist in the Database";
     *success = false;
     return;
   }
@@ -235,13 +235,13 @@ void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success) {
 
 void CDatabaseWorker::getPlaylistsFromDatabase(std::vector<QString> *list,
                                                bool *success) {
+
   // create a query, and find in the database
   QSqlQuery query;
   query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist ");
 
   if (!query.exec()) {
-    QMessageBox::warning(nullptr, "Error",
-                         "Error selecting the Playlist name in the Database");
+    qDebug() << "Error selecting the Playlist name in the Database";
     *success = false;
     return;
   }
@@ -254,7 +254,9 @@ void CDatabaseWorker::getPlaylistsFromDatabase(std::vector<QString> *list,
     // Playlist Name
     list->push_back(query.value(1).toString());
   }
+
   *success = true;
+  return;
 }
 
 void CDatabaseWorker::deletePlaylist(const QString &name, bool *success) {
@@ -265,7 +267,7 @@ void CDatabaseWorker::deletePlaylist(const QString &name, bool *success) {
 
   // deleting the database playlist entry
   if (!query.exec()) {
-    QMessageBox::warning(nullptr, "Error", "Error removing Playlists!");
+    qDebug() << "Error removing Playlists!";
     *success = false;
     return;
   }
@@ -274,7 +276,8 @@ void CDatabaseWorker::deletePlaylist(const QString &name, bool *success) {
 }
 
 void CDatabaseWorker::updatePlaylistInDatabase(const QString &name,
-                                               const int &id, bool *success) {
+                                               const int &id, bool *success,
+                                               bool *doubleName) {
 
   // check if the edited name already exists in the database
   QSqlQuery query;
@@ -282,15 +285,13 @@ void CDatabaseWorker::updatePlaylistInDatabase(const QString &name,
   query.bindValue(":PllName", name);
 
   if (!query.exec()) {
-    QMessageBox::warning(nullptr, "Error",
-                         "Error checking the Playlist name in the Database");
+    qDebug() << "Error checking the Playlist name in the Database";
     *success = false;
     return;
   }
   if (query.first()) {
-    QMessageBox::warning(nullptr, "Error",
-                         "The playlist already exists, please change the name");
-
+    qDebug() << "Error The playlist already exists, please change the name";
+    *doubleName = true;
     *success = false;
     return;
   }
@@ -301,9 +302,7 @@ void CDatabaseWorker::updatePlaylistInDatabase(const QString &name,
   query.bindValue(":PllName", name);
 
   if (!query.exec()) {
-    QMessageBox::warning(
-        nullptr, "Error",
-        "Error updating name in the Playlist name in the Database");
+    qDebug() << "Error updating name in the Playlist name in the Database";
     *success = false;
     return;
   }
@@ -318,9 +317,8 @@ void CDatabaseWorker::cleanupDatabase(bool *success) {
   // Clean the Track table
   if (!query.exec("DELETE FROM Track WHERE TraID NOT IN (SELECT TraFK FROM "
                   "TrackPlaylist) ")) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "Failed to clean Track table: " +
-                              query.lastError().text());
+    qDebug() << "Database Error, Failed to clean Track table: " +
+                    query.lastError().text();
     *success = false;
     return;
   }
@@ -328,9 +326,8 @@ void CDatabaseWorker::cleanupDatabase(bool *success) {
   // Clean the Album table
   if (!query.exec("DELETE FROM Album WHERE AlbID NOT IN (SELECT TraAlbFK FROM "
                   "Track) ")) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "Failed to clean Album table: " +
-                              query.lastError().text());
+    qDebug() << "Database Error, Failed to clean Album table: " +
+                    query.lastError().text();
     *success = false;
     return;
   }
@@ -338,9 +335,8 @@ void CDatabaseWorker::cleanupDatabase(bool *success) {
   // Clean the Artist table
   if (!query.exec("DELETE FROM Artist WHERE ArtID NOT IN (SELECT AlbArtFK FROM "
                   "Album) ")) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "Failed to clean Artist table: " +
-                              query.lastError().text());
+    qDebug() << "Database Error, Failed to clean Artist table: " +
+                    query.lastError().text();
     *success = false;
     return;
   }

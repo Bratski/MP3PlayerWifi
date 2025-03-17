@@ -5,7 +5,6 @@
 #include "dbconnect.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -23,11 +22,11 @@ public slots:
                                      bool *success);
   void readPlaylistTracksFromDatabase(CPlaylistContainer *playlist,
                                       bool *success);
-  void addNewPlaylist(const QString &name, bool *success);
+  void addNewPlaylist(const QString &name, bool *success, bool *doubleName);
   void getPlaylistsFromDatabase(std::vector<QString> *list, bool *success);
   void deletePlaylist(const QString &name, bool *success);
   void updatePlaylistInDatabase(const QString &name, const int &id,
-                                bool *success);
+                                bool *success, bool *doubleName);
   void cleanupDatabase(bool *success);
   void closeDatabase();
 

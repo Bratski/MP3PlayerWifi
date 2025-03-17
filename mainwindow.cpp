@@ -124,6 +124,10 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
 MainWindow::~MainWindow() {
   closingProcedure();
+  if (_dbthread && _dbthread->isRunning()) {
+    _dbthread->quit();
+    _dbthread->wait();
+  }
   delete ui;
 }
 
@@ -238,10 +242,17 @@ void MainWindow::saveToDatabase() {
   connect(_worker, &CDatabaseWorker::progressReady, _dlgProgess,
           &DialogProgress::close);
 
+  // Create an event loop to block until the database operation is done
+  QEventLoop loop;
+  connect(_worker, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
+
   // start the database thread operation
   bool success = false;
   QMetaObject::invokeMethod(_worker, "writePlaylistTracksToDatabase",
                             Qt::QueuedConnection, _playlist, &success);
+
+  // Block until the database operation is complete
+  loop.exec();
 
   // set the bool playlist, in case the files have been successfully saved in
   // the database
@@ -611,13 +622,20 @@ void MainWindow::closingProcedure() {
   // only ask to save the playlist to database, if the playlist has been
   // edited
   // (_playlistChanged is set true)
+
   if (_playlistChanged) {
     // msg.exec() returns "3" if norole, "2" if yesrole
     if (msg.exec() == 2) {
-      (saveToDatabase());
-    }
-  }
-
+      // wait for the invoked method to finish
+      QObject::connect(_worker, &CDatabaseWorker::progressReady, this,
+                       &MainWindow::closingProcedurePart2);
+      saveToDatabase();
+    } else
+      closingProcedurePart2();
+  } else
+    closingProcedurePart2();
+}
+void MainWindow::closingProcedurePart2() {
   // stop playing
   stopPlaying();
 

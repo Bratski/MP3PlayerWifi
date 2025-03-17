@@ -119,6 +119,7 @@ private:
   void updateTrackInfoDisplay();
   void readDataBasePlaylist();
   void closingProcedure();
+  void closingProcedurePart2();
   void processFolder(const QString &path);
 };
 #endif // MAINWINDOW_H
