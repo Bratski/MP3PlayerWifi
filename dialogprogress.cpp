@@ -5,13 +5,15 @@ DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist)
     : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist) {
   ui->setupUi(this);
   setWindowTitle("Saving Music Files to Database...");
-
-  QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
-                   &DialogProgress::close);
+  // initializing the range of the progressbar (0 to 100%)
+  ui->progressBar->setRange(0, 100);
 }
 
 DialogProgress::~DialogProgress() { delete ui; }
 
 void DialogProgress::receiveProgress(const int &progress) {
-  ui->labelProgress->setText(QString::number(progress));
+  // quick calculation from song number to percentage
+  int percentage = ((progress * 100) / _playlist->getNumberOfTracks());
+  // setting the progress bar to the new position
+  ui->progressBar->setValue(percentage);
 }

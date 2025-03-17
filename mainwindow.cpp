@@ -6,9 +6,11 @@
 
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
-                       CTrack *track)
+                       CTrack *track, QThread *dbthread,
+                       CDatabaseWorker *worker)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
-      _audio(audio), _playlist(playlist), _track(track) {
+      _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
+      _worker(worker) {
   ui->setupUi(this);
 
   // setting default parameters and initialize
@@ -133,25 +135,13 @@ void MainWindow::openSettingsDialog() {
   _dlgSettings->show();
 }
 
-void MainWindow::openProgressDialog() {
-  _dlgProgess = new DialogProgress(this);
-
-  connect(_playlist, &CPlaylistContainer::sendProgress, _dlgProgess,
-          &DialogProgress::receiveProgress);
-  connect(_playlist, &CPlaylistContainer::ProgressReady, _dlgProgess,
-          &DialogProgress::close);
-
-  _dlgProgess->show();
-  QApplication::processEvents(); // Force GUI update
-}
-
 void MainWindow::openSearchDialog() {
   _dlgSearch = new DialogSearch(this);
   _dlgSearch->exec();
 }
 
 void MainWindow::openManagementDialog() {
-  _dlgManagement = new DialogManagement(this, _playlist);
+  _dlgManagement = new DialogManagement(this, _playlist, _dbthread, _worker);
 
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
@@ -238,8 +228,24 @@ void MainWindow::addMusicFolder() {
 }
 
 void MainWindow::saveToDatabase() {
-  openProgressDialog();
-  if (_playlist->writePlaylistToDatabase())
+  // display the prorgress bar
+  _dlgProgess = new DialogProgress(this, _playlist);
+  _dlgProgess->show();
+
+  // Connect signals from the database thread to the progress dialog
+  connect(_worker, &CDatabaseWorker::sendProgress, _dlgProgess,
+          &DialogProgress::receiveProgress);
+  connect(_worker, &CDatabaseWorker::progressReady, _dlgProgess,
+          &DialogProgress::close);
+
+  // start the database thread operation
+  bool success = false;
+  QMetaObject::invokeMethod(_worker, "writePlaylistTracksToDatabase",
+                            Qt::QueuedConnection, _playlist, &success);
+
+  // set the bool playlist, in case the files have been successfully saved in
+  // the database
+  if (success)
     _playlistChanged = false;
 }
 
@@ -584,18 +590,12 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 // open first (default) playlist in the database-table "playlist" on start up:
 void MainWindow::readDataBasePlaylist() {
-  QSqlQuery query;
-  query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist WHERE "
-                "PllID = :id ");
-  query.bindValue(":id", _defaultPlaylistID);
-
-  if (!query.exec())
-    return;
-  if (query.next()) {
-    _playlist->setPllID(query.value(0).toInt());
-    _playlist->setPllName(query.value(1).toString());
-    _playlist->readPlaylistFromDatabase();
-  }
+  bool success = false;
+  QMetaObject::invokeMethod(_worker, "readDataBasePlaylist",
+                            Qt::BlockingQueuedConnection, _playlist,
+                            _defaultPlaylistID, &success);
+  if (!success)
+    qDebug() << "Something went wrong reading the database";
 }
 
 void MainWindow::closingProcedure() {
@@ -621,40 +621,20 @@ void MainWindow::closingProcedure() {
   // stop playing
   stopPlaying();
 
-  // Cleaning tables, remove orphaned tracks, albums and artists
-  QSqlQuery query;
+  bool success = false;
+  // cleaning up the database
+  QMetaObject::invokeMethod(_worker, "cleanupDatabase",
+                            Qt::BlockingQueuedConnection, &success);
+  if (success)
+    qDebug() << "Database clean up was successfull";
 
-  // Clean the Track table
-  if (!query.exec("DELETE FROM Track WHERE TraID NOT IN (SELECT TraFK FROM "
-                  "TrackPlaylist) ")) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "Failed to clean Track table: " +
-                              query.lastError().text());
-  }
+  // close database
+  QMetaObject::invokeMethod(_worker, "closeDatabase",
+                            Qt::BlockingQueuedConnection);
 
-  // Clean the Album table
-  if (!query.exec("DELETE FROM Album WHERE AlbID NOT IN (SELECT TraAlbFK FROM "
-                  "Track) ")) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "Failed to clean Album table: " +
-                              query.lastError().text());
-  }
-
-  // Clean the Artist table
-  if (!query.exec("DELETE FROM Artist WHERE ArtID NOT IN (SELECT AlbArtFK FROM "
-                  "Album) ")) {
-    QMessageBox::critical(nullptr, "Database Error",
-                          "Failed to clean Artist table: " +
-                              query.lastError().text());
-  }
-
-  // closing the database
-  QSqlDatabase db =
-      QSqlDatabase::database(); // Get the default database connection
-  if (db.isOpen()) {
-    db.close(); // Close the database connection
-    qDebug() << "Database connection closed";
-  }
+  // stop the thread for the database
+  _dbthread->quit();
+  _dbthread->wait();
 }
 
 // a recursive function to go through all the subdirectories and collect all

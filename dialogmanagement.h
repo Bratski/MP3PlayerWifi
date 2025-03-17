@@ -1,10 +1,13 @@
 #ifndef DIALOGMANAGEMENT_H
 #define DIALOGMANAGEMENT_H
 
+#include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
+
 #include <QDebug>
 #include <QDialog>
 #include <QMessageBox>
+#include <QThread>
 
 // for the SQL Database management
 #include <QtSql/QSqlQuery>
@@ -23,7 +26,9 @@ class DialogManagement : public QDialog {
 
 public:
   explicit DialogManagement(QWidget *parent = nullptr,
-                            CPlaylistContainer *playlist = nullptr);
+                            CPlaylistContainer *playlist = nullptr,
+                            QThread *dbthread = nullptr,
+                            CDatabaseWorker *worker = nullptr);
   ~DialogManagement();
 
 public slots:
@@ -35,6 +40,8 @@ public slots:
 private:
   Ui::DialogManagement *ui;
   CPlaylistContainer *_playlist;
+  QThread *_dbthread;
+  CDatabaseWorker *_worker;
 
   bool isEditing = false;
   void readDatabase();

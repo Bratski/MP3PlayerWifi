@@ -26,24 +26,7 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QLabel" name="labelProgress">
-       <property name="text">
-        <string>Progress %</string>
-       </property>
-      </widget>
-     </item>
     </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="pushButtonCancel">
-     <property name="text">
-      <string>Cancel</string>
-     </property>
-     <property name="icon">
-      <iconset theme="QIcon::ThemeIcon::ProcessStop"/>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

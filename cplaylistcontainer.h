@@ -78,8 +78,6 @@ public:
   void clear();
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
-  bool readPlaylistFromDatabase();
-  bool writePlaylistToDatabase();
 
   static const char
       *sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];
@@ -89,10 +87,6 @@ public:
   void setPllName(const QString &name) { _PllName = name; }
   const int &getPllID() { return _PllID; }
   const QString &getPllName() { return _PllName; }
-
-signals: // for progress bar functionality
-  void sendProgress(const int &progress);
-  void ProgressReady();
 };
 
 #endif // CPLAYLISTCONTAINER_H

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "COled.h"
+#include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 #include "ctrack.h"
 
@@ -10,6 +11,7 @@
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QSettings>
+#include <QThread>
 
 // for the SQL Database management
 #include <QSqlError>
@@ -41,13 +43,13 @@ class MainWindow : public QMainWindow {
 public:
   MainWindow(QWidget *parent = nullptr, COled *oled = nullptr,
              QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr,
-             CPlaylistContainer *playlist = nullptr, CTrack *track = nullptr);
+             CPlaylistContainer *playlist = nullptr, CTrack *track = nullptr,
+             QThread *dbthread = nullptr, CDatabaseWorker *worker = nullptr);
   ~MainWindow();
 
 public slots:
   // header functions
   void openSettingsDialog();
-  void openProgressDialog();
   void openSearchDialog();
   void openManagementDialog();
   void openAddPlaylistDialog();
@@ -88,6 +90,8 @@ private:
   DialogAddPlaylist *_dlgAddPlaylist;
   CPlaylistContainer *_playlist;
   CTrack *_track;
+  QThread *_dbthread;
+  CDatabaseWorker *_worker;
 
   // attributes
   int _index = 0;
