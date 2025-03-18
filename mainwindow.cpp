@@ -264,7 +264,7 @@ void MainWindow::saveToDatabase() {
 
 void MainWindow::deleteTrack() {
   qDebug() << "number of tracks in the list: "
-           << _playlist->getNumberOfTracks();
+           << _playlist->getNumberOfMainwindowTracks();
 
   // create a list of the selected range
   const QList<QTableWidgetSelectionRange> selectedRanges =
@@ -295,7 +295,7 @@ void MainWindow::deleteTrack() {
 
   // refresh the table
   qDebug() << "number of tracks in the list: "
-           << _playlist->getNumberOfTracks();
+           << _playlist->getNumberOfMainwindowTracks();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -343,7 +343,7 @@ void MainWindow::setVolume(int level) {
 void MainWindow::playSongs() {
 
   // if the playlist is empty do nothing
-  if (_playlist->getNumberOfTracks() == 0)
+  if (_playlist->getNumberOfMainwindowTracks() == 0)
     return;
 
   // check if one row has been selected, if yes, which one?
@@ -353,7 +353,7 @@ void MainWindow::playSongs() {
 
   // if no items in the table are selected, and the playlist is not empty,
   // start with the first track
-  if (selectedItems.empty() && _playlist->getNumberOfTracks() >= 1)
+  if (selectedItems.empty() && _playlist->getNumberOfMainwindowTracks() >= 1)
     _index = 0;
 
   // if any items are selected, pick the first row of the selected items
@@ -362,7 +362,7 @@ void MainWindow::playSongs() {
   }
 
   // pass the file location of that entry to the player source
-  if (_playlist->getNumberOfTracks() >= 1)
+  if (_playlist->getNumberOfMainwindowTracks() >= 1)
     _playThisSong = (*_playlist)[_index].getFileLocation();
 
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
@@ -378,11 +378,11 @@ void MainWindow::playSongs() {
 
 void MainWindow::playNext() {
   // check if playlist is empty or the player is playing
-  if (_playlist->getNumberOfTracks() == 0 || !_player->isPlaying())
+  if (_playlist->getNumberOfMainwindowTracks() == 0 || !_player->isPlaying())
     return;
 
   // check if the index is pointing to the last song
-  if (_index >= _playlist->getNumberOfTracks() - 1) {
+  if (_index >= _playlist->getNumberOfMainwindowTracks() - 1) {
     // if repeat all is enabled, start at the beginning, put the index to 0,
     // which occurs at the ++_index;
     if (_repeat)
@@ -411,7 +411,7 @@ void MainWindow::playNext() {
 void MainWindow::playPrevious() {
   // check if the playlist is empty or the player is not playing or the index
   // is already set to the first song in the list
-  if (_playlist->getNumberOfTracks() == 0 || !_player->isPlaying() ||
+  if (_playlist->getNumberOfMainwindowTracks() == 0 || !_player->isPlaying() ||
       _index <= 0) {
     return;
   }
@@ -451,7 +451,7 @@ void MainWindow::playOneSong(QTableWidgetItem *item) {
   _index = item->row();
 
   // pass the file location of that entry to the player source
-  if (_playlist->getNumberOfTracks() >= 1)
+  if (_playlist->getNumberOfMainwindowTracks() >= 1)
     _playThisSong = (*_playlist)[_index].getFileLocation();
 
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
@@ -543,8 +543,8 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
 
 void MainWindow::updateTrackInfoDisplay() {
   // to make sure the index is not pointing to a non existing object
-  if (_index >= _playlist->getNumberOfTracks() ||
-      _playlist->getNumberOfTracks() == 0) {
+  if (_index >= _playlist->getNumberOfMainwindowTracks() ||
+      _playlist->getNumberOfMainwindowTracks() == 0) {
     return;
   }
   QString title = (*_playlist)[_index].getTitle();

@@ -70,7 +70,7 @@ public:
   auto endFilterPtr() { return _playlist_ptr_filter_vector.end(); }
 
   // some general info stats about the playlist
-  int getNumberOfTracks() { return _playlist_obj_vector.size(); }
+  // int getNumberOfTracks() { return _playlist_obj_vector.size(); }
   int getNumberOfMainwindowTracks() {
     return _playlist_ptr_mainwindow_vector.size();
   }

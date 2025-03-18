@@ -13,7 +13,7 @@ DialogProgress::~DialogProgress() { delete ui; }
 
 void DialogProgress::receiveProgress(const int &progress) {
   // quick calculation from song number to percentage
-  int numberOfTracks = _playlist->getNumberOfTracks();
+  int numberOfTracks = _playlist->getNumberOfMainwindowTracks();
   int percentage = 100;
   // caution number of tracks are not allowed to be 0! No division by 0 is
   // possible!

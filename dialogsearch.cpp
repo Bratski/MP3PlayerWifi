@@ -66,9 +66,12 @@ void DialogSearch::filterPlaylist() {
 }
 
 void DialogSearch::openFilteredPlaylist() {
-  // copy the filtered ptr vector to the mainwindow ptr vector (swapping)
-  _playlist->copyFilteredToMainwindow();
-  *_playlistChanged = true;
+  // copy the filtered ptr vector to the mainwindow ptr vector (swapping), only
+  // if there is one or more entry found
+  if (_playlist->getNumberOfFilteredTracks() != 0) {
+    _playlist->copyFilteredToMainwindow();
+    *_playlistChanged = true;
+  }
 
   // close the dialog
   this->close();
