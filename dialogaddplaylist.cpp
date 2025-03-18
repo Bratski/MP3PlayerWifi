@@ -2,8 +2,11 @@
 #include "ui_dialogaddplaylist.h"
 
 DialogAddPlaylist::DialogAddPlaylist(QWidget *parent,
-                                     CPlaylistContainer *playlist)
-    : QDialog(parent), ui(new Ui::DialogAddPlaylist), _playlist(playlist) {
+                                     CPlaylistContainer *playlist,
+                                     CDatabaseWorker *worker,
+                                     bool *playlistChanged)
+    : QDialog(parent), ui(new Ui::DialogAddPlaylist), _playlist(playlist),
+      _worker(worker), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
   setWindowTitle("Add Playlist");
   readDatabase();
@@ -16,117 +19,91 @@ DialogAddPlaylist::DialogAddPlaylist(QWidget *parent,
 DialogAddPlaylist::~DialogAddPlaylist() { delete ui; }
 
 void DialogAddPlaylist::addPlaylist() {
+  // get the playlist id from the selected table widget item
+  int id =
+      ui->tableWidgetDatabase->item(ui->tableWidgetDatabase->currentRow(), 0)
+          ->text()
+          .toInt();
 
-  // get the playlist name from the selected table widget item
-  QString name = ui->tableWidgetDatabase->currentItem()->text();
-  // qDebug() << "name: " << name;
+  qDebug() << " id: " << id;
 
-  // add the playlist object with the all the tracks data from the database
-  // found at that particular playlist
-  QSqlQuery query;
-  query.prepare(
-      "SELECT Track.TraID, Track.TraName, Artist.ArtName, Album.AlbName, "
-      "Album.AlbYear, Track.TraNumber, Artist.ArtGenre, Track.TraDuration, "
-      "Track.TraBitrate, Track.TraSamplerate, Track.TraChannels, "
-      "Track.TraFileLocation "
-      "FROM Track "
-      "JOIN Album ON Track.TraAlbFK = Album.AlbID "
-      "JOIN Artist ON Album.AlbArtFK = Artist.ArtID "
-      "JOIN TrackPlaylist ON Track.TraID = TrackPlaylist.TraFK "
-      "JOIN Playlist ON TrackPlaylist.PllFK = Playlist.PllID "
-      "WHERE Playlist.PllName = :pllName");
-  query.bindValue(":pllName", name);
+  // create a temporary playlist object
+  CPlaylistContainer tempplaylist;
 
-  // if the query returned with an error
-  if (!query.exec()) {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Error");
-    msg.setIcon(QMessageBox::Warning);
-    msg.setText("something wrong with the db-query");
-    msg.exec();
-    return;
-  }
+  // fill that object with the selected playlistname from the tablewidget, only
+  // 1!
+  bool success = false;
+  QMetaObject::invokeMethod(_worker, "readDataBasePlaylist",
+                            Qt::BlockingQueuedConnection, &tempplaylist, id,
+                            &success);
 
-  // populate the _playlist with tracks from query
-  int year, number, duration, bitrate, samplerate, channels;
-  QString id, title, artist, album, genre, filelocation;
   bool doubleTrack = false;
-  while (query.next()) {
-
-    id = query.value(0).toString();
-
-    // check if tracks are already available in the playlist, to avoid
-    // duplicates
-    for (auto it = _playlist->begin(); it != _playlist->end(); ++it) {
-      if (id == it->getID()) {
-        doubleTrack = true;
+  // add the temporary playlist object to the global one: _playlist
+  if (success)
+    for (auto it1 = tempplaylist.begin(); it1 != tempplaylist.end(); ++it1) {
+      // check if tracks are already available in the playlist, to avoid
+      // duplicates
+      doubleTrack = false;
+      for (auto it2 = _playlist->begin(); it2 != _playlist->end(); ++it2) {
+        if (it2->getID() == it1->getID()) {
+          doubleTrack = true;
+        }
+      }
+      if (!doubleTrack) {
+        _playlist->addTrack(*it1);
+        *_playlistChanged = true;
       }
     }
 
-    if (!doubleTrack) {
-      title = query.value(1).toString();
-      artist = query.value(2).toString();
-      album = query.value(3).toString();
-      year = query.value(4).toInt();
-      number = query.value(5).toInt();
-      genre = query.value(6).toString();
-      duration = query.value(7).toInt();
-      bitrate = query.value(8).toInt();
-      samplerate = query.value(9).toInt();
-      channels = query.value(10).toInt();
-      filelocation = query.value(11).toString();
-
-      CTrack newtrack(id, title, artist, album, year, number, genre, duration,
-                      bitrate, samplerate, channels, filelocation);
-
-      _playlist->addTrack(newtrack);
-
-      // Debug output for each track
-      // qDebug() << "Added track:" << title << "by" << artist;
-    }
-    doubleTrack = false;
-  }
   // leave the dialog management and go back to mainwindow
   this->close();
 }
 
 void DialogAddPlaylist::readDatabase() {
+
+  std::vector<QString> playlistsInDatabase;
+
   // empty the list with playlists
   ui->tableWidgetDatabase->clearContents();
   ui->tableWidgetDatabase->setRowCount(0);
+  playlistsInDatabase.clear();
+  qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
 
-  // create a query, and find in the database
-  QSqlQuery query;
-  query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist ");
+  bool success = false;
+  // find in the database
+  QMetaObject::invokeMethod(_worker, "getPlaylistsFromDatabase",
+                            Qt::BlockingQueuedConnection, &playlistsInDatabase,
+                            &success);
 
-  if (!query.exec())
-    return;
+  if (success) {
+    // count the number of Playlists being found
+    int rowCount = (playlistsInDatabase.size() / 2);
 
-  // count the number of Playlists being found
-  int rowCount = 0;
-  while (query.next())
-    ++rowCount;
+    qDebug() << "rowCount: " << rowCount;
+    // set the table in Dialog Management to the corresponding number of rows
+    ui->tableWidgetDatabase->setRowCount(rowCount);
 
-  // set the table in Dialog Management to the corresponding number of rows
-  ui->tableWidgetDatabase->setRowCount(rowCount);
+    // populate the table with data from query
+    QTableWidgetItem *item;
 
-  // populate the table with data from query
-  QTableWidgetItem *item;
-  query.seek(-1); // reset query to start position
-  int row = 0;
-  while (query.next()) {
-    // Playlist ID
-    item = new QTableWidgetItem(query.value(0).toString());
-    ui->tableWidgetDatabase->setItem(row, 0, item);
-    // Playlist Name
-    item = new QTableWidgetItem(query.value(1).toString());
-    ui->tableWidgetDatabase->setItem(row, 1, item);
+    int row = 0;
+    for (size_t i = 0; i < playlistsInDatabase.size(); ++i) {
 
-    ++row;
+      // Playlist ID
+      if (i % 2 == 0) {
+        item = new QTableWidgetItem(playlistsInDatabase[i]);
+        ui->tableWidgetDatabase->setItem(row, 0, item);
+      }
+      // Playlist Name
+      else {
+        item = new QTableWidgetItem(playlistsInDatabase[i]);
+        ui->tableWidgetDatabase->setItem(row, 1, item);
+        ++row;
+      }
+    }
+
+    // customizing the looks
+    ui->tableWidgetDatabase->resizeColumnsToContents();
+    ui->tableWidgetDatabase->setAlternatingRowColors(true);
   }
-
-  // customizing the looks
-  ui->tableWidgetDatabase->resizeColumnsToContents();
-  ui->tableWidgetDatabase->setAlternatingRowColors(true);
 }

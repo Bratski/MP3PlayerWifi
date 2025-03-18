@@ -14,20 +14,24 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
                 "PllID = :id ");
   query.bindValue(":id", defaultPlaylistID);
 
-  if (!query.exec())
+  if (!query.exec()) {
     *success = false;
+    return;
+  }
   if (query.next()) {
     playlist->setPllID(query.value(0).toInt());
     playlist->setPllName(query.value(1).toString());
     readPlaylistTracksFromDatabase(playlist, success);
+    if (!*success) {
+      *success = false;
+      return;
+    }
   }
   *success = true;
 }
 
 void CDatabaseWorker::writePlaylistTracksToDatabase(
     CPlaylistContainer *playlist, bool *success) {
-  // TODO if a lot of entries are to be saved, it demands a lot of CPU power,
-  // some sort of progress bar is needed
 
   // create a query
   QSqlQuery query;
@@ -73,7 +77,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.bindValue(":artName", (*it)->getArtist());
     query.bindValue(":artGenre", (*it)->getGenre());
     if (!query.exec()) {
-      qDebug() << "error artist";
+      qDebug() << "error inserting artist";
       *success = false;
       return;
     }
@@ -89,7 +93,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         ":artName",
         (*it)->getArtist()); // Reuse the artist name to get the ArtID
     if (!query.exec()) {
-      qDebug() << "error album";
+      qDebug() << "error inserting album";
       *success = false;
       return;
     }
@@ -114,7 +118,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.bindValue(":albName",
                     (*it)->getAlbum()); // Reuse the album name to get the AlbID
     if (!query.exec()) {
-      qDebug() << "error track";
+      qDebug() << "error inserting track";
       *success = false;
       return;
     }
@@ -130,14 +134,14 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         ":pllName",
         playlist->getPllName()); // Reuse the playlist name to get the PllID
     if (!query.exec()) {
-      qDebug() << "error playlist";
+      qDebug() << "error inserting playlist";
       *success = false;
       return;
     }
     qDebug() << "Track " << (*it)->getTitle() << " saved";
   }
 
-  qDebug() << "Playlist saved in database";
+  qDebug() << "Playlist successfully saved in database";
   emit progressReady();
   *success = true;
   return;
@@ -171,7 +175,9 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
   int year, number, duration, bitrate, samplerate, channels;
   QString id, title, artist, album, genre, filelocation;
   while (query.next()) {
-
+    // to make shure the track id is unique, a character is added to the
+    // incrementing number, to identify its origin: "F" from file, "D" from
+    // database
     id =
         "D" +
         query.value(0)

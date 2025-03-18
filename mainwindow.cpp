@@ -124,10 +124,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
 MainWindow::~MainWindow() {
   closingProcedure();
-  if (_dbthread && _dbthread->isRunning()) {
-    _dbthread->quit();
-    _dbthread->wait();
-  }
   delete ui;
 }
 
@@ -155,7 +151,8 @@ void MainWindow::openManagementDialog() {
 }
 
 void MainWindow::openAddPlaylistDialog() {
-  _dlgAddPlaylist = new DialogAddPlaylist(this, _playlist);
+  _dlgAddPlaylist =
+      new DialogAddPlaylist(this, _playlist, _worker, &_playlistChanged);
 
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
@@ -176,10 +173,9 @@ void MainWindow::addMusicFile() {
   if (fileLocation.size()) {
     // add the track to the playlist
     CTrack newtrack;
-    // how to make sure the track id is unique, is not already in use by a track
-    // coming from the database? not from tracks which already are have come
-    // from the db, but also for tracks which might be added from the database
-    // in the future?
+    // to make shure the track id is unique, a character is added to the
+    // incrementing number, to identify its origin: "F" from file, "D" from
+    // database
     ++_trackID;
     QString id = "F" + QString::number(_trackID); // to identify its origin from
                                                   // FILE added to the database
@@ -213,10 +209,9 @@ void MainWindow::addMusicFolder() {
       // inserting all the detected files in the playlist
       for (const auto &filepath : _detectedMusicFiles) {
         CTrack newtrack;
-        // how to make sure the track id is unique, is not already in use by a
-        // track coming from the database? not from tracks which already are
-        // have come from the db, but also for tracks which might be added from
-        // the database in the future?
+        // to make shure the track id is unique, a character is added to the
+        // incrementing number, to identify its origin: "F" from file, "D" from
+        // database
         ++_trackID;
         QString id =
             "F" + QString::number(_trackID); // to identify its origin from
@@ -242,7 +237,8 @@ void MainWindow::saveToDatabase() {
   connect(_worker, &CDatabaseWorker::progressReady, _dlgProgess,
           &DialogProgress::close);
 
-  // Create an event loop to block until the database operation is done
+  // Create an event loop to block until the database operation is done,
+  // necessary to display the progressbar properly
   QEventLoop loop;
   connect(_worker, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
 
@@ -251,7 +247,8 @@ void MainWindow::saveToDatabase() {
   QMetaObject::invokeMethod(_worker, "writePlaylistTracksToDatabase",
                             Qt::QueuedConnection, _playlist, &success);
 
-  // Block until the database operation is complete
+  // Block until the database operation is complete, necessary to display the
+  // progressbar properly
   loop.exec();
 
   // set the bool playlist, in case the files have been successfully saved in
@@ -414,7 +411,7 @@ void MainWindow::playPrevious() {
     return;
   }
 
-  // as non of them is the case, than the player can switch to the previous
+  // as none of them is the case, than the player can switch to the previous
   // song
   --_index;
   _playThisSong = (*_playlist)[_index].getFileLocation();
@@ -611,7 +608,6 @@ void MainWindow::readDataBasePlaylist() {
 
 void MainWindow::closingProcedure() {
   // on exit, asking if the current playlist should be saved
-  // TODO,  some kind of progress bar needed!
   QMessageBox msg;
   msg.addButton("Yes", QMessageBox::YesRole);
   msg.addButton("No", QMessageBox::NoRole);
@@ -620,22 +616,15 @@ void MainWindow::closingProcedure() {
   msg.setText("Do you want to save the changes to the playlist?");
 
   // only ask to save the playlist to database, if the playlist has been
-  // edited
-  // (_playlistChanged is set true)
+  // edited (_playlistChanged is set true)
 
   if (_playlistChanged) {
     // msg.exec() returns "3" if norole, "2" if yesrole
     if (msg.exec() == 2) {
-      // wait for the invoked method to finish
-      QObject::connect(_worker, &CDatabaseWorker::progressReady, this,
-                       &MainWindow::closingProcedurePart2);
       saveToDatabase();
-    } else
-      closingProcedurePart2();
-  } else
-    closingProcedurePart2();
-}
-void MainWindow::closingProcedurePart2() {
+    }
+  }
+
   // stop playing
   stopPlaying();
 

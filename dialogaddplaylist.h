@@ -1,6 +1,7 @@
 #ifndef DIALOGADDPLAYLIST_H
 #define DIALOGADDPLAYLIST_H
 
+#include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 #include <QDialog>
 #include <QMessageBox>
@@ -17,7 +18,9 @@ class DialogAddPlaylist : public QDialog {
 
 public:
   explicit DialogAddPlaylist(QWidget *parent = nullptr,
-                             CPlaylistContainer *playlist = nullptr);
+                             CPlaylistContainer *playlist = nullptr,
+                             CDatabaseWorker *worker = nullptr,
+                             bool *playlistChanged = nullptr);
   ~DialogAddPlaylist();
 
 public slots:
@@ -26,6 +29,8 @@ public slots:
 private:
   Ui::DialogAddPlaylist *ui;
   CPlaylistContainer *_playlist;
+  CDatabaseWorker *_worker;
+  bool *_playlistChanged;
   void readDatabase();
 };
 
