@@ -234,7 +234,7 @@ void MainWindow::addMusicFolder() {
 void MainWindow::saveToDatabase() {
   // display the prorgress bar
   _dlgProgess = new DialogProgress(this, _playlist);
-  _dlgProgess->show();
+  _dlgProgess->open();
 
   // Connect signals from the database thread to the progress dialog
   connect(_worker, &CDatabaseWorker::sendProgress, _dlgProgess,

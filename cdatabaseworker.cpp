@@ -38,7 +38,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
   tracknr = 0;
 
   // in case the playlist has been emptied
-  if (playlist->getNumberOfTracks() == 0) {
+  if (playlist->getNumberOfMainwindowTracks() == 0) {
     // clear the database entries for that playlist
     query.prepare("DELETE FROM TrackPlaylist WHERE PllFK = :pllID ");
     query.bindValue(":pllID", playlist->getPllID());
@@ -47,7 +47,9 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
       *success = false;
       return;
     }
-    *success = false;
+    emit sendProgress(tracknr);
+    emit progressReady();
+    *success = true;
     return;
   }
 
