@@ -13,8 +13,11 @@
 #include <algorithm>
 #include <vector>
 
+// for debugging
+#include <QDebug>
+
 // for the SQL Database management
-#include <QtSql/QSqlQuery>
+//#include <QtSql/QSqlQuery>
 
 // for progress bar functionality
 #include <QObject>
@@ -63,8 +66,15 @@ public:
   auto beginPtr() { return _playlist_ptr_mainwindow_vector.begin(); }
   auto endPtr() { return _playlist_ptr_mainwindow_vector.end(); }
 
+  auto beginFilterPtr() { return _playlist_ptr_filter_vector.begin(); }
+  auto endFilterPtr() { return _playlist_ptr_filter_vector.end(); }
+
   // some general info stats about the playlist
   int getNumberOfTracks() { return _playlist_obj_vector.size(); }
+  int getNumberOfMainwindowTracks() {
+    return _playlist_ptr_mainwindow_vector.size();
+  }
+  int getNumberOfFilteredTracks() { return _playlist_ptr_filter_vector.size(); }
   int calculatePlaylistTotalTime();
 
   void addTrack(CTrack &track);
@@ -78,6 +88,7 @@ public:
   void clear();
   void sortPlaylist(art_t wayofsorting);
   void filterPlaylist(art_t wayoffiltering, const QString &text);
+  void copyFilteredToMainwindow();
 
   static const char
       *sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];

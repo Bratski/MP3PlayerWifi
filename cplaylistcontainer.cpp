@@ -189,7 +189,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     break;
   case art_t::byYear:
     for (auto &track : _playlist_obj_vector) {
-      // same for the track year
+      // same for the track year, if text has no numbers it is 0
       if (track.getYear() == text.toInt()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
@@ -198,4 +198,11 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   default:
     break;
   }
+}
+
+void CPlaylistContainer::copyFilteredToMainwindow() {
+  // shortest syntax, just swapping the ptr vectors
+  _playlist_ptr_filter_vector.swap(_playlist_ptr_mainwindow_vector);
+  // clearing the filter ptr vector for a next search
+  _playlist_ptr_filter_vector.clear();
 }

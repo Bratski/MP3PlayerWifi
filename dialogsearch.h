@@ -1,6 +1,7 @@
 #ifndef DIALOGSEARCH_H
 #define DIALOGSEARCH_H
 
+#include "cplaylistcontainer.h"
 #include <QDialog>
 
 namespace Ui {
@@ -11,13 +12,21 @@ class DialogSearch : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogSearch(QWidget *parent = nullptr);
+  explicit DialogSearch(QWidget *parent = nullptr,
+                        CPlaylistContainer *playlist = nullptr,
+                        bool *playlistChanged = nullptr);
   ~DialogSearch();
 
 public slots:
+  void filterPlaylist();
+  void openFilteredPlaylist();
 
 private:
   Ui::DialogSearch *ui;
+  CPlaylistContainer *_playlist;
+  bool *_playlistChanged;
+  void refreshtableWidgetFoundEntries();
+  const QString convertSecToTimeString(const int &sec);
 };
 
 #endif // DIALOGSEARCH_H

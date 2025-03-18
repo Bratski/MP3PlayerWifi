@@ -136,7 +136,12 @@ void MainWindow::openSettingsDialog() {
 }
 
 void MainWindow::openSearchDialog() {
-  _dlgSearch = new DialogSearch(this);
+  _dlgSearch = new DialogSearch(this, _playlist, &_playlistChanged);
+
+  // prepare a connection, in case the management dialog is closed, the
+  // tableWidgetCurrentPlaylist will be updated
+  connect(_dlgSearch, &QDialog::finished, this,
+          &MainWindow::refreshTableWidgetCurrentPlaylist);
   _dlgSearch->exec();
 }
 
@@ -473,7 +478,7 @@ void MainWindow::setRandom(bool state) {
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
   // count the number of Tracks being found
-  int rowCount = _playlist->getNumberOfTracks();
+  int rowCount = _playlist->getNumberOfMainwindowTracks();
   // qDebug() << "row count: " << rowCount;
 
   // empty the current playlist
