@@ -28,7 +28,8 @@ public:
   explicit DialogManagement(QWidget *parent = nullptr,
                             CPlaylistContainer *playlist = nullptr,
                             QThread *dbthread = nullptr,
-                            CDatabaseWorker *worker = nullptr);
+                            CDatabaseWorker *worker = nullptr,
+                            bool *playlistChanged = nullptr);
   ~DialogManagement();
 
 public slots:
@@ -42,6 +43,7 @@ private:
   CPlaylistContainer *_playlist;
   QThread *_dbthread;
   CDatabaseWorker *_worker;
+  bool *_playlistChanged;
 
   bool isEditing = false;
   void readDatabase();

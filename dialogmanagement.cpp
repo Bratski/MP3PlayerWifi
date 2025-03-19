@@ -3,9 +3,10 @@
 
 DialogManagement::DialogManagement(QWidget *parent,
                                    CPlaylistContainer *playlist,
-                                   QThread *dbthread, CDatabaseWorker *worker)
+                                   QThread *dbthread, CDatabaseWorker *worker,
+                                   bool *playlistChanged)
     : QDialog(parent), ui(new Ui::DialogManagement), _playlist(playlist),
-      _dbthread(dbthread), _worker(worker) {
+      _dbthread(dbthread), _worker(worker), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
 
   // initialize the window
@@ -70,8 +71,12 @@ void DialogManagement::openPlaylist() {
   bool success = false;
   // fill the playlist with the database tracks
   QMetaObject::invokeMethod(_worker, "readPlaylistTracksFromDatabase",
-                            Qt::QueuedConnection, _playlist, &success);
+                            Qt::BlockingQueuedConnection, _playlist, &success);
 
+  if (success)
+    *_playlistChanged = true;
+
+  qDebug() << "success: " << success;
   // prevents interfering with the namePlaylistEdited function
   isEditing = false;
 

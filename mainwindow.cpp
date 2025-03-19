@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   readDataBasePlaylist();
   refreshTableWidgetCurrentPlaylist();
+  _network = new QNetworkAccessManager();
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -120,11 +121,16 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // connect the media status changed signal to handle end of media
   connect(_player, &QMediaPlayer::mediaStatusChanged, this,
           &MainWindow::handleMediaStatusChanged);
+
+  // connect response after a network request is completed
+  connect(_network, &QNetworkAccessManager::finished, this,
+          &MainWindow::getDataFromNetwork);
 }
 
 MainWindow::~MainWindow() {
   closingProcedure();
   delete ui;
+  delete _network;
 }
 
 // header windows, the Dialog object pointed to by _dlgxxx is deleted
@@ -146,7 +152,8 @@ void MainWindow::openSearchDialog() {
 }
 
 void MainWindow::openManagementDialog() {
-  _dlgManagement = new DialogManagement(this, _playlist, _dbthread, _worker);
+  _dlgManagement = new DialogManagement(this, _playlist, _dbthread, _worker,
+                                        &_playlistChanged);
 
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
@@ -301,6 +308,7 @@ void MainWindow::deleteTrack() {
 
 void MainWindow::deletePlaylist() {
   _playlist->clear();
+  _playlistChanged = true;
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -476,7 +484,58 @@ void MainWindow::setRandom(bool state) {
   }
 }
 
+// how to deal with the response to a network reply
+void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
+
+  if (_imagedata) {
+    QByteArray bytes = reply->readAll();
+    QPixmap pixmap;
+    pixmap.loadFromData(bytes);
+    ui->labelArtWork->setPixmap(pixmap);
+  } else {
+    QString text = reply->readAll(); // utf-8, geht mit unmlauten um
+    qDebug() << "API JSON returning: " << text;
+
+    // key value prinzip
+    QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
+    QJsonObject obj = doc.object();
+    QJsonObject main = obj["album"].toObject();
+    QJsonArray submainarray = main["image"].toArray();
+
+    qDebug() << "obj: " << obj;
+    qDebug() << "main: " << main;
+
+    QString album = main["name"].toString();
+    QString artist = main["artist"].toString();
+    QString urlimage = "";
+
+    for (const auto &value : submainarray) {
+      QJsonObject imageObject = value.toObject();
+      if (_imageSize == imageObject["size"].toString())
+        urlimage = imageObject["#text"].toString();
+    }
+
+    qDebug() << "album: " << album;
+    qDebug() << "artist: " << artist;
+    qDebug() << "urlimage: " << urlimage;
+
+    if (!urlimage.isEmpty()) {
+
+      QNetworkRequest request(urlimage);
+      _network->get(request);
+      _imagedata = true;
+    } else {
+      ui->labelArtWork->clear();
+    }
+  }
+}
+
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
+  // to restart playing the song at the first index, in case the playlist has
+  // been edited
+  if (_playlistChanged)
+    _index = 0;
+  qDebug() << "_index: " << _index;
   // count the number of Tracks being found
   int rowCount = _playlist->getNumberOfMainwindowTracks();
   // qDebug() << "row count: " << rowCount;
@@ -550,6 +609,18 @@ void MainWindow::updateTrackInfoDisplay() {
   QString title = (*_playlist)[_index].getTitle();
   QString album = (*_playlist)[_index].getAlbum();
   QString artist = (*_playlist)[_index].getArtist();
+
+  // try to get the artwork out of the music file
+  // TODO failed so far
+  // in case that doesnt work, try to get artwork from the internet
+  QUrl url =
+      "http://ws.audioscrobbler.com/2.0/"
+      "?method=album.getinfo&api_key=9d6171634a3f43ff46083c4534ed44db&artist=" +
+      artist + "&album=" + album + "&format=json";
+  qDebug() << "URl: " << url;
+  _imagedata = false;
+  QNetworkRequest request(url);
+  _network->get(request);
 
   ui->labelCurrentSong->setText(title);
   ui->labelcurrentArtist->setText(artist);

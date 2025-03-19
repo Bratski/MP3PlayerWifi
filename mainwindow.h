@@ -28,8 +28,13 @@
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
 
-// to make it possible to extract artwork from the mp3-file
-#include <taglib/id3v2frame.h>
+// to get the artwork from an internet API
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QPixmap>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -77,6 +82,9 @@ public slots:
   void setRepeat(bool state) { _repeat = state; }
   void setRandom(bool state);
 
+  // network functions
+  void getDataFromNetwork(QNetworkReply *reply);
+
 private:
   // pointers
   Ui::MainWindow *ui;
@@ -92,6 +100,7 @@ private:
   CTrack *_track;
   QThread *_dbthread;
   CDatabaseWorker *_worker;
+  QNetworkAccessManager *_network;
 
   // attributes
   int _index = 0;
@@ -102,6 +111,9 @@ private:
   bool _repeat = false;
   bool _playall = false;
   bool _playlistChanged = false;
+  bool _imagedata = false;
+  QString _imageSize =
+      "large"; // Options are: "small", "medium", "large", "extralarge", "mega"
   int _defaultPlaylistID =
       1; // at startup open the first playlist in the database by default
   std::vector<QString>
