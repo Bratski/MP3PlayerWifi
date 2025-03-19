@@ -1,8 +1,8 @@
 #include "dialogprogress.h"
 #include "ui_dialogprogress.h"
 
-DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist)
-    : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist) {
+DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist, QThread *dbthread)
+    : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist), _dbthread(dbthread), _allowclose(false) {
   ui->setupUi(this);
   setWindowTitle("Saving Music Files to Database...");
   // initializing the range of the progressbar (0 to 100%)
@@ -21,4 +21,10 @@ void DialogProgress::receiveProgress(const int &progress) {
     percentage = ((progress * 100) / numberOfTracks);
   // setting the progress bar to the new position
   ui->progressBar->setValue(percentage);
+}
+
+void DialogProgress::allowClose()
+{
+    _allowclose = true;
+    this->close();
 }

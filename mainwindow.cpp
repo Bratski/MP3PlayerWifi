@@ -4,6 +4,10 @@
 // TODO read and save settings from a config file for _defaultID(last playlist)
 // volume, OLED settings etc...
 
+// TODO undosort after a filter operation
+// TODO special characters in song tags not well recognized: öüä etc
+// search and filter possible with partial text orders
+
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
                        CTrack *track, QThread *dbthread,
@@ -249,14 +253,14 @@ void MainWindow::addMusicFolder() {
 
 void MainWindow::saveToDatabase() {
   // display the prorgress bar
-  _dlgProgess = new DialogProgress(this, _playlist);
+  _dlgProgess = new DialogProgress(this, _playlist, _dbthread);
   _dlgProgess->open();
 
   // Connect signals from the database thread to the progress dialog
   connect(_worker, &CDatabaseWorker::sendProgress, _dlgProgess,
           &DialogProgress::receiveProgress);
   connect(_worker, &CDatabaseWorker::progressReady, _dlgProgess,
-          &DialogProgress::close);
+          &DialogProgress::allowClose);
 
   // Create an event loop to block until the database operation is done,
   // necessary to display the progressbar properly
@@ -279,8 +283,8 @@ void MainWindow::saveToDatabase() {
 }
 
 void MainWindow::deleteTrack() {
-  qDebug() << "number of tracks in the list: "
-           << _playlist->getNumberOfMainwindowTracks();
+ // qDebug() << "number of tracks in the list: "
+  //         << _playlist->getNumberOfMainwindowTracks();
 
   // create a list of the selected range
   const QList<QTableWidgetSelectionRange> selectedRanges =
@@ -301,7 +305,7 @@ void MainWindow::deleteTrack() {
       // Get the song ID
       QString id = idItem->text();
 
-      qDebug() << "id: " << id;
+      // qDebug() << "id: " << id;
 
       // delete that song from the playlist vector
       _playlist->removeTrack(id);
@@ -310,8 +314,8 @@ void MainWindow::deleteTrack() {
   }
 
   // refresh the table
-  qDebug() << "number of tracks in the list: "
-           << _playlist->getNumberOfMainwindowTracks();
+  // qDebug() << "number of tracks in the list: "
+  //          << _playlist->getNumberOfMainwindowTracks();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -588,7 +592,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
     ui->tableWidgetCurrentPlaylist->setItem(row, 3, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getYear()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetCurrentPlaylist->setItem(row, 4, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getNumber()));
@@ -599,19 +603,19 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
     ui->tableWidgetCurrentPlaylist->setItem(row, 6, item);
 
     item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetCurrentPlaylist->setItem(row, 7, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetCurrentPlaylist->setItem(row, 8, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetCurrentPlaylist->setItem(row, 9, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getChannels()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetCurrentPlaylist->setItem(row, 10, item);
 
     item = new QTableWidgetItem(((*it)->getFileLocation()));

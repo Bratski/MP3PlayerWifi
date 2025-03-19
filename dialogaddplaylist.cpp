@@ -25,7 +25,7 @@ void DialogAddPlaylist::addPlaylist() {
           ->text()
           .toInt();
 
-  qDebug() << " id: " << id;
+  // qDebug() << " id: " << id;
 
   // create a temporary playlist object
   CPlaylistContainer tempplaylist;
@@ -67,7 +67,7 @@ void DialogAddPlaylist::readDatabase() {
   ui->tableWidgetDatabase->clearContents();
   ui->tableWidgetDatabase->setRowCount(0);
   playlistsInDatabase.clear();
-  qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
+  // qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
 
   bool success = false;
   // find in the database
@@ -79,7 +79,7 @@ void DialogAddPlaylist::readDatabase() {
     // count the number of Playlists being found
     int rowCount = (playlistsInDatabase.size() / 2);
 
-    qDebug() << "rowCount: " << rowCount;
+    // qDebug() << "rowCount: " << rowCount;
     // set the table in Dialog Management to the corresponding number of rows
     ui->tableWidgetDatabase->setRowCount(rowCount);
 
@@ -92,7 +92,7 @@ void DialogAddPlaylist::readDatabase() {
       // Playlist ID
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
-          item->setTextAlignment(Qt::AlignRight);
+          item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->tableWidgetDatabase->setItem(row, 0, item);
       }
       // Playlist Name

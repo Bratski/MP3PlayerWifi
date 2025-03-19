@@ -86,7 +86,7 @@ void DialogManagement::openPlaylist() {
   if (success)
     *_playlistChanged = true;
 
-  qDebug() << "success: " << success;
+  // qDebug() << "success: " << success;
   // prevents interfering with the namePlaylistEdited function
   isEditing = false;
 
@@ -121,7 +121,7 @@ void DialogManagement::addNewPlaylist() {
                             &doubleName);
 
   if (success) {
-    qDebug() << "adding the name playlist " << name << " successfully";
+    qDebug() << "added the name playlist " << name << " successfully";
   }
   if (doubleName) {
     QMessageBox::warning(this, "Error",
@@ -248,7 +248,7 @@ void DialogManagement::readDatabase() {
   ui->tableWidgetPlaylists->clearContents();
   ui->tableWidgetPlaylists->setRowCount(0);
   playlistsInDatabase.clear();
-  qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
+  // qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
 
   bool success = false;
   // find in the database
@@ -260,7 +260,7 @@ void DialogManagement::readDatabase() {
     // count the number of Playlists being found
     int rowCount = (playlistsInDatabase.size() / 2);
 
-    qDebug() << "rowCount: " << rowCount;
+    // qDebug() << "rowCount: " << rowCount;
     // set the table in Dialog Management to the corresponding number of rows
     ui->tableWidgetPlaylists->setRowCount(rowCount);
 
@@ -273,7 +273,7 @@ void DialogManagement::readDatabase() {
       // Playlist ID
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
-          item->setTextAlignment(Qt::AlignRight);
+          item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->tableWidgetPlaylists->setItem(row, 0, item);
       }
       // Playlist Name

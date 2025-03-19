@@ -85,13 +85,13 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
   // for the artists
   auto sortbyartist = [](const std::shared_ptr<CTrack> tr1,
                          const std::shared_ptr<CTrack> tr2) {
-    return tr1->getArtist() < tr2->getArtist();
+    return tr1->getArtist().toLower() < tr2->getArtist().toLower();
   };
 
   // for the albums
   auto sortbyalbum = [](const std::shared_ptr<CTrack> tr1,
                         const std::shared_ptr<CTrack> tr2) {
-    return tr1->getAlbum() < tr2->getAlbum();
+    return tr1->getAlbum().toLower() < tr2->getAlbum().toLower();
   };
 
   // for the album year
@@ -103,7 +103,7 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
   // for the genres
   auto sortbygenre = [](const std::shared_ptr<CTrack> tr1,
                         const std::shared_ptr<CTrack> tr2) {
-    return tr1->getGenre() < tr2->getGenre();
+    return tr1->getGenre().toLower() > tr2->getGenre().toLower();
   };
 
   switch (wayofsorting) {
@@ -153,12 +153,13 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
                                         const QString &text) {
   // empty the search vector with pointers
   _playlist_ptr_filter_vector.clear();
+
   switch (wayoffiltering) {
   case art_t::byTitle:
     for (auto &track : _playlist_obj_vector) {
       // is the search text corresponding to the track title, the pointer of
       // that track is added to the ptr-filter vector
-      if (track.getTitle() == text) {
+      if (track.getTitle().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -166,7 +167,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   case art_t::byAlbum:
     for (auto &track : _playlist_obj_vector) {
       // same for the track album
-      if (track.getAlbum() == text) {
+      if (track.getAlbum().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -174,7 +175,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   case art_t::byArtist:
     for (auto &track : _playlist_obj_vector) {
       // same for the track artist
-      if (track.getArtist() == text) {
+      if (track.getArtist().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -182,7 +183,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   case art_t::byGenre:
     for (auto &track : _playlist_obj_vector) {
       // same for the track genre
-      if (track.getGenre() == text) {
+      if (track.getGenre().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }

@@ -25,12 +25,12 @@ void DialogSearch::filterPlaylist() {
   // get the text to search for
   QString text = ui->lineEditSearch->text();
 
-  qDebug() << "text: " << text;
+  // qDebug() << "text: " << text;
 
   // check which combobox element is selected, determines the ways of filtering
   int selectedIndex = ui->comboBoxSongElements->currentIndex();
 
-  qDebug() << "selected index: " << selectedIndex;
+  // qDebug() << "selected index: " << selectedIndex;
 
   // search in the playlist for the tracks, which its element is corresponding
   // to search text
@@ -108,7 +108,7 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
     ui->tableWidgetFoundEntries->setItem(row, 3, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getYear()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 4, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getNumber()));
@@ -119,19 +119,19 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
     ui->tableWidgetFoundEntries->setItem(row, 6, item);
 
     item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 7, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 8, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 9, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getChannels()));
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 10, item);
 
     item = new QTableWidgetItem(((*it)->getFileLocation()));
