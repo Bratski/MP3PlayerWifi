@@ -125,6 +125,14 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // connect response after a network request is completed
   connect(_network, &QNetworkAccessManager::finished, this,
           &MainWindow::getDataFromNetwork);
+
+  // check which audio files are supported
+  // QMediaFormat mediaFormat;
+  // const QList<QMediaFormat::AudioCodec> supportedAudioCodecs =
+  //     mediaFormat.supportedAudioCodecs(QMediaFormat::Decode);
+  // for (auto &codec : supportedAudioCodecs) {
+  //   qDebug() << codec;
+  // }
 }
 
 MainWindow::~MainWindow() {
@@ -175,7 +183,7 @@ void MainWindow::openAddPlaylistDialog() {
 
 void MainWindow::addMusicFile() {
   // open standard file browser
-  QString filter = "Mp3 Files (*.mp3);; Flac Files (*.flac)";
+  QString filter = "Mp3 Files (*.mp3);; Flac Files (*.flac) ;; WMA Files (*.wma) ;; Wave Files (*.wav) ;; AAC Files (*.aac) ;; AC3 Files (*.ac3) ;; EAC3 (*.eac3) ;; ALAC Files (*.alac)";
   QString fileLocation = QFileDialog::getOpenFileName(
       this, "Open a file", qApp->applicationDirPath(),
       //"/home/bart/Nextcloud/CPlusPlusProjects/qtgui/MP3PlayerWorking",
@@ -759,7 +767,7 @@ void MainWindow::processFolder(const QString &path) {
           5); // get the last 5 characters of the filefound string
       // Process files, only add the file path to the vector
       // _detectedMusicFiles, if it has a .mp3 or .flac extension
-      if (fileExtension4 == ".mp3" || fileExtension5 == ".flac") {
+      if (fileExtension4 == ".mp3" || fileExtension4 == ".aac" || fileExtension4 == ".ac3" || fileExtension4 == ".wma" || fileExtension4 == ".wav" || fileExtension5 == ".flac" || fileExtension5 == ".eac3" || fileExtension5 == ".alac") {
         qDebug() << "File:" << entry.absoluteFilePath();
         _detectedMusicFiles.push_back(filefound);
       }

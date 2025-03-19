@@ -27,6 +27,7 @@
 // to be able to play music files
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
+#include <QtMultimedia/QMediaFormat> // to check which audio formats are supported
 
 // to get the artwork from an internet API
 #include <QJsonArray>
