@@ -39,18 +39,28 @@ void DialogManagement::openPlaylist() {
 
   // Set the flag to true to prevent recursive calls
   isEditing = true;
+
   // check if one row has been selected, if yes, which one? If not return with
   // error message
 
   QList<QTableWidgetSelectionRange> selectedRanges =
       ui->tableWidgetPlaylists->selectedRanges();
 
-  if (selectedRanges.size() != 1) {
+  if (selectedRanges.size() == 0) {
     QMessageBox::warning(
         this, "Error",
-        "Only 1 playlist at the time can be selected to be opened!");
+        "No playlist has been selected to be opened!");
     isEditing = false;
     return;
+  }
+
+  // if yes, is it only one row or more?
+  if (selectedRanges.first().rowCount() != 1) {
+      QMessageBox::warning(
+          this, "Error",
+          "Only 1 Playlist must be selected to be opened!");
+      isEditing = false;
+      return;
   }
 
   // get the items at the selected row
@@ -263,6 +273,7 @@ void DialogManagement::readDatabase() {
       // Playlist ID
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
+          item->setTextAlignment(Qt::AlignRight);
         ui->tableWidgetPlaylists->setItem(row, 0, item);
       }
       // Playlist Name

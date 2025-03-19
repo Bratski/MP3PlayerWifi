@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->labelTotalTime->setText(_timeList);
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
   ui->tableWidgetCurrentPlaylist->hideColumn(11);
+  ui->tableWidgetCurrentPlaylist->setColumnWidth(1, 300);
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   readDataBasePlaylist();
   refreshTableWidgetCurrentPlaylist();
@@ -317,35 +318,41 @@ void MainWindow::deleteTrack() {
 void MainWindow::deletePlaylist() {
   _playlist->clear();
   _playlistChanged = true;
+  ui->checkBoxPlayRandom->setChecked(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
   _playlistChanged = true;
+  ui->checkBoxPlayRandom->setChecked(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
   _playlistChanged = true;
+  ui->checkBoxPlayRandom->setChecked(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
   _playlistChanged = true;
+  ui->checkBoxPlayRandom->setChecked(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
   _playlistChanged = true;
+  ui->checkBoxPlayRandom->setChecked(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::undoSort() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
+    ui->checkBoxPlayRandom->setChecked(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -552,7 +559,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   // been edited
   if (_playlistChanged)
     _index = 0;
-  qDebug() << "_index: " << _index;
+  // qDebug() << "_index: " << _index;
   // count the number of Tracks being found
   int rowCount = _playlist->getNumberOfMainwindowTracks();
   // qDebug() << "row count: " << rowCount;
@@ -581,24 +588,30 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
     ui->tableWidgetCurrentPlaylist->setItem(row, 3, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getYear()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetCurrentPlaylist->setItem(row, 4, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getNumber()));
+    item->setTextAlignment(Qt::AlignCenter);
     ui->tableWidgetCurrentPlaylist->setItem(row, 5, item);
 
     item = new QTableWidgetItem((*it)->getGenre());
     ui->tableWidgetCurrentPlaylist->setItem(row, 6, item);
 
     item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetCurrentPlaylist->setItem(row, 7, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetCurrentPlaylist->setItem(row, 8, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetCurrentPlaylist->setItem(row, 9, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getChannels()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetCurrentPlaylist->setItem(row, 10, item);
 
     item = new QTableWidgetItem(((*it)->getFileLocation()));
@@ -609,6 +622,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
 
   // customizing the looks
   ui->tableWidgetCurrentPlaylist->resizeColumnsToContents();
+  ui->tableWidgetCurrentPlaylist->setColumnWidth(1, 300);
   ui->tableWidgetCurrentPlaylist->setAlternatingRowColors(true);
 
   // set the playlist name in the main window info output
@@ -627,6 +641,7 @@ void MainWindow::updateTrackInfoDisplay() {
   QString title = (*_playlist)[_index].getTitle();
   QString album = (*_playlist)[_index].getAlbum();
   QString artist = (*_playlist)[_index].getArtist();
+  QString time = convertSecToTimeString((*_playlist)[_index].getDuration());
 
   // try to get the artwork out of the music file
   // TODO failed so far
@@ -645,7 +660,9 @@ void MainWindow::updateTrackInfoDisplay() {
 
   // sending the current song data to the main window and oled display
   ui->labelCurrentSong->setText(title);
+  ui->labelcurrentAlbum->setText(album);
   ui->labelcurrentArtist->setText(artist);
+  ui->labelTimeSong->setText(time);
   _oled->updateSong(title.toStdString(), artist.toStdString(),
                     album.toStdString());
 }

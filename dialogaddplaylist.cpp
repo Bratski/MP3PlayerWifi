@@ -92,6 +92,7 @@ void DialogAddPlaylist::readDatabase() {
       // Playlist ID
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
+          item->setTextAlignment(Qt::AlignRight);
         ui->tableWidgetDatabase->setItem(row, 0, item);
       }
       // Playlist Name

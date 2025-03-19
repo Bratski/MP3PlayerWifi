@@ -108,24 +108,30 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
     ui->tableWidgetFoundEntries->setItem(row, 3, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getYear()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetFoundEntries->setItem(row, 4, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getNumber()));
+    item->setTextAlignment(Qt::AlignCenter);
     ui->tableWidgetFoundEntries->setItem(row, 5, item);
 
     item = new QTableWidgetItem((*it)->getGenre());
     ui->tableWidgetFoundEntries->setItem(row, 6, item);
 
     item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetFoundEntries->setItem(row, 7, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getBitrate()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetFoundEntries->setItem(row, 8, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getSamplerate()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetFoundEntries->setItem(row, 9, item);
 
     item = new QTableWidgetItem(QString::number((*it)->getChannels()));
+    item->setTextAlignment(Qt::AlignRight);
     ui->tableWidgetFoundEntries->setItem(row, 10, item);
 
     item = new QTableWidgetItem(((*it)->getFileLocation()));
@@ -136,6 +142,7 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
 
   // customizing the looks
   ui->tableWidgetFoundEntries->resizeColumnsToContents();
+  ui->tableWidgetFoundEntries->setColumnWidth(1, 300);
   ui->tableWidgetFoundEntries->setAlternatingRowColors(true);
 }
 

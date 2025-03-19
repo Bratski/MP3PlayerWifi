@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1025</width>
-    <height>527</height>
+    <width>1049</width>
+    <height>666</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,6 +22,12 @@
       </property>
       <item>
        <widget class="QCheckBox" name="checkBoxRepeatAll">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Repeat All</string>
         </property>
@@ -32,6 +38,12 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkBoxPlayRandom">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Play Random</string>
         </property>
@@ -42,6 +54,18 @@
       </item>
       <item>
        <widget class="QProgressBar" name="progressBarSong">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
@@ -64,6 +88,18 @@
       </item>
       <item>
        <widget class="QSlider" name="horizontalSliderSong">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
         </property>
@@ -153,10 +189,16 @@
       <item>
        <widget class="QPushButton" name="pushButtonPrevious">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -169,10 +211,16 @@
       <item>
        <widget class="QPushButton" name="pushButtonPlay">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -185,10 +233,16 @@
       <item>
        <widget class="QPushButton" name="pushButtonNext">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -201,10 +255,16 @@
       <item>
        <widget class="QPushButton" name="pushButtonPause">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -217,10 +277,16 @@
       <item>
        <widget class="QPushButton" name="pushButtonStop">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="text">
          <string/>
@@ -236,6 +302,18 @@
      <layout class="QVBoxLayout" name="verticalLayout_6">
       <item>
        <widget class="QLabel" name="labelCurrentPlaylist">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Playlist Name</string>
         </property>
@@ -243,20 +321,64 @@
       </item>
       <item>
        <widget class="QLabel" name="labelCurrentSong">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Song Name</string>
         </property>
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="labelcurrentAlbum">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Album</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="labelcurrentArtist">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Artist Name</string>
         </property>
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="labelTimeSong">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Time Song</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="labelTotalTime">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Total Time</string>
         </property>
@@ -268,8 +390,29 @@
      <layout class="QVBoxLayout" name="verticalLayout_7">
       <item>
        <widget class="QLabel" name="labelArtWork">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>174</width>
+          <height>174</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Artwork Album</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -278,30 +421,80 @@
     <item row="1" column="2" rowspan="2">
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QLabel" name="label_pll">
+       <widget class="QLabel" name="labelcupll">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Current Playlist:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_cuso">
+       <widget class="QLabel" name="labelcuso">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Current Song:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="cuar">
+       <widget class="QLabel" name="labelcual">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Current Album:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelcuar">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Current Artist:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="labeltoti">
+       <widget class="QLabel" name="labeltiso">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>Total Time:</string>
+         <string>Time Song:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labeltoti">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Total Time Playlist:</string>
         </property>
        </widget>
       </item>
@@ -310,10 +503,16 @@
     <item row="2" column="0">
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <property name="sizeConstraint">
-       <enum>QLayout::SizeConstraint::SetFixedSize</enum>
+       <enum>QLayout::SizeConstraint::SetMinAndMaxSize</enum>
       </property>
       <item>
        <widget class="QLabel" name="labelVolume">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Volume</string>
         </property>
@@ -321,6 +520,18 @@
       </item>
       <item>
        <widget class="QSlider" name="horizontalSliderVolume">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
         </property>
@@ -335,7 +546,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1025</width>
+     <width>1049</width>
      <height>23</height>
     </rect>
    </property>
@@ -561,6 +772,18 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>pushButtonPlay</tabstop>
+  <tabstop>pushButtonStop</tabstop>
+  <tabstop>pushButtonNext</tabstop>
+  <tabstop>pushButtonPrevious</tabstop>
+  <tabstop>pushButtonPause</tabstop>
+  <tabstop>horizontalSliderVolume</tabstop>
+  <tabstop>checkBoxRepeatAll</tabstop>
+  <tabstop>checkBoxPlayRandom</tabstop>
+  <tabstop>horizontalSliderSong</tabstop>
+  <tabstop>tableWidgetCurrentPlaylist</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
