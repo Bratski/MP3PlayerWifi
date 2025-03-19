@@ -33,6 +33,10 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
 void CDatabaseWorker::writePlaylistTracksToDatabase(
     CPlaylistContainer *playlist, bool *success) {
 
+  // changed the UPDATE for DO NOTHING, it might speed up the saving progress,
+  // tracks not pointed at in the TrackPlaylist table will be deleted at the
+  // cleaning process (cleanupDatabase()) on program exit
+
   // create a query
   QSqlQuery query;
   tracknr = 0;
@@ -75,7 +79,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     //  Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
                   "VALUES (:artName, :artGenre) "
-                  "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
+                  "ON CONFLICT(ArtName) DO NOTHING ");
     query.bindValue(":artName", (*it)->getArtist());
     query.bindValue(":artGenre", (*it)->getGenre());
     if (!query.exec()) {
@@ -88,7 +92,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.prepare(
         "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) VALUES (:albName, "
         ":albYear, (SELECT ArtID FROM Artist WHERE ArtName = :artName)) ON "
-        "CONFLICT(AlbName, AlbArtFK) DO UPDATE SET AlbYear = :albYear ");
+        "CONFLICT(AlbName, AlbArtFK) DO NOTHING ");
     query.bindValue(":albName", (*it)->getAlbum());
     query.bindValue(":albYear", (*it)->getYear());
     query.bindValue(
@@ -106,10 +110,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) VALUES "
         "(:traTitle, :traNumber, :traDuration, :traBitrate, :traSamplerate, "
         ":traChannels, :traFileLocation, (SELECT AlbID FROM Album WHERE "
-        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO UPDATE SET "
-        "TraNumber = :traNumber, TraDuration = :traDuration, TraBitrate = "
-        ":traBitrate, TraSamplerate = :traSamplerate, TraChannels = "
-        ":traChannels, TraFileLocation = :traFileLocation ");
+        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO NOTHING ");
     query.bindValue(":traTitle", (*it)->getTitle());
     query.bindValue(":traNumber", (*it)->getNumber());
     query.bindValue(":traDuration", (*it)->getDuration());

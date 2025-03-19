@@ -487,44 +487,53 @@ void MainWindow::setRandom(bool state) {
 // how to deal with the response to a network reply
 void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
 
+  // in case the image is coming
   if (_imagedata) {
-    QByteArray bytes = reply->readAll();
-    QPixmap pixmap;
-    pixmap.loadFromData(bytes);
-    ui->labelArtWork->setPixmap(pixmap);
+    QByteArray bytes = reply->readAll(); // converting the reply to bytes
+    QPixmap pixmap;                      // creating pixmap object
+    pixmap.loadFromData(bytes);          // filling the pixmap up with the bytes
+    ui->labelArtWork->setPixmap(pixmap); // show the image in the main window
   } else {
-    QString text = reply->readAll(); // utf-8, geht mit unmlauten um
-    qDebug() << "API JSON returning: " << text;
+    // in case the JSON data is coming
+    QString text = reply->readAll(); // read the text string from the reply
+    // qDebug() << "API JSON returning: " << text;
 
     // key value prinzip
-    QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
-    QJsonObject obj = doc.object();
-    QJsonObject main = obj["album"].toObject();
-    QJsonArray submainarray = main["image"].toArray();
+    QJsonDocument doc = QJsonDocument::fromJson(
+        text.toUtf8());             // convert the textstring to a JSON document
+    QJsonObject obj = doc.object(); // convert it to a JSON object
+    QJsonObject main = obj["album"].toObject(); // get the album values
+    QJsonArray submainarray =
+        main["image"]
+            .toArray(); // from the image value, turn the key into an JSON array
 
-    qDebug() << "obj: " << obj;
-    qDebug() << "main: " << main;
+    // qDebug() << "obj: " << obj;
+    // qDebug() << "main: " << main;
 
-    QString album = main["name"].toString();
-    QString artist = main["artist"].toString();
+    // QString album = main["name"].toString();
+    // QString artist = main["artist"].toString();
     QString urlimage = "";
 
+    // look for the right size in the array with different image urls to
+    // different sizes, if available
     for (const auto &value : submainarray) {
       QJsonObject imageObject = value.toObject();
-      if (_imageSize == imageObject["size"].toString())
+      if (_imageSize ==
+          imageObject["size"].toString()) // in case the demanded size is found,
+                                          // get the corresponding url
         urlimage = imageObject["#text"].toString();
     }
 
-    qDebug() << "album: " << album;
-    qDebug() << "artist: " << artist;
-    qDebug() << "urlimage: " << urlimage;
+    // qDebug() << "album: " << album;
+    // qDebug() << "artist: " << artist;
+    // qDebug() << "urlimage: " << urlimage;
 
+    // only send a network request if an url has been found
     if (!urlimage.isEmpty()) {
-
       QNetworkRequest request(urlimage);
       _network->get(request);
       _imagedata = true;
-    } else {
+    } else { // if not, clear the artwork
       ui->labelArtWork->clear();
     }
   }
@@ -606,6 +615,7 @@ void MainWindow::updateTrackInfoDisplay() {
       _playlist->getNumberOfMainwindowTracks() == 0) {
     return;
   }
+  // getting the infos from the playlist for this particular track
   QString title = (*_playlist)[_index].getTitle();
   QString album = (*_playlist)[_index].getAlbum();
   QString artist = (*_playlist)[_index].getArtist();
@@ -613,15 +623,19 @@ void MainWindow::updateTrackInfoDisplay() {
   // try to get the artwork out of the music file
   // TODO failed so far
   // in case that doesnt work, try to get artwork from the internet
+  // search by artist and album
   QUrl url =
       "http://ws.audioscrobbler.com/2.0/"
       "?method=album.getinfo&api_key=9d6171634a3f43ff46083c4534ed44db&artist=" +
       artist + "&album=" + album + "&format=json";
-  qDebug() << "URl: " << url;
-  _imagedata = false;
+  // qDebug() << "URl: " << url;
+  _imagedata = false; // setting the image data to false, to make shure the
+                      // first network request is getting the JSON data, the
+                      // next request is getting the album image (png or jpg)
   QNetworkRequest request(url);
   _network->get(request);
 
+  // sending the current song data to the main window and oled display
   ui->labelCurrentSong->setText(title);
   ui->labelcurrentArtist->setText(artist);
   _oled->updateSong(title.toStdString(), artist.toStdString(),
