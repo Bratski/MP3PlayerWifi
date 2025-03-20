@@ -573,7 +573,7 @@
      <x>0</x>
      <y>0</y>
      <width>1049</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
@@ -612,6 +612,7 @@
     <addaction name="actionby_Artist"/>
     <addaction name="actionby_Album"/>
     <addaction name="actionby_Album_Year"/>
+    <addaction name="actionby_Database"/>
     <addaction name="actionby_Genre"/>
     <addaction name="actionundo_Sort"/>
    </widget>
@@ -795,6 +796,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionby_Database">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+   </property>
+   <property name="text">
+    <string>by Database</string>
    </property>
   </action>
  </widget>

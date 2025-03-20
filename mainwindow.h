@@ -70,6 +70,7 @@ public slots:
   void sortByAlbum();
   void sortByYear();
   void sortByArtist();
+  void sortByDatabase();
   void sortByGenre();
   void undoSort();
 

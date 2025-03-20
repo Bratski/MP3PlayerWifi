@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->progressBarSong->setFormat(_timeSong);
   ui->labelTotalTime->setText(_timeList);
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
-  ui->tableWidgetCurrentPlaylist->hideColumn(11);
+  // ui->tableWidgetCurrentPlaylist->hideColumn(11);
   ui->tableWidgetCurrentPlaylist->setColumnWidth(1, 300);
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   readDataBasePlaylist();
@@ -95,6 +95,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::sortByYear);
   QObject::connect(ui->actionby_Artist, &QAction::triggered, this,
                    &MainWindow::sortByArtist);
+  QObject::connect(ui->actionby_Database, &QAction::triggered, this,
+                   &MainWindow::sortByDatabase);
   QObject::connect(ui->actionby_Genre, &QAction::triggered, this,
                    &MainWindow::sortByGenre);
   QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
@@ -327,35 +329,84 @@ void MainWindow::deletePlaylist() {
   stopPlaying();
   _playlist->clear();
   _playlistChanged = true;
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
   ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
   _playlistChanged = true;
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
   ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
   _playlistChanged = true;
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
   ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
   _playlistChanged = true;
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
   ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::sortByDatabase() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::byDatabase);
+  _playlistChanged = true;
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
+  ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
   _playlistChanged = true;
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
   ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -495,10 +546,13 @@ void MainWindow::playOneSong(QTableWidgetItem *item) {
   // take the row number of the selected item
   _index = item->row();
 
+  // qDebug() << "index: " << _index;
+
   // pass the file location of that entry to the player source
   if (_playlist->getNumberOfMainwindowTracks() >= 1)
     _playThisSong = (*_playlist)[_index].getFileLocation();
 
+  // qDebug() << "song: " << _playThisSong;
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
 
   // start playing the song
