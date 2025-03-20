@@ -2,8 +2,8 @@
 
 const char *CPlaylistContainer::sortMethodsTXT[int(
     CPlaylistContainer::art_t::numberOfMethods)] = {
-    "Random",   "by Artist", "by Album", "by Year",
-    "by Genre", "undo Sort", "Title"};
+    "Random",   "by Artist",   "by Album", "by Year",
+    "by Genre", "by Database", "Title",    "undo Sort"};
 
 // const operator[] overload
 const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
@@ -21,10 +21,11 @@ CTrack &CPlaylistContainer::operator[](const size_t &idx) {
   return *_playlist_ptr_mainwindow_vector[idx];
 }
 
+// to calculate the total time of the displayed playlist
 int CPlaylistContainer::calculatePlaylistTotalTime() {
   int totaltime = 0;
-  for (const auto &track : _playlist_obj_vector) {
-    totaltime += track.getDuration();
+  for (const auto &track : _playlist_ptr_mainwindow_vector) {
+    totaltime += track->getDuration();
   }
   return totaltime;
 }
@@ -44,36 +45,31 @@ void CPlaylistContainer::removeTrack(const QString &id) {
 
   // method 2
   // iterate through the vector and delete on corresponding ids
+
+  // delete Track from the object vector
   for (auto it = _playlist_obj_vector.begin(); it != _playlist_obj_vector.end();
        ++it) {
     if (id == it->getID()) {
       _playlist_obj_vector.erase(it);
-      break; // no duplicates are allowed, so it is ok to stop the operation,
-      // in case the track has been found, how to be sure the track id is always
-      // unique? Impossible? because you have to compare every time if the id is
-      // already in use by the database. How to make a difference between
-      // manually and database added tracks to the playlist vector? How to
-      // design a key for that? Maybe turn the id into a string?
-      // "key+incrementing number" where key determines its origin: database or
-      // manually added?
+      break; // no duplicates are allowed
     }
   }
 
-  // because of the id problem (Tracks not coming out of the database have an id
-  // of none, garbage probably) Tracks will be deleted by rowNumber from the
-  // tablewidget at index position in the vector, bad idea!!, because after each
-  // deletion, the rowNumber doesnt correspond to the next entry to be
-  // deleted in the vector!
-  //_playlist_obj_vector.erase(_playlist_obj_vector.begin() + (rowNumber));
-
-  // synchronise the pointer vector with the object vector
-  sortPlaylist(art_t::undoSort);
+  // delete Track from the pointer vector
+  for (auto it = _playlist_ptr_mainwindow_vector.begin();
+       it != _playlist_ptr_mainwindow_vector.end(); ++it) {
+    if (id == (*it)->getID()) {
+      _playlist_ptr_mainwindow_vector.erase(it);
+      break; // no duplicates are allowed, so it is ok to stop the operation
+    }
+  }
 }
 
 void CPlaylistContainer::clear() {
   _playlist_obj_vector.clear();
   _playlist_ptr_filter_vector.clear();
   _playlist_ptr_mainwindow_vector.clear();
+  _playlist_ptr_undosort_vector.clear();
 }
 
 void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
@@ -108,33 +104,46 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
 
   switch (wayofsorting) {
   case art_t::random:
-    // sort the pointer-vector randomly
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
+
+    // sort the main window pointer-vector randomly
     std::shuffle(_playlist_ptr_mainwindow_vector.begin(),
                  _playlist_ptr_mainwindow_vector.end(), rng);
     break;
 
   case art_t::byArtist:
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
     // sort the pointer-vector by Artist name, alphabetically
     std::sort(_playlist_ptr_mainwindow_vector.begin(),
               _playlist_ptr_mainwindow_vector.end(), sortbyartist);
     break;
   case art_t::byAlbum:
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
     // sort the pointer-vector by Artist name, alphabetically
     std::sort(_playlist_ptr_mainwindow_vector.begin(),
               _playlist_ptr_mainwindow_vector.end(), sortbyalbum);
     break;
 
   case art_t::byYear:
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
     // sort the pointer-vector by year
     std::sort(_playlist_ptr_mainwindow_vector.begin(),
               _playlist_ptr_mainwindow_vector.end(), sortbyyear);
     break;
   case art_t::byGenre:
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
     // sort the pointer-vector by genre
     std::sort(_playlist_ptr_mainwindow_vector.begin(),
               _playlist_ptr_mainwindow_vector.end(), sortbygenre);
     break;
-  case art_t::undoSort:
+  case art_t::byDatabase:
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
     // clear the pointer vector
     _playlist_ptr_mainwindow_vector.clear();
     // fill the pointer vector with pointers to track objects in the _playlist
@@ -143,6 +152,12 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
          it != _playlist_obj_vector.end(); ++it) {
       _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(*it));
     }
+    break;
+  case art_t::undoSort:
+    // swap the pointer vector with the last sorted version, only if the undo
+    // sort ptr vector is not empty
+    if (!_playlist_ptr_undosort_vector.empty())
+      _playlist_ptr_undosort_vector.swap(_playlist_ptr_mainwindow_vector);
     break;
   default:
     break;

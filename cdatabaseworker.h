@@ -19,7 +19,7 @@ public slots:
   void readDataBasePlaylist(CPlaylistContainer *playlist, int defaultPlaylistID,
                             bool *success);
   void writePlaylistTracksToDatabase(CPlaylistContainer *playlist,
-                                     bool *success);
+                                     bool *success, bool *cancelsaving);
   void readPlaylistTracksFromDatabase(CPlaylistContainer *playlist,
                                       bool *success);
   void addNewPlaylist(const QString &name, bool *success, bool *doubleName);

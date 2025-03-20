@@ -1,12 +1,16 @@
 #include "dialogprogress.h"
 #include "ui_dialogprogress.h"
 
-DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist, QThread *dbthread)
-    : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist), _dbthread(dbthread), _allowclose(false) {
+DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist,
+                               QThread *dbthread, bool *cancelsaving)
+    : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist),
+      _dbthread(dbthread), _cancelSaving(cancelsaving), _allowclose(false) {
   ui->setupUi(this);
   setWindowTitle("Saving Music Files to Database...");
   // initializing the range of the progressbar (0 to 100%)
   ui->progressBar->setRange(0, 100);
+  QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
+                   &DialogProgress::cancelSaving);
 }
 
 DialogProgress::~DialogProgress() { delete ui; }
@@ -23,8 +27,13 @@ void DialogProgress::receiveProgress(const int &progress) {
   ui->progressBar->setValue(percentage);
 }
 
-void DialogProgress::allowClose()
-{
-    _allowclose = true;
-    this->close();
+void DialogProgress::allowClose() {
+  _allowclose = true;
+  this->close();
+}
+
+void DialogProgress::cancelSaving() {
+  *_cancelSaving = true;
+  QMessageBox::warning(this, "Warning",
+                       "Saving playlist to database has NOT completed!!");
 }

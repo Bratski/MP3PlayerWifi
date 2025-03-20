@@ -31,7 +31,7 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
 }
 
 void CDatabaseWorker::writePlaylistTracksToDatabase(
-    CPlaylistContainer *playlist, bool *success) {
+    CPlaylistContainer *playlist, bool *success, bool *cancelsaving) {
 
   // changed the UPDATE for DO NOTHING, it might speed up the saving progress,
   // tracks not pointed at in the TrackPlaylist table will be deleted at the
@@ -142,6 +142,13 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
       return;
     }
     qDebug() << "Track " << (*it)->getTitle() << " saved";
+    // if the cancel button is clicked on the dialogProgress Dialog, the saving
+    // process is stopped at this point
+    if (*cancelsaving) {
+      emit progressReady();
+      *success = false;
+      return;
+    }
   }
 
   qDebug() << "Playlist successfully saved in database";
@@ -178,7 +185,7 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
   int year, number, duration, bitrate, samplerate, channels;
   QString id, title, artist, album, genre, filelocation;
   while (query.next()) {
-    // to make shure the track id is unique, a character is added to the
+    // to make sure the track id is unique, a character is added to the
     // incrementing number, to identify its origin: "F" from file, "D" from
     // database
     id =

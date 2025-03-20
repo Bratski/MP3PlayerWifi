@@ -4,6 +4,7 @@
 #include "cplaylistcontainer.h"
 #include <QCloseEvent>
 #include <QDialog>
+#include <QMessageBox>
 #include <QThread>
 
 namespace Ui {
@@ -16,7 +17,8 @@ class DialogProgress : public QDialog {
 public:
   explicit DialogProgress(QWidget *parent = nullptr,
                           CPlaylistContainer *playlist = nullptr,
-                          QThread *dbthread = nullptr);
+                          QThread *dbthread = nullptr,
+                          bool *cancelsaving = nullptr);
   ~DialogProgress();
 
 public slots:
@@ -24,10 +26,11 @@ public slots:
   // needed to prevent the progressbar from closing until the saving process has
   // been completed, if the saving process has completed allowClose is run
   void allowClose();
-
+  void cancelSaving();
 
 protected:
-  // overriding the close function, not to close as long as the saving process is running
+  // overriding the close function, not to close as long as the saving process
+  // is running
   void closeEvent(QCloseEvent *event) override {
     if (!_allowclose && _dbthread->isRunning())
       event->ignore();
@@ -39,6 +42,7 @@ private:
   Ui::DialogProgress *ui;
   CPlaylistContainer *_playlist;
   QThread *_dbthread;
+  bool *_cancelSaving;
   bool _allowclose;
 };
 

@@ -38,6 +38,9 @@ class CPlaylistContainer : public QObject { // for progress bar functionality
       _playlist_ptr_filter_vector; // a vector with pointers, pointing to the
                                    // tracks in the playlist, needed for the
                                    // search and filter function
+  playlist_pt _playlist_ptr_undosort_vector; // a vector to save the last sorted
+                                             // version, in case the user wants
+                                             // to undo the last sorting
   int _PllID;
   QString _PllName;
   int tracknr;
@@ -49,8 +52,9 @@ public:
     byAlbum,
     byYear,
     byGenre,
-    undoSort,
+    byDatabase,
     byTitle,
+    undoSort,
     numberOfMethods
   };
   CPlaylistContainer() = default;

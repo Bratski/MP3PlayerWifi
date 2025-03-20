@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QThread>
+#include <QTimer>
 
 // for the SQL Database management
 #include <QSqlError>
@@ -26,8 +27,8 @@
 
 // to be able to play music files
 #include <QtMultimedia/QAudioOutput>
-#include <QtMultimedia/QMediaPlayer>
 #include <QtMultimedia/QMediaFormat> // to check which audio formats are supported
+#include <QtMultimedia/QMediaPlayer>
 
 // to get the artwork from an internet API
 #include <QJsonArray>
@@ -113,6 +114,8 @@ private:
   bool _playall = false;
   bool _playlistChanged = false;
   bool _imagedata = false;
+  bool _cancelSaving = false;
+  bool _playerStopped = false;
   QString _imageSize =
       "large"; // Options are: "small", "medium", "large", "extralarge", "mega"
   int _defaultPlaylistID =

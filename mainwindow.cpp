@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
       _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
       _worker(worker) {
   ui->setupUi(this);
+  _network = new QNetworkAccessManager();
 
   // setting default parameters and initialize
   setWindowTitle("Bratskis MP3 Player Nitro");
@@ -31,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   readDataBasePlaylist();
   refreshTableWidgetCurrentPlaylist();
-  _network = new QNetworkAccessManager();
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
   // read the position in the song and set the slider and progress bar in the
@@ -188,7 +188,9 @@ void MainWindow::openAddPlaylistDialog() {
 
 void MainWindow::addMusicFile() {
   // open standard file browser
-  QString filter = "Mp3 Files (*.mp3);; Flac Files (*.flac) ;; WMA Files (*.wma) ;; Wave Files (*.wav) ;; AAC Files (*.aac) ;; AC3 Files (*.ac3) ;; EAC3 (*.eac3) ;; ALAC Files (*.alac)";
+  QString filter = "Mp3 Files (*.mp3);; Flac Files (*.flac) ;; WMA Files "
+                   "(*.wma) ;; Wave Files (*.wav) ;; AAC Files (*.aac) ;; AC3 "
+                   "Files (*.ac3) ;; EAC3 (*.eac3) ;; ALAC Files (*.alac)";
   QString fileLocation = QFileDialog::getOpenFileName(
       this, "Open a file", qApp->applicationDirPath(),
       //"/home/bart/Nextcloud/CPlusPlusProjects/qtgui/MP3PlayerWorking",
@@ -198,7 +200,7 @@ void MainWindow::addMusicFile() {
   if (fileLocation.size()) {
     // add the track to the playlist
     CTrack newtrack;
-    // to make shure the track id is unique, a character is added to the
+    // to make sure the track id is unique, a character is added to the
     // incrementing number, to identify its origin: "F" from file, "D" from
     // database
     ++_trackID;
@@ -233,8 +235,10 @@ void MainWindow::addMusicFolder() {
     if (!_detectedMusicFiles.empty()) {
       // inserting all the detected files in the playlist
       for (const auto &filepath : _detectedMusicFiles) {
+
+        // Instantiate a new track object
         CTrack newtrack;
-        // to make shure the track id is unique, a character is added to the
+        // to make sure the track id is unique, a character is added to the
         // incrementing number, to identify its origin: "F" from file, "D" from
         // database
         ++_trackID;
@@ -253,8 +257,9 @@ void MainWindow::addMusicFolder() {
 
 void MainWindow::saveToDatabase() {
   // display the prorgress bar
-  _dlgProgess = new DialogProgress(this, _playlist, _dbthread);
+  _dlgProgess = new DialogProgress(this, _playlist, _dbthread, &_cancelSaving);
   _dlgProgess->open();
+  _cancelSaving = false;
 
   // Connect signals from the database thread to the progress dialog
   connect(_worker, &CDatabaseWorker::sendProgress, _dlgProgess,
@@ -270,7 +275,8 @@ void MainWindow::saveToDatabase() {
   // start the database thread operation
   bool success = false;
   QMetaObject::invokeMethod(_worker, "writePlaylistTracksToDatabase",
-                            Qt::QueuedConnection, _playlist, &success);
+                            Qt::QueuedConnection, _playlist, &success,
+                            &_cancelSaving);
 
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
@@ -283,7 +289,7 @@ void MainWindow::saveToDatabase() {
 }
 
 void MainWindow::deleteTrack() {
- // qDebug() << "number of tracks in the list: "
+  // qDebug() << "number of tracks in the list: "
   //         << _playlist->getNumberOfMainwindowTracks();
 
   // create a list of the selected range
@@ -314,12 +320,11 @@ void MainWindow::deleteTrack() {
   }
 
   // refresh the table
-  // qDebug() << "number of tracks in the list: "
-  //          << _playlist->getNumberOfMainwindowTracks();
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::deletePlaylist() {
+  stopPlaying();
   _playlist->clear();
   _playlistChanged = true;
   ui->checkBoxPlayRandom->setChecked(false);
@@ -356,7 +361,16 @@ void MainWindow::sortByGenre() {
 
 void MainWindow::undoSort() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
-    ui->checkBoxPlayRandom->setChecked(false);
+
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
+  ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
+
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -397,15 +411,15 @@ void MainWindow::playSongs() {
   // start playing the song
   _player->play();
 
-  // display the song title, samplerate and artwork in the main window info
-  // output
+  // set the infos of the current song in the display, running
   updateTrackInfoDisplay();
+
   _playall = true;
 }
 
 void MainWindow::playNext() {
-  // check if playlist is empty or the player is playing
-  if (_playlist->getNumberOfMainwindowTracks() == 0 || !_player->isPlaying())
+  // check if playlist is empty
+  if (_playlist->getNumberOfMainwindowTracks() == 0)
     return;
 
   // check if the index is pointing to the last song
@@ -431,15 +445,15 @@ void MainWindow::playNext() {
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
   // starts playing the song
   _player->play();
-  // updates the song information output to user
+
+  // set the infos of the current song in the display, running
   updateTrackInfoDisplay();
 }
 
 void MainWindow::playPrevious() {
-  // check if the playlist is empty or the player is not playing or the index
+  // check if the playlist is empty or the index
   // is already set to the first song in the list
-  if (_playlist->getNumberOfMainwindowTracks() == 0 || !_player->isPlaying() ||
-      _index <= 0) {
+  if (_playlist->getNumberOfMainwindowTracks() == 0 || _index <= 0) {
     return;
   }
 
@@ -449,6 +463,8 @@ void MainWindow::playPrevious() {
   _playThisSong = (*_playlist)[_index].getFileLocation();
   _player->setSource(QUrl::fromLocalFile(_playThisSong));
   _player->play();
+
+  // set the infos of the current song in the display, running
   updateTrackInfoDisplay();
 }
 
@@ -463,11 +479,13 @@ void MainWindow::stopPlaying() {
   // stop the player
   _player->stop();
 
-  // clear the infos of the current song in the display
-  ui->labelCurrentSong->clear();
-  ui->labelArtWork->clear();
-  ui->labelcurrentArtist->clear();
-  _oled->turnOff();
+  // set the infos of the current song in the display, running
+  _playerStopped = true;
+
+  updateTrackInfoDisplay();
+
+  // resetting the bool
+  _playerStopped = false;
 
   // set the index back to 0
   _index = 0;
@@ -486,8 +504,7 @@ void MainWindow::playOneSong(QTableWidgetItem *item) {
   // start playing the song
   _player->play();
 
-  // display the song title, samplerate and artwork in the main window info
-  // output
+  // set the infos of the current song in the display, running
   updateTrackInfoDisplay();
   _playall = false;
 }
@@ -559,11 +576,12 @@ void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
 }
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
-  // to restart playing the song at the first index, in case the playlist has
-  // been edited
-  if (_playlistChanged)
-    _index = 0;
+  // // to restart playing the song at the first index, in case the playlist has
+  // // been edited
+  // if (_playlistChanged)
+  //   _index = 0;
   // qDebug() << "_index: " << _index;
+
   // count the number of Tracks being found
   int rowCount = _playlist->getNumberOfMainwindowTracks();
   // qDebug() << "row count: " << rowCount;
@@ -631,14 +649,24 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
 
   // set the playlist name in the main window info output
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
+  ui->labelNumberOfTracksAdded->setText(
+      QString::number(ui->tableWidgetCurrentPlaylist->rowCount()));
   ui->labelTotalTime->setText(
       convertSecToTimeString(_playlist->calculatePlaylistTotalTime()));
 }
 
 void MainWindow::updateTrackInfoDisplay() {
-  // to make sure the index is not pointing to a non existing object
+  // to make sure the index is not pointing to a non existing object, or the
+  // playlist is empty, or the player has stopped
+
   if (_index >= _playlist->getNumberOfMainwindowTracks() ||
-      _playlist->getNumberOfMainwindowTracks() == 0) {
+      _playlist->getNumberOfMainwindowTracks() == 0 || _playerStopped) {
+    // clear all the outputs
+    ui->labelCurrentSong->clear();
+    ui->labelcurrentAlbum->clear();
+    ui->labelcurrentArtist->clear();
+    ui->labelTimeSong->setText("00:00");
+    _oled->updateSong("", "", "");
     return;
   }
   // getting the infos from the playlist for this particular track
@@ -656,7 +684,7 @@ void MainWindow::updateTrackInfoDisplay() {
       "?method=album.getinfo&api_key=9d6171634a3f43ff46083c4534ed44db&artist=" +
       artist + "&album=" + album + "&format=json";
   // qDebug() << "URl: " << url;
-  _imagedata = false; // setting the image data to false, to make shure the
+  _imagedata = false; // setting the image data to false, to make sure the
                       // first network request is getting the JSON data, the
                       // next request is getting the album image (png or jpg)
   QNetworkRequest request(url);
@@ -709,7 +737,7 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
 // is set true
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
   if (status == QMediaPlayer::EndOfMedia) {
-    _player->stop();
+    stopPlaying();
     if (_playall)
       playNext();
   }
@@ -726,6 +754,10 @@ void MainWindow::readDataBasePlaylist() {
 }
 
 void MainWindow::closingProcedure() {
+
+  // stop playing
+  stopPlaying();
+
   // on exit, asking if the current playlist should be saved
   QMessageBox msg;
   msg.addButton("Yes", QMessageBox::YesRole);
@@ -743,9 +775,6 @@ void MainWindow::closingProcedure() {
       saveToDatabase();
     }
   }
-
-  // stop playing
-  stopPlaying();
 
   bool success = false;
   // cleaning up the database
@@ -788,7 +817,10 @@ void MainWindow::processFolder(const QString &path) {
           5); // get the last 5 characters of the filefound string
       // Process files, only add the file path to the vector
       // _detectedMusicFiles, if it has a .mp3 or .flac extension
-      if (fileExtension4 == ".mp3" || fileExtension4 == ".aac" || fileExtension4 == ".ac3" || fileExtension4 == ".wma" || fileExtension4 == ".wav" || fileExtension5 == ".flac" || fileExtension5 == ".eac3" || fileExtension5 == ".alac") {
+      if (fileExtension4 == ".mp3" || fileExtension4 == ".aac" ||
+          fileExtension4 == ".ac3" || fileExtension4 == ".wma" ||
+          fileExtension4 == ".wav" || fileExtension5 == ".flac" ||
+          fileExtension5 == ".eac3" || fileExtension5 == ".alac") {
         qDebug() << "File:" << entry.absoluteFilePath();
         _detectedMusicFiles.push_back(filefound);
       }
