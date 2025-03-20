@@ -137,5 +137,6 @@ private:
   void readDataBasePlaylist();
   void closingProcedure();
   void processFolder(const QString &path);
+  void resetRandomCheckbox();
 };
 #endif // MAINWINDOW_H

@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   ui->progressBarSong->setFormat(_timeSong);
   ui->labelTotalTime->setText(_timeList);
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
-  // ui->tableWidgetCurrentPlaylist->hideColumn(11);
+  ui->tableWidgetCurrentPlaylist->hideColumn(11);
   ui->tableWidgetCurrentPlaylist->setColumnWidth(1, 300);
   ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   readDataBasePlaylist();
@@ -174,6 +174,8 @@ void MainWindow::openManagementDialog() {
   // tableWidgetCurrentPlaylist will be updated
   connect(_dlgManagement, &QDialog::finished, this,
           &MainWindow::refreshTableWidgetCurrentPlaylist);
+  connect(_dlgManagement, &QDialog::finished, this,
+          &MainWindow::resetRandomCheckbox);
   _dlgManagement->exec();
 }
 
@@ -330,13 +332,7 @@ void MainWindow::deletePlaylist() {
   _playlist->clear();
   _playlistChanged = true;
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -344,13 +340,7 @@ void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
   _playlistChanged = true;
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -358,13 +348,7 @@ void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
   _playlistChanged = true;
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -372,13 +356,7 @@ void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
   _playlistChanged = true;
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -386,13 +364,7 @@ void MainWindow::sortByDatabase() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byDatabase);
   _playlistChanged = true;
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -400,13 +372,7 @@ void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
   _playlistChanged = true;
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -414,13 +380,7 @@ void MainWindow::undoSort() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
 
   // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
+  resetRandomCheckbox();
 
   refreshTableWidgetCurrentPlaylist();
 }
@@ -880,4 +840,15 @@ void MainWindow::processFolder(const QString &path) {
       }
     }
   }
+}
+
+void MainWindow::resetRandomCheckbox() {
+  // block the connection to prevent executing the setRandom function
+  ui->checkBoxPlayRandom->blockSignals(true);
+
+  // unchecking the checkbox
+  ui->checkBoxPlayRandom->setChecked(false);
+
+  // unblock the connection
+  ui->checkBoxPlayRandom->blockSignals(false);
 }
