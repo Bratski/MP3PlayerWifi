@@ -12,7 +12,6 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QThread>
-#include <QTimer>
 
 // for the SQL Database management
 #include <QSqlError>
@@ -138,5 +137,7 @@ private:
   void closingProcedure();
   void processFolder(const QString &path);
   void resetRandomCheckbox();
+  void setItemBackgroundColour(); // to colour the background of the current
+                                  // playing song
 };
 #endif // MAINWINDOW_H

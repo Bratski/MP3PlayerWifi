@@ -750,6 +750,8 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
 // if a song has detected as ended, the next one is started if bool _playall
 // is set true
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+  // test
+  setItemBackgroundColour();
   if (status == QMediaPlayer::EndOfMedia) {
     stopPlaying();
     if (_playall)
@@ -851,4 +853,23 @@ void MainWindow::resetRandomCheckbox() {
 
   // unblock the connection
   ui->checkBoxPlayRandom->blockSignals(false);
+}
+
+// to colour the background of the current playing song
+void MainWindow::setItemBackgroundColour() {
+  for (int row = 0; row < ui->tableWidgetCurrentPlaylist->rowCount(); ++row) {
+    if (row == _index) {
+      for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
+           ++col) {
+        QTableWidgetItem *item = ui->tableWidgetCurrentPlaylist->item(row, col);
+        item->setBackground(Qt::darkGray);
+      }
+    } else {
+      for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
+           ++col) {
+        QTableWidgetItem *item = ui->tableWidgetCurrentPlaylist->item(row, col);
+        item->setBackground(QBrush());
+      }
+    }
+  }
 }
