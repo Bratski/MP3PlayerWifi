@@ -590,11 +590,11 @@ void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
 }
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
-  // // to restart playing the song at the first index, in case the playlist has
-  // // been edited
-  // if (_playlistChanged)
-  //   _index = 0;
-  // qDebug() << "_index: " << _index;
+  // to restart playing the song at the first index, in case the playlist has
+  // been edited
+  if (_playlistChanged)
+    _index = 0;
+  qDebug() << "_index: " << _index;
 
   // count the number of Tracks being found
   int rowCount = _playlist->getNumberOfMainwindowTracks();
@@ -667,6 +667,9 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
       QString::number(ui->tableWidgetCurrentPlaylist->rowCount()));
   ui->labelTotalTime->setText(
       convertSecToTimeString(_playlist->calculatePlaylistTotalTime()));
+
+  // colour the row which is currently playing
+  setItemBackgroundColour();
 }
 
 void MainWindow::updateTrackInfoDisplay() {
