@@ -18,6 +18,7 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
     *success = false;
     return;
   }
+  // execute only if a playlist has been found
   if (query.next()) {
     playlist->setPllID(query.value(0).toInt());
     playlist->setPllName(query.value(1).toString());
@@ -79,7 +80,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     //  Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
                   "VALUES (:artName, :artGenre) "
-                  "ON CONFLICT(ArtName) DO NOTHING ");
+                  "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
     query.bindValue(":artName", (*it)->getArtist());
     query.bindValue(":artGenre", (*it)->getGenre());
     if (!query.exec()) {
@@ -92,7 +93,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.prepare(
         "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) VALUES (:albName, "
         ":albYear, (SELECT ArtID FROM Artist WHERE ArtName = :artName)) ON "
-        "CONFLICT(AlbName, AlbArtFK) DO NOTHING ");
+        "CONFLICT(AlbName, AlbArtFK) DO UPDATE SET AlbYear = :albYear ");
     query.bindValue(":albName", (*it)->getAlbum());
     query.bindValue(":albYear", (*it)->getYear());
     query.bindValue(
@@ -110,7 +111,10 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         "TraSamplerate, TraChannels, TraFileLocation, TraAlbFK) VALUES "
         "(:traTitle, :traNumber, :traDuration, :traBitrate, :traSamplerate, "
         ":traChannels, :traFileLocation, (SELECT AlbID FROM Album WHERE "
-        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO NOTHING ");
+        "AlbName = :albName)) ON CONFLICT(TraName, TraAlbFK) DO UPDATE SET "
+        "TraNumber = :traNumber, TraDuration = :traDuration, TraBitrate = "
+        ":traBitrate, TraSamplerate = :traSamplerate, TraChannels = "
+        ":traChannels, TraFileLocation = :traFileLocation ");
     query.bindValue(":traTitle", (*it)->getTitle());
     query.bindValue(":traNumber", (*it)->getNumber());
     query.bindValue(":traDuration", (*it)->getDuration());
