@@ -27,6 +27,8 @@ DialogManagement::DialogManagement(QWidget *parent,
   // event of an item has been edited in the table widget
   QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemChanged, this,
                    &DialogManagement::namePlaylistEdited);
+  QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemDoubleClicked,
+                   this, &DialogManagement::openPlaylist);
 }
 
 DialogManagement::~DialogManagement() { delete ui; }
@@ -47,20 +49,18 @@ void DialogManagement::openPlaylist() {
       ui->tableWidgetPlaylists->selectedRanges();
 
   if (selectedRanges.size() == 0) {
-    QMessageBox::warning(
-        this, "Error",
-        "No playlist has been selected to be opened!");
+    QMessageBox::warning(this, "Error",
+                         "No playlist has been selected to be opened!");
     isEditing = false;
     return;
   }
 
   // if yes, is it only one row or more?
   if (selectedRanges.first().rowCount() != 1) {
-      QMessageBox::warning(
-          this, "Error",
-          "Only 1 Playlist must be selected to be opened!");
-      isEditing = false;
-      return;
+    QMessageBox::warning(this, "Error",
+                         "Only 1 Playlist must be selected to be opened!");
+    isEditing = false;
+    return;
   }
 
   // get the items at the selected row
@@ -248,7 +248,8 @@ void DialogManagement::readDatabase() {
   ui->tableWidgetPlaylists->clearContents();
   ui->tableWidgetPlaylists->setRowCount(0);
   playlistsInDatabase.clear();
-  // qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
+  // qDebug() << "playlistsInDatabase vector size: " <<
+  // playlistsInDatabase.size();
 
   bool success = false;
   // find in the database
@@ -273,7 +274,7 @@ void DialogManagement::readDatabase() {
       // Playlist ID
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
-          item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->tableWidgetPlaylists->setItem(row, 0, item);
       }
       // Playlist Name
