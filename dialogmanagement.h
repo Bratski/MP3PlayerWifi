@@ -43,9 +43,8 @@ private:
   CPlaylistContainer *_playlist;
   QThread *_dbthread;
   CDatabaseWorker *_worker;
-  bool *_playlistChanged;
-
-  bool isEditing = false;
+  bool *_playlistChanged;  // to trigger the save to db question at shutdown
+  bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();
 };
 

@@ -35,12 +35,12 @@ DialogManagement::~DialogManagement() { delete ui; }
 
 void DialogManagement::openPlaylist() {
   // If the flag is set, ignore the signal to avoid recursion
-  if (isEditing) {
+  if (_isEditing) {
     return;
   }
 
   // Set the flag to true to prevent recursive calls
-  isEditing = true;
+  _isEditing = true;
 
   // check if one row has been selected, if yes, which one? If not return with
   // error message
@@ -51,7 +51,7 @@ void DialogManagement::openPlaylist() {
   if (selectedRanges.size() == 0) {
     QMessageBox::warning(this, "Error",
                          "No playlist has been selected to be opened!");
-    isEditing = false;
+    _isEditing = false;
     return;
   }
 
@@ -59,7 +59,7 @@ void DialogManagement::openPlaylist() {
   if (selectedRanges.first().rowCount() != 1) {
     QMessageBox::warning(this, "Error",
                          "Only 1 Playlist must be selected to be opened!");
-    isEditing = false;
+    _isEditing = false;
     return;
   }
 
@@ -88,7 +88,7 @@ void DialogManagement::openPlaylist() {
 
   // qDebug() << "success: " << success;
   // prevents interfering with the namePlaylistEdited function
-  isEditing = false;
+  _isEditing = false;
 
   // leave the dialog management and go back to mainwindow
   this->close();
@@ -96,12 +96,12 @@ void DialogManagement::openPlaylist() {
 
 void DialogManagement::addNewPlaylist() {
   // If the flag is set, ignore the signal to avoid recursion
-  if (isEditing) {
+  if (_isEditing) {
     return;
   }
 
   // Set the flag to true to prevent recursive calls
-  isEditing = true;
+  _isEditing = true;
 
   QString name;
   name = ui->lineEditNewPlaylist->text();
@@ -109,7 +109,7 @@ void DialogManagement::addNewPlaylist() {
   // check if there is a name in the input field,
   if (name.size() == 0) {
     QMessageBox::warning(this, "Error", "No valid name in the input field");
-    isEditing = false;
+    _isEditing = false;
     return;
   }
 
@@ -129,20 +129,21 @@ void DialogManagement::addNewPlaylist() {
   }
 
   // prevents interfering with the namePlaylistEdited function
-  isEditing = false;
+  _isEditing = false;
 
   // update the table
   readDatabase();
 }
 
 void DialogManagement::deletePlaylist() {
-  // If the flag is set, ignore the signal to avoid recursion
-  if (isEditing) {
+  // if the flag is set, ignore the signal to avoid recursion
+  if (_isEditing) {
     return;
   }
 
   // Set the flag to true to prevent recursive calls
-  isEditing = true;
+  _isEditing = true;
+
   // check if rows are selected in the table
   QList<QTableWidgetSelectionRange> selectedRanges =
       ui->tableWidgetPlaylists->selectedRanges();
@@ -168,7 +169,7 @@ void DialogManagement::deletePlaylist() {
       if (name == _playlist->getPllName() || id == 1) {
         QMessageBox::warning(this, "Error",
                              "The current playlist cannot be deleted!");
-        isEditing = false;
+        _isEditing = false;
         return;
       }
 
@@ -183,7 +184,7 @@ void DialogManagement::deletePlaylist() {
 
       // msg.exec() returns "3" if norole, "2" if yesrole
       if (msg.exec() == 3) {
-        isEditing = false;
+        _isEditing = false;
         return;
       }
 
@@ -195,7 +196,7 @@ void DialogManagement::deletePlaylist() {
   }
 
   // prevents interfering with the namePlaylistEdited function
-  isEditing = false;
+  _isEditing = false;
 
   // refresh the table
   readDatabase();
@@ -203,12 +204,13 @@ void DialogManagement::deletePlaylist() {
 
 void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
   // If the flag is set, ignore the signal to avoid recursion
-  if (isEditing) {
+  if (_isEditing) {
     return;
   }
 
   // Set the flag to true to prevent recursive calls
-  isEditing = true;
+  _isEditing = true;
+
   // get the edited name
   QString name = item->text();
 
@@ -228,7 +230,7 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
                          "Name already in use, choose another name");
   }
   // prevents interfering with the namePlaylistEdited function
-  isEditing = false;
+  _isEditing = false;
 
   // update the table
   readDatabase();
@@ -236,12 +238,14 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
 
 void DialogManagement::readDatabase() {
   // If the flag is set, ignore the signal to avoid recursion
-  if (isEditing) {
+  if (_isEditing) {
     return;
   }
 
   // Set the flag to true to prevent recursive calls
-  isEditing = true;
+  _isEditing = true;
+
+  // temporare QString vector
   std::vector<QString> playlistsInDatabase;
 
   // empty the list with playlists
@@ -290,5 +294,5 @@ void DialogManagement::readDatabase() {
     ui->tableWidgetPlaylists->setAlternatingRowColors(true);
   }
   // prevents interfering with the namePlaylistEdited function
-  isEditing = false;
+  _isEditing = false;
 }

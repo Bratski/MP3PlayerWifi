@@ -6,11 +6,14 @@ DialogSearch::DialogSearch(QWidget *parent, CPlaylistContainer *playlist,
     : QDialog(parent), ui(new Ui::DialogSearch), _playlist(playlist),
       _playlistChanged(playlistChanged) {
   ui->setupUi(this);
+
+  // initializing window
   setWindowTitle("Search and filter");
   ui->tableWidgetFoundEntries->hideColumn(0);
   ui->tableWidgetFoundEntries->hideColumn(11);
   refreshtableWidgetFoundEntries();
 
+  // connect the button events to functions
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
                    &DialogSearch::close);
   QObject::connect(ui->pushButtonFilter, &QPushButton::clicked, this,
@@ -34,7 +37,8 @@ void DialogSearch::filterPlaylist() {
 
   // search in the playlist for the tracks, which its element is corresponding
   // to search text
-  // save the positive ones in a temporary playlist
+  // save the positive ones in the filter pointer vector in the
+  // cplaylistcontainer
 
   switch (selectedIndex) {
   case 0:
@@ -93,6 +97,7 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
   QTableWidgetItem *item;
 
   int row = 0;
+  // iterating through the filter pointer vector
   for (auto it = _playlist->beginFilterPtr(); it != _playlist->endFilterPtr();
        ++it) {
     item = new QTableWidgetItem((*it)->getID());

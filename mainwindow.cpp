@@ -16,9 +16,9 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
       _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
       _worker(worker) {
   ui->setupUi(this);
-  _network = new QNetworkAccessManager();
 
   // setting default parameters and initialize
+  _network = new QNetworkAccessManager();
   setWindowTitle("Bratskis MP3 Player Nitro");
   _audio->setVolume(_startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
@@ -104,7 +104,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
-                   &MainWindow::playSongs);
+                   &MainWindow::playAllSongs);
   QObject::connect(ui->pushButtonPause, &QPushButton::clicked, this,
                    &MainWindow::togglePause);
   QObject::connect(ui->pushButtonStop, &QPushButton::clicked, this,
@@ -143,6 +143,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
 }
 
 MainWindow::~MainWindow() {
+  // a couple of procedures are in this function put together
   closingProcedure();
   delete ui;
   delete _network;
@@ -331,7 +332,6 @@ void MainWindow::deletePlaylist() {
   stopPlaying();
   _playlist->clear();
   _playlistChanged = true;
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
@@ -339,7 +339,6 @@ void MainWindow::deletePlaylist() {
 void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
   _playlistChanged = true;
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
@@ -347,7 +346,6 @@ void MainWindow::sortByAlbum() {
 void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
   _playlistChanged = true;
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
@@ -355,7 +353,6 @@ void MainWindow::sortByYear() {
 void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
   _playlistChanged = true;
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
@@ -363,7 +360,6 @@ void MainWindow::sortByArtist() {
 void MainWindow::sortByDatabase() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byDatabase);
   _playlistChanged = true;
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
@@ -371,17 +367,13 @@ void MainWindow::sortByDatabase() {
 void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
   _playlistChanged = true;
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::undoSort() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
-
-  // block the connection to prevent executing the setRandom function
   resetRandomCheckbox();
-
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -392,14 +384,13 @@ void MainWindow::setVolume(int level) {
   _audio->setVolume(audioLevel);
 }
 
-void MainWindow::playSongs() {
+void MainWindow::playAllSongs() {
 
   // if the playlist is empty do nothing
   if (_playlist->getNumberOfMainwindowTracks() == 0)
     return;
 
   // check if one row has been selected, if yes, which one?
-
   QList<QTableWidgetItem *> selectedItems =
       ui->tableWidgetCurrentPlaylist->selectedItems();
 
@@ -413,18 +404,10 @@ void MainWindow::playSongs() {
     _index = selectedItems[0]->row();
   }
 
-  // pass the file location of that entry to the player source
-  if (_playlist->getNumberOfMainwindowTracks() >= 1)
-    _playThisSong = (*_playlist)[_index].getFileLocation();
+  playTrack();
 
-  _player->setSource(QUrl::fromLocalFile(_playThisSong));
-
-  // start playing the song
-  _player->play();
-
-  // set the infos of the current song in the display, running
-  updateTrackInfoDisplay();
-
+  // bool to continue to the next track, see the handleMediaStatusChanged()
+  // function
   _playall = true;
 }
 
@@ -449,16 +432,7 @@ void MainWindow::playNext() {
   }
   // set the index to the next song
   ++_index;
-
-  // get the filelocation at that index
-  _playThisSong = (*_playlist)[_index].getFileLocation();
-  // set the player to play that file
-  _player->setSource(QUrl::fromLocalFile(_playThisSong));
-  // starts playing the song
-  _player->play();
-
-  // set the infos of the current song in the display, running
-  updateTrackInfoDisplay();
+  playTrack();
 }
 
 void MainWindow::playPrevious() {
@@ -471,12 +445,7 @@ void MainWindow::playPrevious() {
   // as none of them is the case, than the player can switch to the previous
   // song
   --_index;
-  _playThisSong = (*_playlist)[_index].getFileLocation();
-  _player->setSource(QUrl::fromLocalFile(_playThisSong));
-  _player->play();
-
-  // set the infos of the current song in the display, running
-  updateTrackInfoDisplay();
+  playTrack();
 }
 
 // making the pause button to toggle between pause and playing
@@ -493,13 +462,11 @@ void MainWindow::stopPlaying() {
   // set the infos of the current song in the display, running
   _playerStopped = true;
 
+  // empty the output data info field and oled
   updateTrackInfoDisplay();
 
   // resetting the bool
   _playerStopped = false;
-
-  // set the index back to 0
-  // _index = 0;
 }
 
 void MainWindow::playOneSong(QTableWidgetItem *item) {
@@ -508,22 +475,14 @@ void MainWindow::playOneSong(QTableWidgetItem *item) {
 
   // qDebug() << "index: " << _index;
 
-  // pass the file location of that entry to the player source
-  if (_playlist->getNumberOfMainwindowTracks() >= 1)
-    _playThisSong = (*_playlist)[_index].getFileLocation();
+  playTrack();
 
-  // qDebug() << "song: " << _playThisSong;
-  _player->setSource(QUrl::fromLocalFile(_playThisSong));
-
-  // start playing the song
-  _player->play();
-
-  // set the infos of the current song in the display, running
-  updateTrackInfoDisplay();
+  // to make sure the player stops after playing one song see the
+  // handleMediaStatusChanged() function
   _playall = false;
 }
 
-// sort the playlist randomly, for shuffle mode
+// sort the playlist randomly, for shuffle mode, toggle
 void MainWindow::setRandom(bool state) {
   if (state) {
     _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
@@ -591,13 +550,14 @@ void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
 
 void MainWindow::refreshTableWidgetCurrentPlaylist() {
   // to restart playing the song at the first index, in case the playlist has
-  // been edited
+  // been edited, or the order has changed
   if (_playlistChanged)
     _index = 0;
-  qDebug() << "_index: " << _index;
+  // qDebug() << "_index: " << _index;
 
   // count the number of Tracks being found
   int rowCount = _playlist->getNumberOfMainwindowTracks();
+
   // qDebug() << "row count: " << rowCount;
 
   // empty the current playlist
@@ -668,7 +628,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   ui->labelTotalTime->setText(
       convertSecToTimeString(_playlist->calculatePlaylistTotalTime()));
 
-  // colour the row which is currently playing
+  // colour the row which track is currently playing
   setItemBackgroundColour();
 }
 
@@ -696,6 +656,7 @@ void MainWindow::updateTrackInfoDisplay() {
   // TODO failed so far
   // in case that doesnt work, try to get artwork from the internet
   // search by artist and album
+  // TODO set the api link and key in the settings menu
   QUrl url =
       "http://ws.audioscrobbler.com/2.0/"
       "?method=album.getinfo&api_key=9d6171634a3f43ff46083c4534ed44db&artist=" +
@@ -753,11 +714,11 @@ const QString MainWindow::convertSecToTimeString(const int &sec) {
 // if a song has detected as ended, the next one is started if bool _playall
 // is set true
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-  // test
   setItemBackgroundColour();
   if (status == QMediaPlayer::EndOfMedia) {
     stopPlaying();
-    if (_playall)
+    if (_playall) // if all songs should be played, _playall is true and the
+                  // next song is started
       playNext();
   }
 }
@@ -806,13 +767,13 @@ void MainWindow::closingProcedure() {
   QMetaObject::invokeMethod(_worker, "closeDatabase",
                             Qt::BlockingQueuedConnection);
 
-  // stop the thread for the database
+  // stop the worker thread for the database operations
   _dbthread->quit();
   _dbthread->wait();
 }
 
 // a recursive function to go through all the subdirectories and collect all
-// the music files
+// the music files stored in there
 void MainWindow::processFolder(const QString &path) {
   QDir dir(path);
   if (!dir.exists()) {
@@ -874,5 +835,23 @@ void MainWindow::setItemBackgroundColour() {
         item->setBackground(QBrush());
       }
     }
+  }
+}
+
+void MainWindow::playTrack() {
+
+  // to make sure the _index is not pointing outside the playlist range
+  if (_playlist->getNumberOfMainwindowTracks() >= 1 && _index >= 0 &&
+      _index < _playlist->getNumberOfMainwindowTracks()) {
+    // pass the file location of that entry to the player source
+    _playThisSong = (*_playlist)[_index].getFileLocation();
+
+    _player->setSource(QUrl::fromLocalFile(_playThisSong));
+
+    // start playing the song
+    _player->play();
+
+    // set the infos of the current song in the display, running
+    updateTrackInfoDisplay();
   }
 }

@@ -1,11 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+// adding the header files
 #include "COled.h"
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 #include "ctrack.h"
 
+// general Qt libraries
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileDialog>
@@ -75,7 +77,7 @@ public slots:
 
   // player functions
   void setVolume(int level);
-  void playSongs();
+  void playAllSongs();
   void playNext();
   void playPrevious();
   void togglePause();
@@ -106,7 +108,7 @@ private:
 
   // attributes
   int _index = 0;
-  QString _playThisSong;
+  QString _playThisSong; // contains the filelocation of the music file
   QString _timeSong = "Time Song";
   QString _timeList = "Total Time";
   float _startVolume = 0.2; // setting the start volume to 20%
@@ -121,23 +123,29 @@ private:
   int _defaultPlaylistID =
       1; // at startup open the first playlist in the database by default
   std::vector<QString>
-      _detectedMusicFiles; // vector with all file paths for the add music
-                           // folder functionality
+      _detectedMusicFiles; // vector with all file paths for the
+                           // add-music-folder functionality
   int _trackID = 0; // to be able to give manually added tracks a unique id
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
   const QString convertSecToTimeString(const int &sec);
-  // detect if a song has finished playing
-  void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
-  // populate the table widget
-  void refreshTableWidgetCurrentPlaylist();
-  void updateTrackInfoDisplay();
-  void readDataBasePlaylist();
-  void closingProcedure();
-  void processFolder(const QString &path);
-  void resetRandomCheckbox();
+  void
+  handleMediaStatusChanged(QMediaPlayer::MediaStatus
+                               status); // detect if a song has finished playing
+  void refreshTableWidgetCurrentPlaylist(); // populate the table widget
+  void updateTrackInfoDisplay(); // sends the info to the mainwindow info field
+                                 // and oled display
+  void readDataBasePlaylist();   // reads all the tracks from the database of a
+                                 // particular playlist
+  void closingProcedure(); // contains several procedures for a secure shutdown
+  void processFolder(
+      const QString &path);   // recursive function to scan all the directories
+                              // and subdirectories for music files
+  void resetRandomCheckbox(); // to avoid toggling if a program is changing the
+                              // status of the checkbos
   void setItemBackgroundColour(); // to colour the background of the current
                                   // playing song
+  void playTrack();               // procedure to start playing a track
 };
 #endif // MAINWINDOW_H

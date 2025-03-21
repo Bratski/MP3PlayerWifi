@@ -8,8 +8,12 @@ DialogAddPlaylist::DialogAddPlaylist(QWidget *parent,
     : QDialog(parent), ui(new Ui::DialogAddPlaylist), _playlist(playlist),
       _worker(worker), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
+
+  // initialize the window
   setWindowTitle("Add Playlist");
   readDatabase();
+
+  // connecting the pushbutton events to functions
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
                    &DialogAddPlaylist::close);
   QObject::connect(ui->pushButtonAdd, &QPushButton::clicked, this,
@@ -61,13 +65,15 @@ void DialogAddPlaylist::addPlaylist() {
 
 void DialogAddPlaylist::readDatabase() {
 
+  // no editing in this window, so this vector can be temporarely
   std::vector<QString> playlistsInDatabase;
 
   // empty the list with playlists
   ui->tableWidgetDatabase->clearContents();
   ui->tableWidgetDatabase->setRowCount(0);
   playlistsInDatabase.clear();
-  // qDebug() << "playlistsInDatabase vector size: " << playlistsInDatabase.size();
+  // qDebug() << "playlistsInDatabase vector size: " <<
+  // playlistsInDatabase.size();
 
   bool success = false;
   // find in the database
@@ -92,7 +98,7 @@ void DialogAddPlaylist::readDatabase() {
       // Playlist ID
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
-          item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->tableWidgetDatabase->setItem(row, 0, item);
       }
       // Playlist Name

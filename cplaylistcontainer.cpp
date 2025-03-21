@@ -1,5 +1,6 @@
 #include "cplaylistcontainer.h"
 
+// not really necessary
 const char *CPlaylistContainer::sortMethodsTXT[int(
     CPlaylistContainer::art_t::numberOfMethods)] = {
     "Random",   "by Artist",   "by Album", "by Year",
@@ -30,11 +31,13 @@ int CPlaylistContainer::calculatePlaylistTotalTime() {
   return totaltime;
 }
 
+// to add a track to the playlist
 void CPlaylistContainer::addTrack(CTrack &track) {
   _playlist_obj_vector.push_back(track);
   _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(track));
 }
 
+// to remove a track from the playlist
 void CPlaylistContainer::removeTrack(const QString &id) {
   // method 1
   // track object is removed from the vector, if lambda track returns true
@@ -51,7 +54,7 @@ void CPlaylistContainer::removeTrack(const QString &id) {
        ++it) {
     if (id == it->getID()) {
       _playlist_obj_vector.erase(it);
-      break; // no duplicates are allowed
+      break; // no duplicates are allowedso, it is ok to abort the operation
     }
   }
 
@@ -60,11 +63,12 @@ void CPlaylistContainer::removeTrack(const QString &id) {
        it != _playlist_ptr_mainwindow_vector.end(); ++it) {
     if (id == (*it)->getID()) {
       _playlist_ptr_mainwindow_vector.erase(it);
-      break; // no duplicates are allowed, so it is ok to stop the operation
+      break; // no duplicates are allowed, so it is ok to abort the operation
     }
   }
 }
 
+// empties all the vectors
 void CPlaylistContainer::clear() {
   _playlist_obj_vector.clear();
   _playlist_ptr_filter_vector.clear();
@@ -72,13 +76,14 @@ void CPlaylistContainer::clear() {
   _playlist_ptr_undosort_vector.clear();
 }
 
+// different ways to sort the pointer vector
 void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
   // Initialize random number generator
   std::random_device rd; // Seed for the random number generator
   std::mt19937 rng(rd());
 
   // defining the sorting criteria
-  // for the artists
+  // for the artists in lambda definitions
   auto sortbyartist = [](const std::shared_ptr<CTrack> tr1,
                          const std::shared_ptr<CTrack> tr2) {
     return tr1->getArtist().toLower() < tr2->getArtist().toLower();
@@ -102,6 +107,7 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
     return tr1->getGenre().toLower() > tr2->getGenre().toLower();
   };
 
+  // switching to the way of sorting
   switch (wayofsorting) {
   case art_t::random:
     // copy the main window ptr vector to the ptr undo sort vector
@@ -169,11 +175,13 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   // empty the search vector with pointers
   _playlist_ptr_filter_vector.clear();
 
+  // switching to the way of filtering
   switch (wayoffiltering) {
   case art_t::byTitle:
     for (auto &track : _playlist_obj_vector) {
       // is the search text corresponding to the track title, the pointer of
-      // that track is added to the ptr-filter vector
+      // that track is added to the ptr-filter vector // TODO partially
+      // corresponding suggestions?
       if (track.getTitle().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }

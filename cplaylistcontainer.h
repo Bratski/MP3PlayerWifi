@@ -16,9 +16,6 @@
 // for debugging
 #include <QDebug>
 
-// for the SQL Database management
-//#include <QtSql/QSqlQuery>
-
 // for progress bar functionality
 #include <QObject>
 
@@ -28,8 +25,9 @@ using playlist_pt = std::vector<std::shared_ptr<CTrack>>;
 class CPlaylistContainer : public QObject { // for progress bar functionality
   Q_OBJECT                                  // for progress bar functionality
 
-      private : playlist_t _playlist_obj_vector; // the playlist with objects as
-                                                 // read from the database
+      private
+      : playlist_t _playlist_obj_vector; // the playlist with track-objects as
+                                         // read from the database
   playlist_pt
       _playlist_ptr_mainwindow_vector; // a vector with pointers, pointing to
                                        // the tracks in the playlist, what is
@@ -38,14 +36,17 @@ class CPlaylistContainer : public QObject { // for progress bar functionality
       _playlist_ptr_filter_vector; // a vector with pointers, pointing to the
                                    // tracks in the playlist, needed for the
                                    // search and filter function
-  playlist_pt _playlist_ptr_undosort_vector; // a vector to save the last sorted
-                                             // version, in case the user wants
-                                             // to undo the last sorting
+  playlist_pt
+      _playlist_ptr_undosort_vector; // a vector to save the previous sorted
+                                     // version, in case the user wants
+                                     // to undo the current sorting method
+
+  // saves the name of the current playlist id and name
   int _PllID;
   QString _PllName;
-  int tracknr;
 
 public:
+  // to make the switch functionality more readable
   enum class art_t : u_int8_t {
     random,
     byArtist,
@@ -59,11 +60,12 @@ public:
   };
   CPlaylistContainer() = default;
 
-  // make it possible to get a track by the vector index, operator[] overload
+  // to get to a track by the vector index, which correspondig to the
+  // tablewidget index, operator[] overload
   const CTrack &operator[](const size_t &idx) const;
   CTrack &operator[](const size_t &idx);
 
-  // making it possible to iterate through the different vectors
+  // to be able iterate through the different vectors
   auto begin() { return _playlist_obj_vector.begin(); }
   auto end() { return _playlist_obj_vector.end(); }
 
@@ -89,6 +91,7 @@ public:
   void filterPlaylist(art_t wayoffiltering, const QString &text);
   void copyFilteredToMainwindow();
 
+  // not really necessary
   static const char
       *sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];
 

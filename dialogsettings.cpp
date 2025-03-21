@@ -4,9 +4,14 @@
 DialogSettings::DialogSettings(QWidget *parent, COled *oled)
     : QDialog(parent), ui(new Ui::DialogSettings), _oled(oled) {
   ui->setupUi(this);
+
+  // initialize
   setWindowTitle("Settings");
   showOledData();
+  toggleOledButtons(_statusOled);
+  toggleRTCButtons(_statusRTC);
 
+  // connect button / checkbox events to functions
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
                    &DialogSettings::close);
   QObject::connect(ui->pushButtonAutoDetectOled, SIGNAL(clicked(bool)), this,
@@ -18,9 +23,6 @@ DialogSettings::DialogSettings(QWidget *parent, COled *oled)
                    SLOT(toggleOledButtons(bool)));
   QObject::connect(ui->checkBoxRTC, SIGNAL(toggled(bool)), this,
                    SLOT(toggleRTCButtons(bool)));
-
-  toggleOledButtons(_statusOled);
-  toggleRTCButtons(_statusRTC);
 }
 
 DialogSettings::~DialogSettings() { delete ui; }
@@ -35,25 +37,15 @@ void DialogSettings::initializeOled() {
   _oled->setAdress(ui->lineEditi2cAdress->text().toStdString());
 
   if (!_oled->initialize()) {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Error");
-    msg.setIcon(QMessageBox::Warning);
-    msg.setText("no Oled-display could be initialized");
-    msg.exec();
+    QMessageBox::warning(this, "Error", "no Oled-display could be initialized");
   } else {
-    QMessageBox msg;
-    msg.addButton("OK", QMessageBox::YesRole);
-    msg.setWindowTitle("Success");
-    msg.setIcon(QMessageBox::Information);
-    msg.setText("Oled-display succesfully initialized");
-    msg.exec();
+    QMessageBox::information(this, "Success",
+                             "Oled-display succesfully initialized");
   }
 }
 
 void DialogSettings::toggleRTCButtons(bool checked) {
   _statusRTC = checked;
-
   ui->lineEditRTCPin1->setEnabled(_statusRTC);
   ui->lineEditRTCPin2->setEnabled(_statusRTC);
   ui->lineEditRTCPin3->setEnabled(_statusRTC);
@@ -66,7 +58,6 @@ void DialogSettings::showOledData() {
 
 void DialogSettings::toggleOledButtons(bool checked) {
   _statusOled = checked;
-
   ui->pushButtonAutoDetectOled->setEnabled(_statusOled);
   ui->pushButtonInitializeOled->setEnabled(_statusOled);
   ui->lineEditi2cAdress->setEnabled(_statusOled);

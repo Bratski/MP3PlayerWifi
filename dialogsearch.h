@@ -26,7 +26,10 @@ private:
   CPlaylistContainer *_playlist;
   bool *_playlistChanged;
   void refreshtableWidgetFoundEntries();
-  const QString convertSecToTimeString(const int &sec);
+  const QString convertSecToTimeString(
+      const int &sec); // I tried to use the function from the mainwindow class,
+                       // by a function pointer parameter, did not work, so
+                       // using a copy instead // TODO
 };
 
 #endif // DIALOGSEARCH_H

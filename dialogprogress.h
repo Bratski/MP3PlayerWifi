@@ -42,8 +42,9 @@ private:
   Ui::DialogProgress *ui;
   CPlaylistContainer *_playlist;
   QThread *_dbthread;
-  bool *_cancelSaving;
-  bool _allowclose;
+  bool *_cancelSaving; // for proper aborting
+  bool _allowclose;    // to be able to block all the functions while saving is
+                       // running
 };
 
 #endif // DIALOGPROGRESS_H

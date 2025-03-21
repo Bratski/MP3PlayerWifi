@@ -34,13 +34,9 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
 void CDatabaseWorker::writePlaylistTracksToDatabase(
     CPlaylistContainer *playlist, bool *success, bool *cancelsaving) {
 
-  // changed the UPDATE for DO NOTHING, it might speed up the saving progress,
-  // tracks not pointed at in the TrackPlaylist table will be deleted at the
-  // cleaning process (cleanupDatabase()) on program exit
-
   // create a query
   QSqlQuery query;
-  tracknr = 0;
+  _tracknr = 0; // resetting the tracknumber
 
   // in case the playlist has been emptied
   if (playlist->getNumberOfMainwindowTracks() == 0) {
@@ -52,16 +48,14 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
       *success = false;
       return;
     }
-    emit sendProgress(tracknr);
+    emit sendProgress(_tracknr);
     emit progressReady();
     *success = true;
     return;
   }
 
   // clear the database entries for that playlist first, otherwise the tracks
-  // will be added to the playlist, as far as they arent already in the database
-  // available, isnt there some sychronize function, as alternative, it might be
-  // more efficient?
+  // will be added to the playlist, instead of updated
   query.prepare("DELETE FROM TrackPlaylist WHERE PllFK = :pllID ");
   query.bindValue(":pllID", playlist->getPllID());
   if (!query.exec()) {
@@ -74,9 +68,10 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
   for (auto it = playlist->beginPtr(); it != playlist->endPtr(); ++it) {
 
     // qDebug() << "artist: " << (*it)->getArtist();
+
     // for one track:
-    ++tracknr;
-    emit sendProgress(tracknr);
+    ++_tracknr;
+    emit sendProgress(_tracknr); // to be able to run the progress bar
     //  Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
                   "VALUES (:artName, :artGenre) "
@@ -146,8 +141,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
       return;
     }
     qDebug() << "Track " << (*it)->getTitle() << " saved";
-    // if the cancel button is clicked on the dialogProgress Dialog, the saving
-    // process is stopped at this point
+    // if the cancel button is clicked on the dialogProgress Bar, the saving
+    // process is aborted at this point
     if (*cancelsaving) {
       emit progressReady();
       *success = false;
@@ -236,7 +231,8 @@ void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success,
   if (query.first()) {
     qDebug() << "The playlist already exists, please change the name";
     *success = false;
-    *doubleName = true;
+    *doubleName = true; // bool pointer to communicate to the main window that
+                        // the name is already in use
     return;
   }
 
