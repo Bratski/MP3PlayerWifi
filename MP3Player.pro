@@ -46,7 +46,9 @@ FORMS += \
 INCLUDEPATH += OLEDDriver/
 
 # Library path and libraries to link against
-LIBS += -LOLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
+LIBS += -L../../OLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
+# LIBS += -L/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/OLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
+
 
 # for the use of the tag libraries
 INCLUDEPATH += $$PWD/myTaglib
@@ -66,4 +68,6 @@ DISTFILES += \
     .gitignore
 
 # for debugging
-# QMAKE_LINK += -v
+QMAKE_LINK += -v
+message("Resolved LIBDIR: $$QMAKE_LIBDIR")
+message("Resolved LIBS: $$LIBS")

@@ -499,7 +499,7 @@ void MainWindow::stopPlaying() {
   _playerStopped = false;
 
   // set the index back to 0
-  _index = 0;
+  // _index = 0;
 }
 
 void MainWindow::playOneSong(QTableWidgetItem *item) {
