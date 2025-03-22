@@ -110,7 +110,9 @@ private:
   int _index = 0;
   QString _playThisSong; // contains the filelocation of the music file
   QString _timeSong = "Time Song";
-  QString _timeList = "Total Time";
+  QString _timePrevious; // needed for reduced flickering of the OLED Display
+  QString _timeList = "Total Time"; // sum of the song durations in the playlist
+  QString _apiKey = "9d6171634a3f43ff46083c4534ed44db"; // default API key
   float _startVolume = 0.2; // setting the start volume to 20%
   bool _repeat = false;
   bool _playall = false;
@@ -118,6 +120,7 @@ private:
   bool _imagedata = false;
   bool _cancelSaving = false;
   bool _playerStopped = false;
+  bool _statusOled = false;
   QString _imageSize =
       "large"; // Options are: "small", "medium", "large", "extralarge", "mega"
   int _defaultPlaylistID =
@@ -126,6 +129,7 @@ private:
       _detectedMusicFiles; // vector with all file paths for the
                            // add-music-folder functionality
   int _trackID = 0; // to be able to give manually added tracks a unique id
+  QSettings _settings{"Bratski", "MP3Player"};
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
@@ -147,5 +151,9 @@ private:
   void setItemBackgroundColour(); // to colour the background of the current
                                   // playing song
   void playTrack();               // procedure to start playing a track
+  void initializeSettings(); // create a default configuration file, if it is
+                             // non existing
+  void saveSettings();       // saving the configuration settings
+  void loadSettings();       // loading the configuration settings
 };
 #endif // MAINWINDOW_H

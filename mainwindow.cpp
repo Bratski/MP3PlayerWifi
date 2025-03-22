@@ -2,11 +2,11 @@
 #include "ui_mainwindow.h"
 
 // TODO read and save settings from a config file for _defaultID(last playlist)
-// volume, OLED settings etc...
+// volume, OLED settings, API key etc...
 
 // TODO undosort after a filter operation
-// TODO special characters in song tags not well recognized: öüä etc
-// search and filter possible with partial text orders
+
+// TODO search and filter possible with partial text orders
 
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
@@ -20,6 +20,11 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // setting default parameters and initialize
   _network = new QNetworkAccessManager();
   setWindowTitle("Bratskis MP3 Player Nitro");
+  initializeSettings();
+  loadSettings();
+  if (_statusOled)
+    _statusOled = _oled->initialize(); // in case the initialisation failed,
+                                       // further settings must be disabled
   _audio->setVolume(_startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
@@ -61,9 +66,11 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    [this](qint64 timeMS) {
                      _timeSong = convertMilliSecToTimeString(timeMS);
                      ui->progressBarSong->setFormat(_timeSong);
-                     // "timeMS % 10" reduces flickering in the Oled display
-                     if (!(timeMS % 10))
+                     // Only change time if the time has changed, to reduce
+                     // flickering in the Oled display
+                     if (_timeSong != _timePrevious)
                        _oled->updateTime(_timeSong.toStdString());
+                     _timePrevious = _timeSong;
                    });
 
   // header menu items
@@ -153,7 +160,7 @@ MainWindow::~MainWindow() {
 // automatically when its parent object (the one referred to by this) is
 // destroyed.
 void MainWindow::openSettingsDialog() {
-  _dlgSettings = new DialogSettings(this, _oled);
+  _dlgSettings = new DialogSettings(this, _oled, &_apiKey, &_statusOled);
   _dlgSettings->show();
 }
 
@@ -656,11 +663,9 @@ void MainWindow::updateTrackInfoDisplay() {
   // TODO failed so far
   // in case that doesnt work, try to get artwork from the internet
   // search by artist and album
-  // TODO set the api link and key in the settings menu
-  QUrl url =
-      "http://ws.audioscrobbler.com/2.0/"
-      "?method=album.getinfo&api_key=9d6171634a3f43ff46083c4534ed44db&artist=" +
-      artist + "&album=" + album + "&format=json";
+  QUrl url = "http://ws.audioscrobbler.com/2.0/"
+             "?method=album.getinfo&api_key=" +
+             _apiKey + "&artist=" + artist + "&album=" + album + "&format=json";
   // qDebug() << "URl: " << url;
   _imagedata = false; // setting the image data to false, to make sure the
                       // first network request is getting the JSON data, the
@@ -755,6 +760,8 @@ void MainWindow::closingProcedure() {
       saveToDatabase();
     }
   }
+
+  saveSettings(); // saving programm settings
 
   bool success = false;
   // cleaning up the database
@@ -854,4 +861,48 @@ void MainWindow::playTrack() {
     // set the infos of the current song in the display, running
     updateTrackInfoDisplay();
   }
+}
+
+void MainWindow::initializeSettings() {
+
+  // Set default values if the settings file or certain parameters do not exist
+  if (!_settings.contains("Api Key")) {
+    _settings.setValue("Api Key", _apiKey);
+  }
+  if (!_settings.contains("Volume")) {
+    _settings.setValue("Volume", _startVolume);
+  }
+  if (!_settings.contains("Default Playlist ID")) {
+    _settings.setValue("Default Playlist ID", _defaultPlaylistID);
+  }
+  if (!_settings.contains("OLED Status")) {
+    _settings.setValue("OLED Status", _statusOled);
+  }
+  if (!_settings.contains("OLED Bus")) {
+    _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
+  }
+  if (!_settings.contains("OLED Adress")) {
+    _settings.setValue("OLED Adress",
+                       QString::fromStdString(_oled->getAdress()));
+  }
+
+  qDebug() << "Settings initialized with default values!";
+}
+
+void MainWindow::saveSettings() {
+  _settings.setValue("Api Key", _apiKey);
+  _settings.setValue("Volume", _audio->volume());
+  _settings.setValue("Default Playlist ID", _playlist->getPllID());
+  _settings.setValue("OLED Status", _statusOled);
+  _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
+  _settings.setValue("OLED Adress", QString::fromStdString(_oled->getAdress()));
+}
+
+void MainWindow::loadSettings() {
+  _apiKey = _settings.value("Api Key").toString();
+  _startVolume = _settings.value("Volume").toFloat();
+  _defaultPlaylistID = _settings.value("Default Playlist ID").toInt();
+  _statusOled = _settings.value("OLED Status").toBool();
+  _oled->setBus(_settings.value("OLED Bus").toString().toStdString());
+  _oled->setAdress(_settings.value("OLED Adress").toString().toStdString());
 }

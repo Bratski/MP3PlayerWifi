@@ -16,7 +16,9 @@ class DialogSettings : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogSettings(QWidget *parent = nullptr, COled *oled = nullptr);
+  explicit DialogSettings(QWidget *parent = nullptr, COled *oled = nullptr,
+                          QString *apikey = nullptr,
+                          bool *statusoled = nullptr);
   ~DialogSettings();
 
 public slots:
@@ -24,12 +26,14 @@ public slots:
   void initializeOled();
   void toggleOledButtons(bool checked);
   void toggleRTCButtons(bool checked);
+  void saveSettings();
 
 private:
   Ui::DialogSettings *ui;
   COled *_oled;
+  QString *_apiKey;
   void showOledData();
-  bool _statusOled = false;
+  bool *_statusOled;
   bool _statusRTC = false;
 };
 

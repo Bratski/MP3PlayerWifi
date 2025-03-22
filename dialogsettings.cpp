@@ -1,15 +1,19 @@
 #include "dialogsettings.h"
 #include "ui_dialogsettings.h"
 
-DialogSettings::DialogSettings(QWidget *parent, COled *oled)
-    : QDialog(parent), ui(new Ui::DialogSettings), _oled(oled) {
+DialogSettings::DialogSettings(QWidget *parent, COled *oled, QString *apikey,
+                               bool *statusoled)
+    : QDialog(parent), ui(new Ui::DialogSettings), _oled(oled), _apiKey(apikey),
+      _statusOled(statusoled) {
   ui->setupUi(this);
 
   // initialize
   setWindowTitle("Settings");
   showOledData();
-  toggleOledButtons(_statusOled);
+  ui->checkBoxOled->setChecked(*_statusOled);
+  toggleOledButtons(*_statusOled);
   toggleRTCButtons(_statusRTC);
+  ui->lineEditApiKey->setText(*_apiKey);
 
   // connect button / checkbox events to functions
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
@@ -18,6 +22,8 @@ DialogSettings::DialogSettings(QWidget *parent, COled *oled)
                    SLOT(autodetectOled()));
   QObject::connect(ui->pushButtonInitializeOled, SIGNAL(clicked(bool)), this,
                    SLOT(initializeOled()));
+  QObject::connect(ui->pushButtonSave, &QPushButton::clicked, this,
+                   &DialogSettings::saveSettings);
 
   QObject::connect(ui->checkBoxOled, SIGNAL(toggled(bool)), this,
                    SLOT(toggleOledButtons(bool)));
@@ -51,18 +57,23 @@ void DialogSettings::toggleRTCButtons(bool checked) {
   ui->lineEditRTCPin3->setEnabled(_statusRTC);
 }
 
+void DialogSettings::saveSettings() {
+  *_apiKey = ui->lineEditApiKey->text();
+  this->close();
+}
+
 void DialogSettings::showOledData() {
   ui->lineEditi2cAdress->setText(QString::fromStdString(_oled->getAdress()));
   ui->lineEditi2cBus->setText(QString::fromStdString(_oled->getBus()));
 }
 
 void DialogSettings::toggleOledButtons(bool checked) {
-  _statusOled = checked;
-  ui->pushButtonAutoDetectOled->setEnabled(_statusOled);
-  ui->pushButtonInitializeOled->setEnabled(_statusOled);
-  ui->lineEditi2cAdress->setEnabled(_statusOled);
-  ui->lineEditi2cBus->setEnabled(_statusOled);
+  *_statusOled = checked;
+  ui->pushButtonAutoDetectOled->setEnabled(*_statusOled);
+  ui->pushButtonInitializeOled->setEnabled(*_statusOled);
+  ui->lineEditi2cAdress->setEnabled(*_statusOled);
+  ui->lineEditi2cBus->setEnabled(*_statusOled);
 
-  if (!_statusOled)
+  if (!*_statusOled)
     _oled->turnOff();
 }
