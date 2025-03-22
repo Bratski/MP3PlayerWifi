@@ -437,9 +437,22 @@ void MainWindow::playNext() {
       return;
     }
   }
-  // set the index to the next song
-  ++_index;
+
+  // shuffle alternative
+  // if (_shuffle) {
+  //   _index = randomNumberGenerator(
+  //       0, (_playlist->getNumberOfMainwindowTracks() - 1));
+  //   ++_shuffleCounter;
+  //   if (_shuffleCounter == _playlist->getNumberOfMainwindowTracks() &&
+  //   !_repeat)
+  //     return;
+  // } else
+  ++_index; // set the index to the next song
   playTrack();
+  // qDebug() << "shuffle counter: " << _shuffleCounter;
+  // qDebug() << "index: " << _index;
+  // qDebug() << "number of tracks: " <<
+  // _playlist->getNumberOfMainwindowTracks();
 }
 
 void MainWindow::playPrevious() {
@@ -491,6 +504,13 @@ void MainWindow::playOneSong(QTableWidgetItem *item) {
 
 // sort the playlist randomly, for shuffle mode, toggle
 void MainWindow::setRandom(bool state) {
+  // shuffle alternative
+  //   if (state) {
+  //   _shuffle = true;
+  //   _shuffleCounter = 0;
+  // } else
+  //   _shuffle = false;
+
   if (state) {
     _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
     refreshTableWidgetCurrentPlaylist();
@@ -653,11 +673,34 @@ void MainWindow::updateTrackInfoDisplay() {
     _oled->updateSong("", "", "");
     return;
   }
+
   // getting the infos from the playlist for this particular track
   QString title = (*_playlist)[_index].getTitle();
   QString album = (*_playlist)[_index].getAlbum();
   QString artist = (*_playlist)[_index].getArtist();
   QString time = convertSecToTimeString((*_playlist)[_index].getDuration());
+
+  // in case the filelocation is invalid
+  if (!_filelocationValid) {
+      // set the outputs, but turn them to a red colour
+      ui->labelCurrentSong->setStyleSheet("color:#FF0000");
+      ui->labelcurrentAlbum->setStyleSheet("color:#FF0000");
+      ui->labelcurrentArtist->setStyleSheet("color:#FF0000");
+      ui->labelTimeSong->setStyleSheet("color:#FF0000");
+
+      ui->labelCurrentSong->setText(title);
+      ui->labelcurrentAlbum->setText(album);
+      ui->labelcurrentArtist->setText(artist);
+      ui->labelTimeSong->setText(time);
+      _oled->updateSong("", "", "");
+      return;
+  } else {
+      // set colour back to default colours
+      ui->labelCurrentSong->setStyleSheet("");
+      ui->labelcurrentAlbum->setStyleSheet("");
+      ui->labelcurrentArtist->setStyleSheet("");
+      ui->labelTimeSong->setStyleSheet("");
+  }
 
   // try to get the artwork out of the music file
   // TODO failed so far
@@ -853,6 +896,14 @@ void MainWindow::playTrack() {
     // pass the file location of that entry to the player source
     _playThisSong = (*_playlist)[_index].getFileLocation();
 
+    // check if the file location is valid
+    if (!QFile::exists(_playThisSong)) {
+      _filelocationValid = false;
+      updateTrackInfoDisplay();
+      return;
+    }
+
+    _filelocationValid = true;
     _player->setSource(QUrl::fromLocalFile(_playThisSong));
 
     // start playing the song
@@ -905,4 +956,12 @@ void MainWindow::loadSettings() {
   _statusOled = _settings.value("OLED Status").toBool();
   _oled->setBus(_settings.value("OLED Bus").toString().toStdString());
   _oled->setAdress(_settings.value("OLED Adress").toString().toStdString());
+}
+
+int MainWindow::randomNumberGenerator(
+    const int &min, const int &max) { // Initialize a random number generator
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distrib(min, max);
+  return distrib(gen);
 }

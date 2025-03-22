@@ -115,12 +115,14 @@ private:
   QString _apiKey = "9d6171634a3f43ff46083c4534ed44db"; // default API key
   float _startVolume = 0.2; // setting the start volume to 20%
   bool _repeat = false;
+  // bool _shuffle = false; // for the shuffle alternative
   bool _playall = false;
   bool _playlistChanged = false;
   bool _imagedata = false;
   bool _cancelSaving = false;
   bool _playerStopped = false;
   bool _statusOled = false;
+  bool _filelocationValid = true;
   QString _imageSize =
       "large"; // Options are: "small", "medium", "large", "extralarge", "mega"
   int _defaultPlaylistID =
@@ -130,6 +132,7 @@ private:
                            // add-music-folder functionality
   int _trackID = 0; // to be able to give manually added tracks a unique id
   QSettings _settings{"Bratski", "MP3Player"};
+  // int _shuffleCounter = 0; // for the shuffle alternative
 
   // methods
   const QString convertMilliSecToTimeString(const qint64 &millisec);
@@ -155,5 +158,6 @@ private:
                              // non existing
   void saveSettings();       // saving the configuration settings
   void loadSettings();       // loading the configuration settings
+  int randomNumberGenerator(const int&min, const int &max);  // for the shuffle alternative
 };
 #endif // MAINWINDOW_H
