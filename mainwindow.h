@@ -110,8 +110,9 @@ private:
 
   // attributes
   QString _playThisSong; // contains the filelocation of the music file
-  QString _timeSong = "Time Song";
-  QString _timePrevious; // needed for reduced flickering of the OLED Display
+  QString _timeSong = "00:00";
+  QString _timePrevious =
+      "00:00"; // needed for reduced flickering of the OLED Display
   QString _timeList = "Total Time"; // sum of the song durations in the playlist
   QString _apiKey = "9d6171634a3f43ff46083c4534ed44db"; // default API key
   QString _imageSize =

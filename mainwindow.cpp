@@ -268,7 +268,7 @@ void MainWindow::addMusicFolder() {
 }
 
 void MainWindow::saveToDatabase() {
-  // display the prorgress bar
+  // display the progress bar
   _dlgProgess = new DialogProgress(this, _playlist, _dbthread, &_cancelSaving);
   _dlgProgess->open();
   _cancelSaving = false;
@@ -528,8 +528,12 @@ void MainWindow::playPrevious() {
     return;
   }
 
+  // TODO
+  // if (_shuffle)
+  //   _index = _shuffleAlreadyPlayed[];
   // as none of them is the case, than the player can switch to the previous
   // song
+  // else
   --_index;
   // start playing the track
   playTrack();
@@ -783,8 +787,8 @@ void MainWindow::updateTrackInfoDisplay() {
   ui->labelcurrentAlbum->setText(album);
   ui->labelcurrentArtist->setText(artist);
   ui->labelTimeSong->setText(time);
-  _oled->updateSong(title.toStdString(), artist.toStdString(),
-                    album.toStdString());
+  _oled->updateSong(title.toStdString(), album.toStdString(),
+                    artist.toStdString());
 }
 
 // converts milliseconds and returns a QString displaying the time in this

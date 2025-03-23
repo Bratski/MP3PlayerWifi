@@ -3,6 +3,7 @@
 
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
+#include "dialogprogress.h"
 
 #include <QDebug>
 #include <QDialog>
@@ -43,9 +44,12 @@ private:
   CPlaylistContainer *_playlist;
   QThread *_dbthread;
   CDatabaseWorker *_worker;
+  DialogProgress *_dlgProgess;
   bool *_playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
+  bool _cancelSaving = false;
   void readDatabase();
+  void saveToDatabase();
 };
 
 #endif // DIALOGMANAGEMENT_H
