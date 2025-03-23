@@ -106,6 +106,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::sortByDatabase);
   QObject::connect(ui->actionby_Genre, &QAction::triggered, this,
                    &MainWindow::sortByGenre);
+  QObject::connect(ui->actionRandom, &QAction::triggered, this,
+                   &MainWindow::sortRandom);
   QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
                    &MainWindow::undoSort);
 
@@ -129,8 +131,8 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // Checkbox events
   QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::checkStateChanged, this,
                    &MainWindow::setRepeat);
-  QObject::connect(ui->checkBoxPlayRandom, &QCheckBox::checkStateChanged, this,
-                   &MainWindow::setRandom);
+  QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::checkStateChanged, this,
+                   &MainWindow::setShuffle);
 
   // connect the media status changed signal to handle end of media
   connect(_player, &QMediaPlayer::mediaStatusChanged, this,
@@ -182,8 +184,6 @@ void MainWindow::openManagementDialog() {
   // tableWidgetCurrentPlaylist will be updated
   connect(_dlgManagement, &QDialog::finished, this,
           &MainWindow::refreshTableWidgetCurrentPlaylist);
-  connect(_dlgManagement, &QDialog::finished, this,
-          &MainWindow::resetRandomCheckbox);
   _dlgManagement->exec();
 }
 
@@ -339,48 +339,55 @@ void MainWindow::deletePlaylist() {
   stopPlaying();
   _playlist->clear();
   _playlistChanged = true;
-  resetRandomCheckbox();
+
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
   _playlistChanged = true;
-  resetRandomCheckbox();
+
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
   _playlistChanged = true;
-  resetRandomCheckbox();
+
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
   _playlistChanged = true;
-  resetRandomCheckbox();
+
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByDatabase() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byDatabase);
   _playlistChanged = true;
-  resetRandomCheckbox();
+
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
   _playlistChanged = true;
-  resetRandomCheckbox();
+
+  refreshTableWidgetCurrentPlaylist();
+}
+
+void MainWindow::sortRandom() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
+  _playlistChanged = true;
+
   refreshTableWidgetCurrentPlaylist();
 }
 
 void MainWindow::undoSort() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
-  resetRandomCheckbox();
+
   refreshTableWidgetCurrentPlaylist();
 }
 
@@ -410,12 +417,18 @@ void MainWindow::playAllSongs() {
   if (!selectedItems.empty()) {
     _index = selectedItems[0]->row();
   }
-
-  playTrack();
-
   // bool to continue to the next track, see the handleMediaStatusChanged()
   // function
+
+  // clear the shuffle list, in case shuffle is activated
+  if (_shuffle)
+    _shuffleAlreadyPlayed.clear();
+
+  // to continue playing the list, see handleMediaStatusChanged() function
   _playall = true;
+
+  // play the track
+  playTrack();
 }
 
 void MainWindow::playNext() {
@@ -423,32 +436,85 @@ void MainWindow::playNext() {
   if (_playlist->getNumberOfMainwindowTracks() == 0)
     return;
 
-  // check if the index is pointing to the last song
-  if (_index >= _playlist->getNumberOfMainwindowTracks() - 1) {
-    // if repeat all is enabled, start at the beginning, put the index to 0,
-    // which occurs at the ++_index;
-    if (_repeat)
-      _index = -1;
-    // if repeat all is disabled, stop playing and stop going to play the next
-    // song, reset the index to 0
-    else {
-      _player->stop();
-      _index = 0;
-      return;
+  // SHUFFLE MODUS
+  if (_shuffle) {
+    // qDebug() << "size of shuffle already played: "
+    //          << int(_shuffleAlreadyPlayed.size());
+    // qDebug() << "size of playlist main window: "
+    //          << _playlist->getNumberOfMainwindowTracks();
+
+    // if all the songs have been played one time, exit the loop
+    if (int(_shuffleAlreadyPlayed.size()) >=
+        _playlist->getNumberOfMainwindowTracks()) {
+      if (_repeat) // by repeat, clear the shuffle number list, will
+                   // automatically result in relooping through a shuffle list
+        _shuffleAlreadyPlayed.clear();
+      else {
+        return; // stop going to the next song
+      }
     }
+
+    // getting a random index number, which hasnt been used before
+    bool numberInList = true;
+    int randomnumber = 0;
+    do {
+      // generate a random number
+      randomnumber = randomNumberGenerator(
+          0, _playlist->getNumberOfMainwindowTracks() - 1);
+      // qDebug() << "random number: " << randomnumber;
+      // if the  shuffle list is empty, save that number
+      if (_shuffleAlreadyPlayed.empty()) {
+        _shuffleAlreadyPlayed.push_back(randomnumber);
+        break; // leave the while loop
+      } else {
+        // check if the number has already been used
+        for (const int &idx : _shuffleAlreadyPlayed) {
+          // qDebug() << "idx: " << idx;
+          if (idx == randomnumber) {
+            numberInList = true;
+            break; // leave the range based for loop
+          } else
+            numberInList = false;
+        }
+        // qDebug() << "bool number in list: " << numberInList;
+
+        // is the number not in the list yet, and is the list not full yet, add
+        // the number
+        if (!numberInList && int(_shuffleAlreadyPlayed.size()) <=
+                                 _playlist->getNumberOfMainwindowTracks())
+          _shuffleAlreadyPlayed.push_back(randomnumber);
+      }
+    } while (numberInList);
+
+    // set the index to the random generate number
+
+    _index = randomnumber;
+
+    // qDebug() << "index random: " << _index;
+
+  } else {
+    // NORMAL MODUS
+    // check if the index is pointing to the last song
+    if (_index >= _playlist->getNumberOfMainwindowTracks() - 1) {
+      // if repeat all is enabled, start at the beginning, put the index to 0,
+      // which occurs at the ++_index;
+      if (_repeat)
+        _index = -1;
+      // if repeat all is disabled, stop playing and stop going to play the next
+      // song, reset the index to 0
+      else {
+        _player->stop();
+        return;
+      }
+    }
+    // set the index to the next song
+    ++_index;
   }
 
-  // shuffle alternative
-  // if (_shuffle) {
-  //   _index = randomNumberGenerator(
-  //       0, (_playlist->getNumberOfMainwindowTracks() - 1));
-  //   ++_shuffleCounter;
-  //   if (_shuffleCounter == _playlist->getNumberOfMainwindowTracks() &&
-  //   !_repeat)
-  //     return;
-  // } else
-  ++_index; // set the index to the next song
+  // qDebug() << "index: " << _index;
+  // start playing the track
   playTrack();
+
   // qDebug() << "shuffle counter: " << _shuffleCounter;
   // qDebug() << "index: " << _index;
   // qDebug() << "number of tracks: " <<
@@ -465,6 +531,7 @@ void MainWindow::playPrevious() {
   // as none of them is the case, than the player can switch to the previous
   // song
   --_index;
+  // start playing the track
   playTrack();
 }
 
@@ -487,37 +554,32 @@ void MainWindow::stopPlaying() {
 
   // resetting the bool
   _playerStopped = false;
+
+  // // resetting the shuffle list
+  // _shuffleAlreadyPlayed.clear();
 }
 
 void MainWindow::playOneSong(QTableWidgetItem *item) {
+  // to make sure the player stops after playing one song see the
+  // handleMediaStatusChanged() function
+  _playall = false;
+
   // take the row number of the selected item
   _index = item->row();
 
   // qDebug() << "index: " << _index;
 
   playTrack();
-
-  // to make sure the player stops after playing one song see the
-  // handleMediaStatusChanged() function
-  _playall = false;
 }
 
-// sort the playlist randomly, for shuffle mode, toggle
-void MainWindow::setRandom(bool state) {
-  // shuffle alternative
-  //   if (state) {
-  //   _shuffle = true;
-  //   _shuffleCounter = 0;
-  // } else
-  //   _shuffle = false;
-
+// set the playmode to shuffle instead of play next
+void MainWindow::setShuffle(bool state) {
+  // shuffle mode
   if (state) {
-    _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
-    refreshTableWidgetCurrentPlaylist();
-  } else {
-    _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
-    refreshTableWidgetCurrentPlaylist();
-  }
+    _shuffleAlreadyPlayed.clear();
+    _shuffle = true;
+  } else
+    _shuffle = false;
 }
 
 // how to deal with the response to a network reply
@@ -540,8 +602,8 @@ void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
     QJsonObject obj = doc.object(); // convert it to a JSON object
     QJsonObject main = obj["album"].toObject(); // get the album values
     QJsonArray submainarray =
-        main["image"]
-            .toArray(); // from the image value, turn the key into an JSON array
+        main["image"].toArray(); // from the image value, turn the key into an
+                                 // JSON array
 
     // qDebug() << "obj: " << obj;
     // qDebug() << "main: " << main;
@@ -555,8 +617,8 @@ void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
     for (const auto &value : submainarray) {
       QJsonObject imageObject = value.toObject();
       if (_imageSize ==
-          imageObject["size"].toString()) // in case the demanded size is found,
-                                          // get the corresponding url
+          imageObject["size"].toString()) // in case the demanded size is
+                                          // found, get the corresponding url
         urlimage = imageObject["#text"].toString();
     }
 
@@ -682,24 +744,24 @@ void MainWindow::updateTrackInfoDisplay() {
 
   // in case the filelocation is invalid
   if (!_filelocationValid) {
-      // set the outputs, but turn them to a red colour
-      ui->labelCurrentSong->setStyleSheet("color:#FF0000");
-      ui->labelcurrentAlbum->setStyleSheet("color:#FF0000");
-      ui->labelcurrentArtist->setStyleSheet("color:#FF0000");
-      ui->labelTimeSong->setStyleSheet("color:#FF0000");
+    // set the outputs, but turn them to a red colour
+    ui->labelCurrentSong->setStyleSheet("color:#FF0000");
+    ui->labelcurrentAlbum->setStyleSheet("color:#FF0000");
+    ui->labelcurrentArtist->setStyleSheet("color:#FF0000");
+    ui->labelTimeSong->setStyleSheet("color:#FF0000");
 
-      ui->labelCurrentSong->setText(title);
-      ui->labelcurrentAlbum->setText(album);
-      ui->labelcurrentArtist->setText(artist);
-      ui->labelTimeSong->setText(time);
-      _oled->updateSong("", "", "");
-      return;
+    ui->labelCurrentSong->setText(title);
+    ui->labelcurrentAlbum->setText(album);
+    ui->labelcurrentArtist->setText(artist);
+    ui->labelTimeSong->setText(time);
+    _oled->updateSong("", "", "");
+    return;
   } else {
-      // set colour back to default colours
-      ui->labelCurrentSong->setStyleSheet("");
-      ui->labelcurrentAlbum->setStyleSheet("");
-      ui->labelcurrentArtist->setStyleSheet("");
-      ui->labelTimeSong->setStyleSheet("");
+    // set colour back to default colours
+    ui->labelCurrentSong->setStyleSheet("");
+    ui->labelcurrentAlbum->setStyleSheet("");
+    ui->labelcurrentArtist->setStyleSheet("");
+    ui->labelTimeSong->setStyleSheet("");
   }
 
   // try to get the artwork out of the music file
@@ -858,17 +920,6 @@ void MainWindow::processFolder(const QString &path) {
   }
 }
 
-void MainWindow::resetRandomCheckbox() {
-  // block the connection to prevent executing the setRandom function
-  ui->checkBoxPlayRandom->blockSignals(true);
-
-  // unchecking the checkbox
-  ui->checkBoxPlayRandom->setChecked(false);
-
-  // unblock the connection
-  ui->checkBoxPlayRandom->blockSignals(false);
-}
-
 // to colour the background of the current playing song
 void MainWindow::setItemBackgroundColour() {
   for (int row = 0; row < ui->tableWidgetCurrentPlaylist->rowCount(); ++row) {
@@ -888,7 +939,7 @@ void MainWindow::setItemBackgroundColour() {
   }
 }
 
-void MainWindow::playTrack() {
+bool MainWindow::playTrack() {
 
   // to make sure the _index is not pointing outside the playlist range
   if (_playlist->getNumberOfMainwindowTracks() >= 1 && _index >= 0 &&
@@ -900,23 +951,26 @@ void MainWindow::playTrack() {
     if (!QFile::exists(_playThisSong)) {
       _filelocationValid = false;
       updateTrackInfoDisplay();
-      return;
+      return false;
+    } else {
+      _filelocationValid = true;
+      _player->setSource(QUrl::fromLocalFile(_playThisSong));
+
+      // start playing the song
+      _player->play();
+
+      // set the infos of the current song in the display, running
+      updateTrackInfoDisplay();
+      return true;
     }
-
-    _filelocationValid = true;
-    _player->setSource(QUrl::fromLocalFile(_playThisSong));
-
-    // start playing the song
-    _player->play();
-
-    // set the infos of the current song in the display, running
-    updateTrackInfoDisplay();
   }
+  return false;
 }
 
 void MainWindow::initializeSettings() {
 
-  // Set default values if the settings file or certain parameters do not exist
+  // Set default values if the settings file or certain parameters do not
+  // exist
   if (!_settings.contains("Api Key")) {
     _settings.setValue("Api Key", _apiKey);
   }
@@ -959,9 +1013,11 @@ void MainWindow::loadSettings() {
 }
 
 int MainWindow::randomNumberGenerator(
-    const int &min, const int &max) { // Initialize a random number generator
+    const int &min, const int &max) { // Initialize a random number generator,
+                                      // within the min and max range
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> distrib(min, max);
-  return distrib(gen);
+  return distrib(
+      gen); // returning a random number between the min and max values
 }

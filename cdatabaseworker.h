@@ -6,6 +6,7 @@
 #include "dbconnect.h"
 
 #include <QDebug>
+#include <QFile>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>

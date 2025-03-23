@@ -203,13 +203,15 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
     channels = query.value(10).toInt();
     filelocation = query.value(11).toString();
 
-    CTrack newtrack(id, title, artist, album, year, number, genre, duration,
-                    bitrate, samplerate, channels, filelocation);
-
-    playlist->addTrack(newtrack);
-
-    // Debug output for each track
-    // qDebug() << "Added track:" << title << "by" << artist;
+    // only add the track if the file location is valid
+    if (QFile::exists(filelocation)) {
+      CTrack newtrack(id, title, artist, album, year, number, genre, duration,
+                      bitrate, samplerate, channels, filelocation);
+      playlist->addTrack(newtrack);
+      // Debug output for each track
+      qDebug() << "Added track:" << title << "by" << artist;
+    } else
+      qDebug() << "Track: " << title << " file location invalid";
   }
   *success = true;
   return;

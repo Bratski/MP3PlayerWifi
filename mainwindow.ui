@@ -170,7 +170,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBoxPlayRandom">
+       <widget class="QCheckBox" name="checkBoxPlayShuffle">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -178,7 +178,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Play Random</string>
+         <string>Play Shuffle</string>
         </property>
         <property name="icon">
          <iconset theme="QIcon::ThemeIcon::MediaPlaylistShuffle"/>
@@ -573,7 +573,7 @@
      <x>0</x>
      <y>0</y>
      <width>1049</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
@@ -614,6 +614,7 @@
     <addaction name="actionby_Album_Year"/>
     <addaction name="actionby_Database"/>
     <addaction name="actionby_Genre"/>
+    <addaction name="actionRandom"/>
     <addaction name="actionundo_Sort"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
@@ -721,7 +722,7 @@
   </action>
   <action name="actionby_Genre">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditRedo"/>
+    <iconset theme="QIcon::ThemeIcon::MailForward"/>
    </property>
    <property name="text">
     <string>by Genre</string>
@@ -806,6 +807,14 @@
     <string>by Database</string>
    </property>
   </action>
+  <action name="actionRandom">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::MailReplyAll"/>
+   </property>
+   <property name="text">
+    <string>Random</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>pushButtonPlay</tabstop>
@@ -815,7 +824,7 @@
   <tabstop>pushButtonPause</tabstop>
   <tabstop>horizontalSliderVolume</tabstop>
   <tabstop>checkBoxRepeatAll</tabstop>
-  <tabstop>checkBoxPlayRandom</tabstop>
+  <tabstop>checkBoxPlayShuffle</tabstop>
   <tabstop>horizontalSliderSong</tabstop>
   <tabstop>tableWidgetCurrentPlaylist</tabstop>
  </tabstops>
