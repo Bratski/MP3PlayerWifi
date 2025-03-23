@@ -3,6 +3,7 @@
 
 #include "cplaylistcontainer.h"
 #include <QDialog>
+#include <QTableWidget>
 
 namespace Ui {
 class DialogSearch;
@@ -20,6 +21,7 @@ public:
 public slots:
   void filterPlaylist();
   void openFilteredPlaylist();
+  void filterOnItem(QTableWidgetItem *item);
 
 private:
   Ui::DialogSearch *ui;

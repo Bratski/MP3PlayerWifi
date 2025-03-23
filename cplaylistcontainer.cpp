@@ -3,8 +3,8 @@
 // not really necessary
 const char *CPlaylistContainer::sortMethodsTXT[int(
     CPlaylistContainer::art_t::numberOfMethods)] = {
-    "Random",   "by Artist",   "by Album", "by Year",
-    "by Genre", "by Database", "Title",    "undo Sort"};
+    "Random",      "by Artist", "by Album",  "by Year",      "by Genre",
+    "by Database", "Title",     "undo Sort", "By MainWindow"};
 
 // const operator[] overload
 const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
@@ -49,14 +49,15 @@ void CPlaylistContainer::removeTrack(const QString &id) {
   // method 2
   // iterate through the vector and delete on corresponding ids
 
-  // delete Track from the object vector
-  for (auto it = _playlist_obj_vector.begin(); it != _playlist_obj_vector.end();
-       ++it) {
-    if (id == it->getID()) {
-      _playlist_obj_vector.erase(it);
-      break; // no duplicates are allowedso, it is ok to abort the operation
-    }
-  }
+  // delete Track from the object vector, is this relevant?
+  // for (auto it = _playlist_obj_vector.begin(); it !=
+  // _playlist_obj_vector.end();
+  //      ++it) {
+  //   if (id == it->getID()) {
+  //     _playlist_obj_vector.erase(it);
+  //     break; // no duplicates are allowedso, it is ok to abort the operation
+  //   }
+  // }
 
   // delete Track from the pointer vector
   for (auto it = _playlist_ptr_mainwindow_vector.begin();
@@ -217,6 +218,11 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
       if (track.getYear() == text.toInt()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
+    }
+    break;
+  case art_t::byMainWindow:
+    for (auto &track : _playlist_ptr_mainwindow_vector) {
+      _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(*track));
     }
     break;
   default:

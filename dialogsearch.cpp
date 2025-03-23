@@ -11,6 +11,8 @@ DialogSearch::DialogSearch(QWidget *parent, CPlaylistContainer *playlist,
   setWindowTitle("Search and filter");
   ui->tableWidgetFoundEntries->hideColumn(0);
   ui->tableWidgetFoundEntries->hideColumn(11);
+  // load the search window with the same songs as the mainwindow
+  _playlist->filterPlaylist(CPlaylistContainer::art_t::byMainWindow, "");
   refreshtableWidgetFoundEntries();
 
   // connect the button events to functions
@@ -20,6 +22,11 @@ DialogSearch::DialogSearch(QWidget *parent, CPlaylistContainer *playlist,
                    &DialogSearch::filterPlaylist);
   QObject::connect(ui->pushButtonOK, &QPushButton::clicked, this,
                    &DialogSearch::openFilteredPlaylist);
+
+  // to filter for a item double clicked in the table widget
+  QObject::connect(ui->tableWidgetFoundEntries,
+                   &QTableWidget::itemDoubleClicked, this,
+                   &DialogSearch::filterOnItem);
 }
 
 DialogSearch::~DialogSearch() { delete ui; }
@@ -62,6 +69,7 @@ void DialogSearch::filterPlaylist() {
 
     break;
   default:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byMainWindow, "");
     break;
   }
 
@@ -79,6 +87,39 @@ void DialogSearch::openFilteredPlaylist() {
 
   // close the dialog
   this->close();
+}
+
+void DialogSearch::filterOnItem(QTableWidgetItem *item) {
+  // which column belongs to the item?
+  int col = item->column();
+
+  // get the text from the item
+  QString text = item->text();
+
+  // start filter on the column type
+  switch (col) {
+  case 1:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byTitle, text);
+    break;
+  case 2:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byArtist, text);
+    break;
+  case 3:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byAlbum, text);
+    break;
+  case 4:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byYear, text);
+    break;
+  case 6:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byGenre, text);
+    break;
+  default:
+    _playlist->filterPlaylist(CPlaylistContainer::art_t::byMainWindow, "");
+    break;
+  }
+
+  // show the results in the table
+  refreshtableWidgetFoundEntries();
 }
 
 void DialogSearch::refreshtableWidgetFoundEntries() {

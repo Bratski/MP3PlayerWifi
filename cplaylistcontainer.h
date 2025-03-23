@@ -56,6 +56,7 @@ public:
     byDatabase,
     byTitle,
     undoSort,
+    byMainWindow,
     numberOfMethods
   };
   CPlaylistContainer() = default;
