@@ -63,8 +63,10 @@ void DialogManagement::openPlaylist() {
     return;
   }
 
-  // ask to save the old playlist first, before continuing
-  if (_playlistChanged) {
+  // only ask to save the playlist to database, if the playlist has been
+  // edited (_playlistChanged is set true)
+
+  if (*_playlistChanged) {
     QMessageBox msg;
     msg.addButton("Yes", QMessageBox::YesRole);
     msg.addButton("No", QMessageBox::NoRole);
@@ -72,17 +74,12 @@ void DialogManagement::openPlaylist() {
     msg.setIcon(QMessageBox::Warning);
     msg.setText("Do you want to save the changes to the playlist?");
 
-    // only ask to save the playlist to database, if the playlist has been
-    // edited (_playlistChanged is set true)
-
-    if (*_playlistChanged) {
-      // msg.exec() returns "3" if norole, "2" if yesrole
-      if (msg.exec() == 2) {
-        saveToDatabase(); // how can i access a function from the mainwindow
-                          // class? functionpointer I tried, didnt work, other
-                          // methods? Now I just copied the complete
-                          // saveToDatabase() function
-      }
+    // msg.exec() returns "3" if norole, "2" if yesrole
+    if (msg.exec() == 2) {
+      saveToDatabase(); // how can i access a function from the mainwindow
+                        // class? functionpointer I tried, didnt work, other
+                        // methods? Now I just copied the complete
+                        // saveToDatabase() function
     }
   }
 
