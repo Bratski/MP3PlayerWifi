@@ -177,11 +177,13 @@ void MainWindow::openSearchDialog() {
 }
 
 void MainWindow::openManagementDialog() {
-  _dlgManagement = new DialogManagement(this, _playlist, _dbthread, _worker,
-                                        &_playlistChanged);
+  _dlgManagement =
+      new DialogManagement(this, _playlist, _worker, &_playlistChanged);
 
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
+  connect(_dlgManagement, &DialogManagement::saveToDBMainWindow, this,
+          &MainWindow::saveToDatabase);
   connect(_dlgManagement, &QDialog::finished, this,
           &MainWindow::refreshTableWidgetCurrentPlaylist);
   _dlgManagement->exec();
@@ -293,6 +295,10 @@ void MainWindow::saveToDatabase() {
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
   loop.exec();
+
+  if (_cancelSaving)
+    QMessageBox::warning(this, "Warning",
+                         "Saving playlist to database has NOT completed!!");
 
   // set the bool playlist, in case the files have been successfully saved in
   // the database

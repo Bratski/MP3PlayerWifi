@@ -39,6 +39,5 @@ void DialogProgress::allowClose() {
 void DialogProgress::cancelSaving() {
   *_cancelSaving = true; // for proper abortion of the saving process in the
                          // database worker-thread
-  QMessageBox::warning(this, "Warning",
-                       "Saving playlist to database has NOT completed!!");
+
 }

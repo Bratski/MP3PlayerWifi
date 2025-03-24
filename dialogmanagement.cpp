@@ -3,10 +3,10 @@
 
 DialogManagement::DialogManagement(QWidget *parent,
                                    CPlaylistContainer *playlist,
-                                   QThread *dbthread, CDatabaseWorker *worker,
+                                   CDatabaseWorker *worker,
                                    bool *playlistChanged)
     : QDialog(parent), ui(new Ui::DialogManagement), _playlist(playlist),
-      _dbthread(dbthread), _worker(worker), _playlistChanged(playlistChanged) {
+      _worker(worker), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
 
   // initialize the window
@@ -76,10 +76,7 @@ void DialogManagement::openPlaylist() {
 
     // msg.exec() returns "3" if norole, "2" if yesrole
     if (msg.exec() == 2) {
-      saveToDatabase(); // how can i access a function from the mainwindow
-                        // class? functionpointer I tried, didnt work, other
-                        // methods? Now I just copied the complete
-                        // saveToDatabase() function
+      emit saveToDBMainWindow();
     }
   }
 
@@ -317,37 +314,4 @@ void DialogManagement::readDatabase() {
   }
   // prevents interfering with the namePlaylistEdited function
   _isEditing = false;
-}
-
-void DialogManagement::saveToDatabase() {
-  // display the progress bar
-  _dlgProgess = new DialogProgress(this, _playlist, _dbthread, &_cancelSaving);
-  _dlgProgess->open();
-  _cancelSaving = false;
-
-  // Connect signals from the database thread to the progress dialog
-  connect(_worker, &CDatabaseWorker::sendProgress, _dlgProgess,
-          &DialogProgress::receiveProgress);
-  connect(_worker, &CDatabaseWorker::progressReady, _dlgProgess,
-          &DialogProgress::allowClose);
-
-  // Create an event loop to block until the database operation is done,
-  // necessary to display the progressbar properly
-  QEventLoop loop;
-  connect(_worker, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
-
-  // start the database thread operation
-  bool success = false;
-  QMetaObject::invokeMethod(_worker, "writePlaylistTracksToDatabase",
-                            Qt::QueuedConnection, _playlist, &success,
-                            &_cancelSaving);
-
-  // Block until the database operation is complete, necessary to display the
-  // progressbar properly
-  loop.exec();
-
-  // set the bool playlist, in case the files have been successfully saved in
-  // the database
-  if (success)
-    *_playlistChanged = false;
 }
