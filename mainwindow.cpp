@@ -333,62 +333,63 @@ void MainWindow::deleteTrack() {
 
   // refresh the table
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::deletePlaylist() {
   stopPlaying();
   _playlist->clear();
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::sortByAlbum() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byAlbum);
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::sortByYear() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byYear);
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::sortByArtist() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byArtist);
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::sortByDatabase() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byDatabase);
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::sortByGenre() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::byGenre);
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::sortRandom() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
   _playlistChanged = true;
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 void MainWindow::undoSort() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::undoSort);
-
   refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
 }
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no

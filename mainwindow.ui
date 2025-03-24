@@ -612,7 +612,6 @@
     <addaction name="actionby_Artist"/>
     <addaction name="actionby_Album"/>
     <addaction name="actionby_Album_Year"/>
-    <addaction name="actionby_Database"/>
     <addaction name="actionby_Genre"/>
     <addaction name="actionRandom"/>
     <addaction name="actionundo_Sort"/>
@@ -625,9 +624,10 @@
    </widget>
    <widget class="QMenu" name="menuSearchfilter">
     <property name="title">
-     <string>Search</string>
+     <string>Filter</string>
     </property>
     <addaction name="actionSearchfilter"/>
+    <addaction name="actionby_Database"/>
    </widget>
    <addaction name="menuManagement"/>
    <addaction name="menuAdd"/>
@@ -782,7 +782,7 @@
     <iconset theme="QIcon::ThemeIcon::EditFind"/>
    </property>
    <property name="text">
-    <string>Searchfilter</string>
+    <string>Filter Playlist</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
@@ -801,10 +801,13 @@
   </action>
   <action name="actionby_Database">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+    <iconset theme="QIcon::ThemeIcon::EditUndo"/>
    </property>
    <property name="text">
-    <string>by Database</string>
+    <string>undo Filter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
    </property>
   </action>
   <action name="actionRandom">

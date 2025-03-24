@@ -49,15 +49,15 @@ void CPlaylistContainer::removeTrack(const QString &id) {
   // method 2
   // iterate through the vector and delete on corresponding ids
 
-  // delete Track from the object vector, is this relevant?
-  // for (auto it = _playlist_obj_vector.begin(); it !=
-  // _playlist_obj_vector.end();
-  //      ++it) {
-  //   if (id == it->getID()) {
-  //     _playlist_obj_vector.erase(it);
-  //     break; // no duplicates are allowedso, it is ok to abort the operation
-  //   }
-  // }
+  // delete Track from the object vector, is this relevant? Yes, because undo
+  // filter returns all the deleted tracks, if objects havent been deleted
+  for (auto it = _playlist_obj_vector.begin(); it != _playlist_obj_vector.end();
+       ++it) {
+    if (id == it->getID()) {
+      _playlist_obj_vector.erase(it);
+      break; // no duplicates are allowedso, it is ok to abort the operation
+    }
+  }
 
   // delete Track from the pointer vector
   for (auto it = _playlist_ptr_mainwindow_vector.begin();
