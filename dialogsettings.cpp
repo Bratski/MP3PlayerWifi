@@ -81,9 +81,11 @@ void DialogSettings::initializeRTC() {
   // invoke the initialisation
   bool success = false;
   QMetaObject::invokeMethod(_workerrtc, "setPins", Qt::BlockingQueuedConnection,
-                            _pinSW, _pinCLK, _pinDT);
+                            Q_ARG(uint, _pinSW), Q_ARG(uint, _pinCLK),
+                            Q_ARG(uint, _pinDT));
   QMetaObject::invokeMethod(_workerrtc, "initialize",
-                            Qt::BlockingQueuedConnection, &success);
+                            Qt::BlockingQueuedConnection,
+                            Q_ARG(bool *, &success));
 
   if (!success) {
     _rtcthread->quit();
@@ -133,11 +135,11 @@ void DialogSettings::showRTCData() {
   if (_rtcthread->isRunning()) {
     uint pin1, pin2, pin3;
     QMetaObject::invokeMethod(_workerrtc, "getPinSWITCH",
-                              Qt::BlockingQueuedConnection, &pin1);
+                              Qt::BlockingQueuedConnection, Q_ARG(uint*, &pin1));
     QMetaObject::invokeMethod(_workerrtc, "getPinCLK",
-                              Qt::BlockingQueuedConnection, &pin2);
+                              Qt::BlockingQueuedConnection, Q_ARG(uint*, &pin2));
     QMetaObject::invokeMethod(_workerrtc, "getPinDT",
-                              Qt::BlockingQueuedConnection, &pin3);
+                              Qt::BlockingQueuedConnection, Q_ARG(uint*, &pin3));
 
     ui->lineEditRTCPin1->setText(QString::number(pin1));
     ui->lineEditRTCPin2->setText(QString::number(pin2));

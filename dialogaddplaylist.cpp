@@ -38,8 +38,9 @@ void DialogAddPlaylist::addPlaylist() {
   // 1!
   bool success = false;
   QMetaObject::invokeMethod(_workerdb, "readDataBasePlaylist",
-                            Qt::BlockingQueuedConnection, &tempplaylist, id,
-                            &success);
+                            Qt::BlockingQueuedConnection,
+                            Q_ARG(CPlaylistContainer* , &tempplaylist),
+                            Q_ARG(int, id), Q_ARG(bool* , &success));
 
   bool doubleTrack = false;
   // add the temporary playlist object to the global one: _playlist
@@ -68,6 +69,9 @@ void DialogAddPlaylist::readDatabase() {
   // no editing in this window, so this vector can be temporarely
   std::vector<QString> playlistsInDatabase;
 
+  // for pi compilation necessary
+  std::vector<QString> *pllptr = &playlistsInDatabase;
+
   // empty the list with playlists
   ui->tableWidgetDatabase->clearContents();
   ui->tableWidgetDatabase->setRowCount(0);
@@ -78,8 +82,8 @@ void DialogAddPlaylist::readDatabase() {
   bool success = false;
   // find in the database
   QMetaObject::invokeMethod(_workerdb, "getPlaylistsFromDatabase",
-                            Qt::BlockingQueuedConnection, &playlistsInDatabase,
-                            &success);
+                            Qt::BlockingQueuedConnection, Q_ARG(std::vector<QString> *, pllptr),
+                            Q_ARG(bool*, &success));
 
   if (success) {
     // count the number of Playlists being found

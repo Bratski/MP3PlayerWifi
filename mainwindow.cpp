@@ -30,17 +30,23 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // turn on the rotary encoder, if it has been set the last time shutdown
   if (_statusRTC) {
     _rtcthread->start();
+    // for the raspberry pi
     QMetaObject::invokeMethod(_workerrtc, "setPins",
-                              Qt::BlockingQueuedConnection, _pinSW, _pinCLK,
-                              _pinDT);
+                              Qt::BlockingQueuedConnection, Q_ARG(uint, _pinSW),
+                              Q_ARG(uint, _pinCLK), Q_ARG(uint, _pinDT));
+
+    // QMetaObject::invokeMethod(_workerrtc, "setPins",
+    //                           Qt::BlockingQueuedConnection, _pinSW, _pinCLK,
+    //                           _pinDT);
     QMetaObject::invokeMethod(_workerrtc, "initialize",
-                              Qt::BlockingQueuedConnection, &_statusRTC);
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(bool *, &_statusRTC));
 
     if (_statusRTC) {
       // syncing the volume level
       QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
                                 Qt::BlockingQueuedConnection,
-                                int(_startVolume * 100));
+                                Q_ARG(int, int(_startVolume * 100)));
       // start the event detecting loop in the worker thread
       QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection);
     }
@@ -317,9 +323,10 @@ void MainWindow::saveToDatabase() {
 
   // start the database thread operation
   bool success = false;
-  QMetaObject::invokeMethod(_workerdb, "writePlaylistTracksToDatabase",
-                            Qt::QueuedConnection, _playlist, &success,
-                            &_cancelSaving);
+  QMetaObject::invokeMethod(
+      _workerdb, "writePlaylistTracksToDatabase", Qt::QueuedConnection,
+      Q_ARG(CPlaylistContainer *, _playlist), Q_ARG(bool *, &success),
+      Q_ARG(bool *, &_cancelSaving));
 
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
@@ -435,7 +442,7 @@ void MainWindow::setVolume(int level) {
   // syncing the volume level with the rotary encoder
   if (_statusRTC)
     QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
-                              Qt::BlockingQueuedConnection, level);
+                              Qt::BlockingQueuedConnection, Q_ARG(int, level));
 }
 
 void MainWindow::playAllSongs() {
@@ -880,9 +887,10 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 // open first (default) playlist in the database-table "playlist" on start up:
 void MainWindow::readDataBasePlaylist() {
   bool success = false;
-  QMetaObject::invokeMethod(_workerdb, "readDataBasePlaylist",
-                            Qt::BlockingQueuedConnection, _playlist,
-                            _defaultPlaylistID, &success);
+  QMetaObject::invokeMethod(
+      _workerdb, "readDataBasePlaylist", Qt::BlockingQueuedConnection,
+      Q_ARG(CPlaylistContainer* , _playlist), Q_ARG(int, _defaultPlaylistID),
+      Q_ARG(bool* , &success));
   if (!success)
     qDebug() << "Something went wrong reading the database";
 }
@@ -915,7 +923,7 @@ void MainWindow::closingProcedure() {
   bool success = false;
   // cleaning up the database
   QMetaObject::invokeMethod(_workerdb, "cleanupDatabase",
-                            Qt::BlockingQueuedConnection, &success);
+                            Qt::BlockingQueuedConnection,Q_ARG(bool*, &success));
   if (success)
     qDebug() << "Database clean up was successfull";
 

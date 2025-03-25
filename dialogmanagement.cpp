@@ -97,8 +97,9 @@ void DialogManagement::openPlaylist() {
 
   bool success = false;
   // fill the playlist with the database tracks
-  QMetaObject::invokeMethod(_workerdb, "readPlaylistTracksFromDatabase",
-                            Qt::BlockingQueuedConnection, _playlist, &success);
+  QMetaObject::invokeMethod(
+      _workerdb, "readPlaylistTracksFromDatabase", Qt::BlockingQueuedConnection,
+      Q_ARG(CPlaylistContainer *, _playlist), Q_ARG(bool *, &success));
 
   // if all went well, the playlist is a exact representation of the database,
   // and no need to save it again
@@ -136,8 +137,9 @@ void DialogManagement::addNewPlaylist() {
   bool doubleName = false;
   // add a new playlist with the name to the database
   QMetaObject::invokeMethod(_workerdb, "addNewPlaylist",
-                            Qt::BlockingQueuedConnection, name, &success,
-                            &doubleName);
+                            Qt::BlockingQueuedConnection, Q_ARG(QString, name),
+                            Q_ARG(bool *, &success),
+                            Q_ARG(bool *, &doubleName));
 
   if (success) {
     qDebug() << "added the name playlist " << name << " successfully";
@@ -210,7 +212,8 @@ void DialogManagement::deletePlaylist() {
       bool success = false;
       // delete the playlist from the database
       QMetaObject::invokeMethod(_workerdb, "deletePlaylist",
-                                Qt::BlockingQueuedConnection, name, &success);
+                                Qt::BlockingQueuedConnection,
+                                Q_ARG(QString, name), Q_ARG(bool *, &success));
     }
   }
 
@@ -241,8 +244,9 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
   bool doubleName = false;
   // update the database
   QMetaObject::invokeMethod(_workerdb, "updatePlaylistInDatabase",
-                            Qt::QueuedConnection, name, id, &success,
-                            &doubleName);
+                            Qt::QueuedConnection, Q_ARG(QString, name),
+                            Q_ARG(int, id), Q_ARG(bool *, &success),
+                            Q_ARG(bool *, &doubleName));
 
   if (doubleName) {
     QMessageBox::warning(this, "Error",
@@ -267,6 +271,9 @@ void DialogManagement::readDatabase() {
   // temporare QString vector
   std::vector<QString> playlistsInDatabase;
 
+  // for pi compilation necessary
+  std::vector<QString> *pllptr = &playlistsInDatabase;
+
   // empty the list with playlists
   ui->tableWidgetPlaylists->clearContents();
   ui->tableWidgetPlaylists->setRowCount(0);
@@ -276,9 +283,9 @@ void DialogManagement::readDatabase() {
 
   bool success = false;
   // find in the database
-  QMetaObject::invokeMethod(_workerdb, "getPlaylistsFromDatabase",
-                            Qt::BlockingQueuedConnection, &playlistsInDatabase,
-                            &success);
+  QMetaObject::invokeMethod(
+      _workerdb, "getPlaylistsFromDatabase", Qt::BlockingQueuedConnection,
+      Q_ARG(std::vector<QString> *, pllptr), Q_ARG(bool *, &success));
 
   if (success) {
     // count the number of Playlists being found

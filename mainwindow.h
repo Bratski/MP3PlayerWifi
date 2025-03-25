@@ -132,7 +132,7 @@ private:
   bool _cancelSaving = false;
   bool _playerStopped = false;
   bool _statusOled = false;
-  bool _statusRTC = false;
+  bool _statusRTC = true;
   bool _filelocationValid = true;
 
   float _startVolume = 0.2; // setting the start volume to 20%
