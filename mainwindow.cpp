@@ -23,9 +23,11 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   setWindowTitle("Bratskis MP3 Player Nitro");
   initializeSettings();
   loadSettings();
+  // turn on oled, if it has been set the last time shutdown
   if (_statusOled)
     _statusOled = _oled->initialize(); // in case the initialisation failed,
                                        // further settings must be disabled
+  // turn on the rotary encoder, if it has been set the last time shutdown
   if (_statusRTC) {
     _rtcthread->start();
     QMetaObject::invokeMethod(_workerrtc, "setPins",
@@ -35,17 +37,17 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                               Qt::BlockingQueuedConnection, &_statusRTC);
 
     if (_statusRTC) {
+      // syncing the volume level
       QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
                                 Qt::BlockingQueuedConnection,
                                 int(_startVolume * 100));
+      // start the event detecting loop in the worker thread
       QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection);
     }
     if (!_statusRTC) {
-      qDebug() << "rtc thread closed? is running: " << _rtcthread->isRunning();
       _rtcthread->quit();
       _rtcthread->wait();
     }
-    qDebug() << "rtc thread closed? is running: " << _rtcthread->isRunning();
   }
   _audio->setVolume(_startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
@@ -430,6 +432,7 @@ void MainWindow::undoSort() {
 void MainWindow::setVolume(int level) {
   float audioLevel = static_cast<float>(level) / 100.0f;
   _audio->setVolume(audioLevel);
+  // syncing the volume level with the rotary encoder
   if (_statusRTC)
     QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
                               Qt::BlockingQueuedConnection, level);

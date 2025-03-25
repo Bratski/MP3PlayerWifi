@@ -26,6 +26,11 @@ public slots:
   void getPinSWITCH(uint *pin1) { *pin1 = _pin1; }
   void getPinCLK(uint *pin2) { *pin2 = _pin2; }
   void getPinDT(uint *pin3) { *pin3 = _pin3; }
+  void getPins(uint *pin1, uint *pin2, uint *pin3) {
+    *pin1 = _pin1;
+    *pin2 = _pin2;
+    *pin3 = _pin3;
+  }
 
 signals:
   void sendVolumeChange(const int &counter);

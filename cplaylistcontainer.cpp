@@ -55,7 +55,7 @@ void CPlaylistContainer::removeTrack(const QString &id) {
        ++it) {
     if (id == it->getID()) {
       _playlist_obj_vector.erase(it);
-      break; // no duplicates are allowedso, it is ok to abort the operation
+      break; // no duplicates are allowed, so it is ok to abort the operation
     }
   }
 

@@ -47,6 +47,7 @@ void CRotaryEncoderWorker::initialize(bool *success) {
 void CRotaryEncoderWorker::run() {
   _running = true;
   int last_clk_state = gpiod_line_get_value(_line2);
+  // main loop picking up the events
   while (_running) {
 
     // Read switch state
