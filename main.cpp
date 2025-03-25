@@ -1,5 +1,6 @@
 #include "COled.h"
 #include "cdatabaseworker.h"
+#include "crotaryencoderworker.h"
 #include "cplaylistcontainer.h"
 #include "ctrack.h"
 #include "mainwindow.h"
@@ -18,10 +19,15 @@ int main(int argc, char *argv[]) {
   QAudioOutput audioOutput; // needed for setting the audio output
   CPlaylistContainer playlist;
   CTrack track;
-  QThread dbthread;       // the thread for database operations
-  CDatabaseWorker worker; // object containing all possible database operations
 
-  worker.moveToThread(
+  QThread rtcthread;        // the thread for the rtc coder
+  QThread dbthread;       // the thread for database operations
+  CDatabaseWorker workerdb; // object containing all possible database operations
+  CRotaryEncoderWorker workerrtc; // object containing rotary encoder operations
+
+
+  workerrtc.moveToThread(&rtcthread); // thread for rtc, not started yet, only if it is been activated
+  workerdb.moveToThread(
       &dbthread); // thread and possible operations are connected
 
   dbthread.start(); // the database thread is started
@@ -31,7 +37,7 @@ int main(int argc, char *argv[]) {
 
   // Create Database,  wait until the success-bool has turned to true
   bool success = false;
-  QMetaObject::invokeMethod(&worker, "initialize", Qt::BlockingQueuedConnection,
+  QMetaObject::invokeMethod(&workerdb, "initialize", Qt::BlockingQueuedConnection,
                             &success);
 
   // stop program if not succesfull
@@ -41,7 +47,7 @@ int main(int argc, char *argv[]) {
 
   MainWindow w(
       nullptr, &oled, &player, &audioOutput, &playlist, &track, &dbthread,
-      &worker); // passing all the objects as pointers to the main window
+      &workerdb, &rtcthread, &workerrtc); // passing all the objects as pointers to the main window
 
   w.show();
 

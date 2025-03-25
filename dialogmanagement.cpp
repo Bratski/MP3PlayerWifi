@@ -3,10 +3,10 @@
 
 DialogManagement::DialogManagement(QWidget *parent,
                                    CPlaylistContainer *playlist,
-                                   CDatabaseWorker *worker,
+                                   CDatabaseWorker *workerdb,
                                    bool *playlistChanged)
     : QDialog(parent), ui(new Ui::DialogManagement), _playlist(playlist),
-      _worker(worker), _playlistChanged(playlistChanged) {
+      _workerdb(workerdb), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
 
   // initialize the window
@@ -97,7 +97,7 @@ void DialogManagement::openPlaylist() {
 
   bool success = false;
   // fill the playlist with the database tracks
-  QMetaObject::invokeMethod(_worker, "readPlaylistTracksFromDatabase",
+  QMetaObject::invokeMethod(_workerdb, "readPlaylistTracksFromDatabase",
                             Qt::BlockingQueuedConnection, _playlist, &success);
 
   // if all went well, the playlist is a exact representation of the database,
@@ -135,7 +135,7 @@ void DialogManagement::addNewPlaylist() {
   bool success = false;
   bool doubleName = false;
   // add a new playlist with the name to the database
-  QMetaObject::invokeMethod(_worker, "addNewPlaylist",
+  QMetaObject::invokeMethod(_workerdb, "addNewPlaylist",
                             Qt::BlockingQueuedConnection, name, &success,
                             &doubleName);
 
@@ -209,7 +209,7 @@ void DialogManagement::deletePlaylist() {
 
       bool success = false;
       // delete the playlist from the database
-      QMetaObject::invokeMethod(_worker, "deletePlaylist",
+      QMetaObject::invokeMethod(_workerdb, "deletePlaylist",
                                 Qt::BlockingQueuedConnection, name, &success);
     }
   }
@@ -240,7 +240,7 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem *item) {
   bool success = false;
   bool doubleName = false;
   // update the database
-  QMetaObject::invokeMethod(_worker, "updatePlaylistInDatabase",
+  QMetaObject::invokeMethod(_workerdb, "updatePlaylistInDatabase",
                             Qt::QueuedConnection, name, id, &success,
                             &doubleName);
 
@@ -276,7 +276,7 @@ void DialogManagement::readDatabase() {
 
   bool success = false;
   // find in the database
-  QMetaObject::invokeMethod(_worker, "getPlaylistsFromDatabase",
+  QMetaObject::invokeMethod(_workerdb, "getPlaylistsFromDatabase",
                             Qt::BlockingQueuedConnection, &playlistsInDatabase,
                             &success);
 

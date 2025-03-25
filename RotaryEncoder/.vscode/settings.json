@@ -42,8 +42,7 @@
     "-lgpiod"
   ],
   "C_Cpp_Runner.includePaths": [
-    "/home/bart/Nextcloud/CPlusPlusProjects/Tag17/StaticDBLib"
-  ],
+   ],
   "C_Cpp_Runner.includeSearch": [
     "*",
     "**/*"

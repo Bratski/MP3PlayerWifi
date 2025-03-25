@@ -5,6 +5,7 @@
 #include "COled.h"
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
+#include "crotaryencoderworker.h"
 #include "ctrack.h"
 
 // general Qt libraries
@@ -53,7 +54,9 @@ public:
   MainWindow(QWidget *parent = nullptr, COled *oled = nullptr,
              QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr,
              CPlaylistContainer *playlist = nullptr, CTrack *track = nullptr,
-             QThread *dbthread = nullptr, CDatabaseWorker *worker = nullptr);
+             QThread *dbthread = nullptr, CDatabaseWorker *workerdb = nullptr,
+             QThread *rtcthread = nullptr,
+             CRotaryEncoderWorker *workerrtc = nullptr);
   ~MainWindow();
 
 public slots:
@@ -105,7 +108,10 @@ private:
   CPlaylistContainer *_playlist;
   CTrack *_track;
   QThread *_dbthread;
-  CDatabaseWorker *_worker;
+  QThread *_rtcthread;
+  CDatabaseWorker *_workerdb;
+  CRotaryEncoderWorker *_workerrtc;
+
   QNetworkAccessManager *_network;
 
   // attributes
@@ -126,6 +132,7 @@ private:
   bool _cancelSaving = false;
   bool _playerStopped = false;
   bool _statusOled = false;
+  bool _statusRTC = true;
   bool _filelocationValid = true;
 
   float _startVolume = 0.2; // setting the start volume to 20%
@@ -134,6 +141,9 @@ private:
   int _defaultPlaylistID =
       1; // at startup open the first playlist in the database by default
   int _trackID = 0; // to be able to give manually added tracks a unique id
+  uint _pinSW = 23;
+  uint _pinCLK = 17;
+  uint _pinDT = 27;
 
   std::vector<QString>
       _detectedMusicFiles; // vector with all detected file paths for the

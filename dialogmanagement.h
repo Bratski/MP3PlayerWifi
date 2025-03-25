@@ -27,7 +27,7 @@ class DialogManagement : public QDialog {
 public:
   explicit DialogManagement(QWidget *parent = nullptr,
                             CPlaylistContainer *playlist = nullptr,
-                            CDatabaseWorker *worker = nullptr,
+                            CDatabaseWorker *workerdb = nullptr,
                             bool *playlistChanged = nullptr);
   ~DialogManagement();
 
@@ -43,7 +43,7 @@ signals:
 private:
   Ui::DialogManagement *ui;
   CPlaylistContainer *_playlist;
-  CDatabaseWorker *_worker;
+  CDatabaseWorker *_workerdb;
   bool *_playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();

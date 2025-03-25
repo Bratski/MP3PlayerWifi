@@ -11,10 +11,10 @@
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
                        CTrack *track, QThread *dbthread,
-                       CDatabaseWorker *worker)
+                       CDatabaseWorker *workerdb, QThread *rtcthread, CRotaryEncoderWorker *workerrtc)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
       _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
-      _worker(worker) {
+    _workerdb(workerdb), _rtcthread(rtcthread), _workerrtc(workerrtc)  {
   ui->setupUi(this);
 
   // setting default parameters and initialize
@@ -25,6 +25,11 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   if (_statusOled)
     _statusOled = _oled->initialize(); // in case the initialisation failed,
                                        // further settings must be disabled
+  if (_statusRTC) {
+      _rtcthread->start();
+      QMetaObject::invokeMethod(_workerrtc, "initialize",
+                                Qt::QueuedConnection, _pinSW, _pinCLK, _pinDT, &_statusRTC);
+  }
   _audio->setVolume(_startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
@@ -142,6 +147,10 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   connect(_network, &QNetworkAccessManager::finished, this,
           &MainWindow::getDataFromNetwork);
 
+
+  // connect the volume change on event from the _workerrtc
+  connect(_workerrtc, &CRotaryEncoderWorker::sendVolumeChange, this, &MainWindow::setVolume);
+
   // check which audio files are supported
   // QMediaFormat mediaFormat;
   // const QList<QMediaFormat::AudioCodec> supportedAudioCodecs =
@@ -178,7 +187,7 @@ void MainWindow::openSearchDialog() {
 
 void MainWindow::openManagementDialog() {
   _dlgManagement =
-      new DialogManagement(this, _playlist, _worker, &_playlistChanged);
+      new DialogManagement(this, _playlist, _workerdb, &_playlistChanged);
 
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
@@ -191,7 +200,7 @@ void MainWindow::openManagementDialog() {
 
 void MainWindow::openAddPlaylistDialog() {
   _dlgAddPlaylist =
-      new DialogAddPlaylist(this, _playlist, _worker, &_playlistChanged);
+      new DialogAddPlaylist(this, _playlist, _workerdb, &_playlistChanged);
 
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
@@ -276,19 +285,19 @@ void MainWindow::saveToDatabase() {
   _cancelSaving = false;
 
   // Connect signals from the database thread to the progress dialog
-  connect(_worker, &CDatabaseWorker::sendProgress, _dlgProgess,
+  connect(_workerdb, &CDatabaseWorker::sendProgress, _dlgProgess,
           &DialogProgress::receiveProgress);
-  connect(_worker, &CDatabaseWorker::progressReady, _dlgProgess,
+  connect(_workerdb, &CDatabaseWorker::progressReady, _dlgProgess,
           &DialogProgress::allowClose);
 
   // Create an event loop to block until the database operation is done,
   // necessary to display the progressbar properly
   QEventLoop loop;
-  connect(_worker, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
+  connect(_workerdb, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
 
   // start the database thread operation
   bool success = false;
-  QMetaObject::invokeMethod(_worker, "writePlaylistTracksToDatabase",
+  QMetaObject::invokeMethod(_workerdb, "writePlaylistTracksToDatabase",
                             Qt::QueuedConnection, _playlist, &success,
                             &_cancelSaving);
 
@@ -847,7 +856,7 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 // open first (default) playlist in the database-table "playlist" on start up:
 void MainWindow::readDataBasePlaylist() {
   bool success = false;
-  QMetaObject::invokeMethod(_worker, "readDataBasePlaylist",
+  QMetaObject::invokeMethod(_workerdb, "readDataBasePlaylist",
                             Qt::BlockingQueuedConnection, _playlist,
                             _defaultPlaylistID, &success);
   if (!success)
@@ -881,13 +890,13 @@ void MainWindow::closingProcedure() {
 
   bool success = false;
   // cleaning up the database
-  QMetaObject::invokeMethod(_worker, "cleanupDatabase",
+  QMetaObject::invokeMethod(_workerdb, "cleanupDatabase",
                             Qt::BlockingQueuedConnection, &success);
   if (success)
     qDebug() << "Database clean up was successfull";
 
   // close database
-  QMetaObject::invokeMethod(_worker, "closeDatabase",
+  QMetaObject::invokeMethod(_workerdb, "closeDatabase",
                             Qt::BlockingQueuedConnection);
 
   // stop the worker thread for the database operations

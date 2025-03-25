@@ -3,10 +3,10 @@
 
 DialogAddPlaylist::DialogAddPlaylist(QWidget *parent,
                                      CPlaylistContainer *playlist,
-                                     CDatabaseWorker *worker,
+                                     CDatabaseWorker *workerdb,
                                      bool *playlistChanged)
     : QDialog(parent), ui(new Ui::DialogAddPlaylist), _playlist(playlist),
-      _worker(worker), _playlistChanged(playlistChanged) {
+      _workerdb(workerdb), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
 
   // initialize the window
@@ -37,7 +37,7 @@ void DialogAddPlaylist::addPlaylist() {
   // fill that object with the selected playlistname from the tablewidget, only
   // 1!
   bool success = false;
-  QMetaObject::invokeMethod(_worker, "readDataBasePlaylist",
+  QMetaObject::invokeMethod(_workerdb, "readDataBasePlaylist",
                             Qt::BlockingQueuedConnection, &tempplaylist, id,
                             &success);
 
@@ -77,7 +77,7 @@ void DialogAddPlaylist::readDatabase() {
 
   bool success = false;
   // find in the database
-  QMetaObject::invokeMethod(_worker, "getPlaylistsFromDatabase",
+  QMetaObject::invokeMethod(_workerdb, "getPlaylistsFromDatabase",
                             Qt::BlockingQueuedConnection, &playlistsInDatabase,
                             &success);
 

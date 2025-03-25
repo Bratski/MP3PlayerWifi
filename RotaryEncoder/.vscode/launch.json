@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/RotaryEncoder",
-      "program": "/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/RotaryEncoder/build/Debug/outDebug",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
