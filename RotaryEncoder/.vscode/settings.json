@@ -41,8 +41,7 @@
   "C_Cpp_Runner.linkerArgs": [
     "-lgpiod"
   ],
-  "C_Cpp_Runner.includePaths": [
-   ],
+  "C_Cpp_Runner.includePaths": [],
   "C_Cpp_Runner.includeSearch": [
     "*",
     "**/*"

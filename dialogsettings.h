@@ -2,9 +2,12 @@
 #define DIALOGSETTINGS_H
 
 #include "COled.h"
+#include "crotaryencoderworker.h"
+
 #include <QDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QThread>
 
 // TODO: save and read settings from a config file
 
@@ -17,13 +20,16 @@ class DialogSettings : public QDialog {
 
 public:
   explicit DialogSettings(QWidget *parent = nullptr, COled *oled = nullptr,
-                          QString *apikey = nullptr,
-                          bool *statusoled = nullptr);
+                          QString *apikey = nullptr, bool *statusoled = nullptr,
+                          QThread *rtcthread = nullptr,
+                          CRotaryEncoderWorker *workerrtc = nullptr,
+                          bool *statusrtc = nullptr);
   ~DialogSettings();
 
 public slots:
   void autodetectOled();
   void initializeOled();
+  void initializeRTC();
   void toggleOledButtons(bool checked);
   void toggleRTCButtons(bool checked);
   void saveSettings();
@@ -31,10 +37,18 @@ public slots:
 private:
   Ui::DialogSettings *ui;
   COled *_oled;
+  QThread *_rtcthread;
+  CRotaryEncoderWorker *_workerrtc;
   QString *_apiKey;
-  void showOledData();
   bool *_statusOled;
-  bool _statusRTC = false;
+  bool *_statusRTC;
+
+  uint _pinSW = 23;
+  uint _pinCLK = 17;
+  uint _pinDT = 27;
+
+  void showOledData();
+  void showRTCData();
 };
 
 #endif // DIALOGSETTINGS_H

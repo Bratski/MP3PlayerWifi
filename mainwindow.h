@@ -54,8 +54,8 @@ public:
   MainWindow(QWidget *parent = nullptr, COled *oled = nullptr,
              QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr,
              CPlaylistContainer *playlist = nullptr, CTrack *track = nullptr,
-             QThread *dbthread = nullptr, CDatabaseWorker *workerdb = nullptr,
-             QThread *rtcthread = nullptr,
+             QThread *dbthread = nullptr, QThread *rtcthread = nullptr,
+             CDatabaseWorker *workerdb = nullptr,
              CRotaryEncoderWorker *workerrtc = nullptr);
   ~MainWindow();
 

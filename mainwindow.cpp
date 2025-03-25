@@ -10,11 +10,12 @@
 
 MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                        QAudioOutput *audio, CPlaylistContainer *playlist,
-                       CTrack *track, QThread *dbthread,
-                       CDatabaseWorker *workerdb, QThread *rtcthread, CRotaryEncoderWorker *workerrtc)
+                       CTrack *track, QThread *dbthread, QThread *rtcthread,
+                       CDatabaseWorker *workerdb,
+                       CRotaryEncoderWorker *workerrtc)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
       _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
-    _workerdb(workerdb), _rtcthread(rtcthread), _workerrtc(workerrtc)  {
+      _rtcthread(rtcthread), _workerdb(workerdb), _workerrtc(workerrtc) {
   ui->setupUi(this);
 
   // setting default parameters and initialize
@@ -26,9 +27,25 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
     _statusOled = _oled->initialize(); // in case the initialisation failed,
                                        // further settings must be disabled
   if (_statusRTC) {
-      _rtcthread->start();
-      QMetaObject::invokeMethod(_workerrtc, "initialize",
-                                Qt::QueuedConnection, _pinSW, _pinCLK, _pinDT, &_statusRTC);
+    _rtcthread->start();
+    QMetaObject::invokeMethod(_workerrtc, "setPins",
+                              Qt::BlockingQueuedConnection, _pinSW, _pinCLK,
+                              _pinDT);
+    QMetaObject::invokeMethod(_workerrtc, "initialize",
+                              Qt::BlockingQueuedConnection, &_statusRTC);
+
+    if (_statusRTC) {
+      QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
+                                Qt::BlockingQueuedConnection,
+                                int(_startVolume * 100));
+      QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection);
+    }
+    if (!_statusRTC) {
+      qDebug() << "rtc thread closed? is running: " << _rtcthread->isRunning();
+      _rtcthread->quit();
+      _rtcthread->wait();
+    }
+    qDebug() << "rtc thread closed? is running: " << _rtcthread->isRunning();
   }
   _audio->setVolume(_startVolume);
   ui->horizontalSliderVolume->setRange(0, 100);
@@ -147,9 +164,9 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   connect(_network, &QNetworkAccessManager::finished, this,
           &MainWindow::getDataFromNetwork);
 
-
   // connect the volume change on event from the _workerrtc
-  connect(_workerrtc, &CRotaryEncoderWorker::sendVolumeChange, this, &MainWindow::setVolume);
+  connect(_workerrtc, &CRotaryEncoderWorker::sendVolumeChange, this,
+          &MainWindow::setVolume);
 
   // check which audio files are supported
   // QMediaFormat mediaFormat;
@@ -171,7 +188,8 @@ MainWindow::~MainWindow() {
 // automatically when its parent object (the one referred to by this) is
 // destroyed.
 void MainWindow::openSettingsDialog() {
-  _dlgSettings = new DialogSettings(this, _oled, &_apiKey, &_statusOled);
+  _dlgSettings = new DialogSettings(this, _oled, &_apiKey, &_statusOled,
+                                    _rtcthread, _workerrtc, &_statusRTC);
   _dlgSettings->show();
 }
 
@@ -412,6 +430,9 @@ void MainWindow::undoSort() {
 void MainWindow::setVolume(int level) {
   float audioLevel = static_cast<float>(level) / 100.0f;
   _audio->setVolume(audioLevel);
+  if (_statusRTC)
+    QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
+                              Qt::BlockingQueuedConnection, level);
 }
 
 void MainWindow::playAllSongs() {
@@ -899,7 +920,18 @@ void MainWindow::closingProcedure() {
   QMetaObject::invokeMethod(_workerdb, "closeDatabase",
                             Qt::BlockingQueuedConnection);
 
-  // stop the worker thread for the database operations
+  qDebug() << "rtcthread is running: " << _rtcthread->isRunning();
+  // stop the worker rotary encoder thread for the volume changing operations
+  if (_rtcthread->isRunning()) {
+    if (_statusRTC)
+      QMetaObject::invokeMethod(_workerrtc, "stop",
+                                Qt::BlockingQueuedConnection);
+    qDebug() << "rtcthread is being closed";
+    _rtcthread->quit();
+    _rtcthread->wait();
+  }
+
+  // stop the worker database thread for the database operations
   _dbthread->quit();
   _dbthread->wait();
 }
@@ -1010,6 +1042,18 @@ void MainWindow::initializeSettings() {
     _settings.setValue("OLED Adress",
                        QString::fromStdString(_oled->getAdress()));
   }
+  if (!_settings.contains("RTC Status")) {
+    _settings.setValue("RTC Status", _statusRTC);
+  }
+  if (!_settings.contains("RTC Pin 1 SWITCH")) {
+    _settings.setValue("RTC Pin 1 SWITCH", _pinSW);
+  }
+  if (!_settings.contains("RTC Pin 2 CLK")) {
+    _settings.setValue("RTC Pin 2 CLK", _pinCLK);
+  }
+  if (!_settings.contains("RTC Pin 3 DT")) {
+    _settings.setValue("RTC Pin 3 DT", _pinDT);
+  }
 
   qDebug() << "Settings initialized with default values!";
 }
@@ -1021,6 +1065,10 @@ void MainWindow::saveSettings() {
   _settings.setValue("OLED Status", _statusOled);
   _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
   _settings.setValue("OLED Adress", QString::fromStdString(_oled->getAdress()));
+  _settings.setValue("RTC Status", _statusRTC);
+  _settings.setValue("RTC Pin 1 SWITCH", _pinSW);
+  _settings.setValue("RTC Pin 2 CLK", _pinCLK);
+  _settings.setValue("RTC Pin 3 DT", _pinDT);
 }
 
 void MainWindow::loadSettings() {
@@ -1030,6 +1078,10 @@ void MainWindow::loadSettings() {
   _statusOled = _settings.value("OLED Status").toBool();
   _oled->setBus(_settings.value("OLED Bus").toString().toStdString());
   _oled->setAdress(_settings.value("OLED Adress").toString().toStdString());
+  _statusRTC = _settings.value("RTC Status").toBool();
+  _pinSW = _settings.value("RTC Pin 1 SWITCH").toUInt();
+  _pinCLK = _settings.value("RTC Pin 2 CLK").toUInt();
+  _pinDT = _settings.value("RTC Pin 3 DT").toUInt();
 }
 
 int MainWindow::randomNumberGenerator(
