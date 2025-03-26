@@ -25,26 +25,26 @@ class DialogManagement : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogManagement(QWidget *parent = nullptr,
-                            CPlaylistContainer *playlist = nullptr,
-                            CDatabaseWorker *workerdb = nullptr,
-                            bool *playlistChanged = nullptr);
+  explicit DialogManagement(QWidget* parent = nullptr,
+                            CPlaylistContainer* playlist = nullptr,
+                            CDatabaseWorker* workerdb = nullptr,
+                            bool* playlistChanged = nullptr);
   ~DialogManagement();
 
 public slots:
   void openPlaylist();
   void addNewPlaylist();
   void deletePlaylist();
-  void namePlaylistEdited(QTableWidgetItem *item);
+  void namePlaylistEdited(QTableWidgetItem* item);
 
 signals:
   void saveToDBMainWindow();
 
 private:
-  Ui::DialogManagement *ui;
-  CPlaylistContainer *_playlist;
-  CDatabaseWorker *_workerdb;
-  bool *_playlistChanged;  // to trigger the save to db question at shutdown
+  Ui::DialogManagement* ui;
+  CPlaylistContainer* _playlist;
+  CDatabaseWorker* _workerdb;
+  bool* _playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();
 };

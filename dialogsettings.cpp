@@ -3,14 +3,17 @@
 
 DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
                                bool* statusoled, QThread* rtcthread,
-                               CRotaryEncoderWorker* workerrtc, bool* statusrtc)
+                               CRotaryEncoderWorker* workerrtc, bool* statusrtc,
+                               bool* runrtcloop)
     : QDialog(parent), ui(new Ui::DialogSettings), _oled(oled), _apiKey(apikey),
       _statusOled(statusoled), _rtcthread(rtcthread), _workerrtc(workerrtc),
-      _statusRTC(statusrtc) {
+      _statusRTC(statusrtc), _runRTCloop(runrtcloop) {
   ui->setupUi(this);
 
   // initialize
   setWindowTitle("Settings");
+  // stop the event loop for the RTC
+  *_runRTCloop = false;
   showOledData();
   showRTCData();
   ui->checkBoxOled->setChecked(*_statusOled);
@@ -50,6 +53,7 @@ void DialogSettings::initializeOled() {
   _oled->setAdress(ui->lineEditi2cAdress->text().toStdString());
 
   if (!_oled->initialize()) {
+    *_statusOled = false;
     QMessageBox::warning(this, "Error", "no Oled-display could be initialized");
   } else {
     QMessageBox::information(this, "Success",
@@ -62,8 +66,9 @@ void DialogSettings::initializeRTC() {
   if (!_rtcthread->isRunning())
     _rtcthread->start();
   // get the pin numbers from the textlines in the dialog
-  QString pinSW, pinCLK, pinDT;
+  QString chipNUMBER, pinSW, pinCLK, pinDT;
 
+  chipNUMBER = ui->lineEditChipNumber->text();
   pinSW = ui->lineEditRTCPin1->text();
   pinCLK = ui->lineEditRTCPin2->text();
   pinDT = ui->lineEditRTCPin3->text();
@@ -71,6 +76,8 @@ void DialogSettings::initializeRTC() {
   // check if they are actually numbers
   bool ok;
 
+  if (chipNUMBER.toInt(&ok))
+    _chipNUMBER = chipNUMBER.toInt();
   if (pinSW.toInt(&ok))
     _pinSW = pinSW.toInt();
   if (pinCLK.toInt(&ok))
@@ -79,28 +86,27 @@ void DialogSettings::initializeRTC() {
     _pinSW = pinDT.toInt();
 
   // invoke the initialisation
-  bool success = false;
   QMetaObject::invokeMethod(_workerrtc, "setPins", Qt::BlockingQueuedConnection,
                             Q_ARG(uint, _pinSW), Q_ARG(uint, _pinCLK),
                             Q_ARG(uint, _pinDT));
+  QMetaObject::invokeMethod(_workerrtc, "setChipnumber",
+                            Qt::BlockingQueuedConnection,
+                            Q_ARG(int, _chipNUMBER));
   QMetaObject::invokeMethod(_workerrtc, "initialize",
                             Qt::BlockingQueuedConnection,
-                            Q_ARG(bool*, &success));
+                            Q_ARG(bool*, _statusRTC));
 
-  if (!success) {
+  // send message successful or not
+  if (!*_statusRTC) {
     _rtcthread->quit();
     _rtcthread->wait();
     QMessageBox::warning(this, "Error",
                          "Rotary Encoder could NOT be initialized");
   }
 
-  // send message successful or not
-
   else {
-
-    // TODO sync the volumes
-    // QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
-    //                           Qt::BlockingQueuedConnection, int());
+    // start the rtc event loop
+    *_runRTCloop = true;
     QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection);
     QMessageBox::information(this, "Success",
                              "Rotary Encoder succesfully initialized");
@@ -109,13 +115,14 @@ void DialogSettings::initializeRTC() {
 
 void DialogSettings::toggleRTCButtons(bool checked) {
   *_statusRTC = checked;
+  ui->lineEditChipNumber->setEnabled(*_statusRTC);
   ui->lineEditRTCPin1->setEnabled(*_statusRTC);
   ui->lineEditRTCPin2->setEnabled(*_statusRTC);
   ui->lineEditRTCPin3->setEnabled(*_statusRTC);
   ui->pushButtonInitializeRTC->setEnabled(*_statusRTC);
 
   if (!*_statusRTC && _rtcthread->isRunning()) {
-    QMetaObject::invokeMethod(_workerrtc, "stop", Qt::BlockingQueuedConnection);
+    *_runRTCloop = false;
     _rtcthread->quit();
     _rtcthread->wait();
   }
@@ -132,22 +139,18 @@ void DialogSettings::showOledData() {
 }
 
 void DialogSettings::showRTCData() {
-  if (_rtcthread->isRunning()) {
-    uint pin1, pin2, pin3;
-    QMetaObject::invokeMethod(_workerrtc, "getPinSWITCH",
+  if (_rtcthread->isRunning() && *_statusRTC) {
+    QMetaObject::invokeMethod(
+        _workerrtc, "getPins", Qt::BlockingQueuedConnection,
+        Q_ARG(uint*, &_pinSW), Q_ARG(uint*, &_pinCLK), Q_ARG(uint*, &_pinDT));
+    QMetaObject::invokeMethod(_workerrtc, "getChipnumber",
                               Qt::BlockingQueuedConnection,
-                              Q_ARG(uint*, &pin1));
-    QMetaObject::invokeMethod(_workerrtc, "getPinCLK",
-                              Qt::BlockingQueuedConnection,
-                              Q_ARG(uint*, &pin2));
-    QMetaObject::invokeMethod(_workerrtc, "getPinDT",
-                              Qt::BlockingQueuedConnection,
-                              Q_ARG(uint*, &pin3));
-
-    ui->lineEditRTCPin1->setText(QString::number(pin1));
-    ui->lineEditRTCPin2->setText(QString::number(pin2));
-    ui->lineEditRTCPin3->setText(QString::number(pin3));
+                              Q_ARG(int*, &_chipNUMBER));
   }
+  ui->lineEditChipNumber->setText(QString::number(_chipNUMBER));
+  ui->lineEditRTCPin1->setText(QString::number(_pinSW));
+  ui->lineEditRTCPin2->setText(QString::number(_pinCLK));
+  ui->lineEditRTCPin3->setText(QString::number(_pinDT));
 }
 
 void DialogSettings::toggleOledButtons(bool checked) {

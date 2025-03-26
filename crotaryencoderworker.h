@@ -9,44 +9,34 @@
 class CRotaryEncoderWorker : public QObject {
   Q_OBJECT
 public:
-  explicit CRotaryEncoderWorker(QObject *parent = nullptr);
+  explicit CRotaryEncoderWorker(QObject* parent = nullptr);
 
 public slots:
-
-  void initialize(bool *success);
-  void stop() { _running = false; }
+  void initialize(bool* success);
+  void run(bool* runRTCloop, int* level, bool* switchstate);
   void run();
-
-  void getCounter(int *counter) { *counter = _rotaryCounter; }
-  void getSwitchState(bool *switchstate) { *switchstate = _switchState; }
-
+  void disconnect(bool* success);
+  void setChipnumber(const int chipnumber);
+  void getChipnumber(int* chipnumber);
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
-  void setRotaryCounter(int counter) { _rotaryCounter = counter; }
-
-  void getPinSWITCH(uint *pin1) { *pin1 = _pin1; }
-  void getPinCLK(uint *pin2) { *pin2 = _pin2; }
-  void getPinDT(uint *pin3) { *pin3 = _pin3; }
-  void getPins(uint *pin1, uint *pin2, uint *pin3) {
-    *pin1 = _pin1;
-    *pin2 = _pin2;
-    *pin3 = _pin3;
-  }
+  void getPins(uint* pin1, uint* pin2, uint* pin3);
 
 signals:
-  void sendVolumeChange(const int &counter);
+  void sendVolumeChanged(int& level);
+  void sendSwitchPressed();
 
 private:
   uint _pin1; // SWITCH
   uint _pin2; // CLK
   uint _pin3; // DT
-  int _rotaryCounter = 0;
-  const char *_chipname = "gpiochip0";
-  gpiod_line *_line1;
-  gpiod_line *_line2;
-  gpiod_line *_line3;
-  gpiod_chip *_chip;
-  bool _running;
-  bool _switchState;
+  const char* _chipname = "gpiochip0";
+  gpiod_line* _line1;
+  gpiod_line* _line2;
+  gpiod_line* _line3;
+  gpiod_chip* _chip;
+  bool* _runRTCloop;
+  int* _level;
+  bool* _switchstate;
 };
 
 #endif // CROTARYENCODERWORKER_H

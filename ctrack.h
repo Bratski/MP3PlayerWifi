@@ -27,12 +27,12 @@ public:
   // CTrack() = default;
 
   // Ctor for the sql table input
-  CTrack(const QString &id = 0, const QString &title = "Unknown",
-         const QString &artist = "Unknown", const QString &album = "Unknown",
-         const int &year = 0, const int &number = 0,
-         const QString &genre = "Unknown", const int &duration = 0,
-         const int &bitrate = 0, const int &samplerate = 0,
-         const int &channels = 0, const QString &filelocation = "Unknown")
+  CTrack(const QString& id = 0, const QString& title = "Unknown",
+         const QString& artist = "Unknown", const QString& album = "Unknown",
+         const int& year = 0, const int& number = 0,
+         const QString& genre = "Unknown", const int& duration = 0,
+         const int& bitrate = 0, const int& samplerate = 0,
+         const int& channels = 0, const QString& filelocation = "Unknown")
       : _TraID(id), _TraTitle(title), _TraArtist(artist), _TraAlbum(album),
         _TraYear(year), _TraNumber(number), _TraGenre(genre),
         _TraDuration(duration), _TraBitrate(bitrate),
@@ -40,21 +40,21 @@ public:
         _TraFileLocation(filelocation) {}
 
   // Method to set data from mp3-file-tag
-  void setTrackData(const QString &fileloc, const QString &id);
+  void setTrackData(const QString& fileloc, const QString& id);
 
   // All the get-methods for the attributes
-  const QString &getArtist() const { return _TraArtist; }
-  const QString &getAlbum() const { return _TraAlbum; }
-  const QString &getGenre() const { return _TraGenre; }
-  const QString &getTitle() const { return _TraTitle; }
-  const QString &getFileLocation() const { return _TraFileLocation; }
-  const QString &getID() const { return _TraID; }
-  const int &getNumber() const { return _TraNumber; }
-  const int &getDuration() const { return _TraDuration; }
-  const int &getBitrate() const { return _TraBitrate; }
-  const int &getSamplerate() const { return _TraSamplerate; }
-  const int &getChannels() const { return _TraChannels; }
-  const int &getYear() const { return _TraYear; }
+  const QString& getArtist() const { return _TraArtist; }
+  const QString& getAlbum() const { return _TraAlbum; }
+  const QString& getGenre() const { return _TraGenre; }
+  const QString& getTitle() const { return _TraTitle; }
+  const QString& getFileLocation() const { return _TraFileLocation; }
+  const QString& getID() const { return _TraID; }
+  const int& getNumber() const { return _TraNumber; }
+  const int& getDuration() const { return _TraDuration; }
+  const int& getBitrate() const { return _TraBitrate; }
+  const int& getSamplerate() const { return _TraSamplerate; }
+  const int& getChannels() const { return _TraChannels; }
+  const int& getYear() const { return _TraYear; }
 };
 
 #endif // CTRACK_H

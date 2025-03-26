@@ -19,7 +19,7 @@ void CRotaryEncoderWorker::initialize(bool* success) {
   _line3 = gpiod_chip_get_line(_chip, _pin3);
 
   if (!_line3 || !_line2 || !_line1) {
-    qDebug() << "Error getting line";
+    qDebug() << "Error getting lines";
     gpiod_chip_close(_chip);
     *success = false;
     return;
@@ -39,23 +39,29 @@ void CRotaryEncoderWorker::initialize(bool* success) {
     *success = false;
     return;
   }
-
+  qDebug() << "GPIO succesfully initialized";
   *success = true;
   return;
 }
 
-void CRotaryEncoderWorker::run() {
-  _running = true;
-  int last_clk_state = gpiod_line_get_value(_line2);
-  // main loop picking up the events
-  while (_running) {
+void CRotaryEncoderWorker::run(bool* runRTCloop, int* level,
+                               bool* switchstate) {
+  // saving the pointers
+  _runRTCloop = runRTCloop;
+  _level = level;
+  _switchstate = switchstate;
 
+  qDebug() << "event detecting loop started";
+  // main loop picking up the events
+  int last_clk_state = gpiod_line_get_value(_line2);
+  while (*_runRTCloop) {
     // Read switch state
     if (gpiod_line_event_wait(_line1, nullptr) > 0) {
       gpiod_line_event event;
       if (gpiod_line_event_read(_line1, &event) == 0) {
-        _switchState = (event.event_type == GPIOD_LINE_EVENT_RISING_EDGE);
-        qDebug() << "Button state: " << _switchState;
+        *switchstate = (event.event_type == GPIOD_LINE_EVENT_RISING_EDGE);
+        emit sendSwitchPressed();
+        qDebug() << "Button state: " << *switchstate;
       }
     }
 
@@ -67,35 +73,91 @@ void CRotaryEncoderWorker::run() {
       int current_dt = gpiod_line_get_value(_line3);
 
       if (current_clk == current_dt) {
-        --_rotaryCounter;
-        if (_rotaryCounter < 0) {
-          _rotaryCounter = 0;
+        --*level;
+        if (*level < 0) {
+          *level = 0;
         }
-        emit sendVolumeChange(_rotaryCounter);
-        qDebug() << "Rotation: Counter-clockwise | Count: " << _rotaryCounter;
+        emit sendVolumeChanged(*level);
+        qDebug() << "Rotation: Counter-clockwise | Count: " << *level;
       } else {
-        ++_rotaryCounter;
-        if (_rotaryCounter > 100) {
-          _rotaryCounter = 100;
+        ++*level;
+        if (*level > 100) {
+          *level = 100;
         }
-        emit sendVolumeChange(_rotaryCounter);
-        qDebug() << "Rotation: Clockwise | Count: " << _rotaryCounter;
+        emit sendVolumeChanged(*level);
+        qDebug() << "Rotation: Clockwise | Count: " << *level;
       }
-
-      last_clk_state = current_clk;
     }
+    last_clk_state = current_clk;
 
     // Small delay to reduce CPU usage
     usleep(1000); // 1ms
   }
+}
 
-  // if stopping, properly closing the chip and lines
-  if (!_running) {
-    gpiod_line_release(_line1);
-    gpiod_line_release(_line2);
-    gpiod_line_release(_line3);
-    gpiod_chip_close(_chip);
+// in case the pointers are already known, to restart the loop
+void CRotaryEncoderWorker::run() {
+  qDebug() << "event detecting loop started";
+  // main loop picking up the events
+  int last_clk_state = gpiod_line_get_value(_line2);
+  while (*_runRTCloop) {
+    // Read switch state
+    if (gpiod_line_event_wait(_line1, nullptr) > 0) {
+      gpiod_line_event event;
+      if (gpiod_line_event_read(_line1, &event) == 0) {
+        *_switchstate = (event.event_type == GPIOD_LINE_EVENT_RISING_EDGE);
+        emit sendSwitchPressed();
+        qDebug() << "Button state: " << *_switchstate;
+      }
+    }
+
+    // Reading CLK and DT states
+    int current_clk = gpiod_line_get_value(_line2);
+
+    if (current_clk != last_clk_state) {
+      // CLK state changed, check DT pin to determine direction
+      int current_dt = gpiod_line_get_value(_line3);
+
+      if (current_clk == current_dt) {
+        --*_level;
+        if (*_level < 0) {
+          *_level = 0;
+        }
+        emit sendVolumeChanged(*_level);
+        qDebug() << "Rotation: Counter-clockwise | Count: " << *_level;
+      } else {
+        ++*_level;
+        if (*_level > 100) {
+          *_level = 100;
+        }
+        emit sendVolumeChanged(*_level);
+        qDebug() << "Rotation: Clockwise | Count: " << *_level;
+      }
+    }
+    last_clk_state = current_clk;
+
+    // Small delay to reduce CPU usage
+    usleep(1000); // 1ms
   }
+}
+
+void CRotaryEncoderWorker::disconnect(bool* success) {
+  // properly closing the chip and lines
+  gpiod_line_release(_line1);
+  gpiod_line_release(_line2);
+  gpiod_line_release(_line3);
+  gpiod_chip_close(_chip);
+  *success = true;
+  qDebug() << "lines and chip successfully released";
+}
+
+void CRotaryEncoderWorker::setChipnumber(const int chipnumber) {
+  QString chipname = "gpiochip" + QString::number(chipnumber);
+  _chipname = chipname.toStdString().c_str();
+}
+
+void CRotaryEncoderWorker::getChipnumber(int* chipnumber) {
+  *chipnumber = int(std::string(_chipname).back());
 }
 
 void CRotaryEncoderWorker::setPins(const uint SWITCH, const uint CLK,
@@ -103,4 +165,12 @@ void CRotaryEncoderWorker::setPins(const uint SWITCH, const uint CLK,
   this->_pin1 = SWITCH;
   this->_pin2 = CLK;
   this->_pin3 = DT;
+  qDebug() << "Pins succesfully set";
+}
+
+void CRotaryEncoderWorker::getPins(uint* pin1, uint* pin2, uint* pin3) {
+  *pin1 = _pin1;
+  *pin2 = _pin2;
+  *pin3 = _pin3;
+  qDebug() << "Pins succesfully retrieved";
 }

@@ -63,8 +63,8 @@ public:
 
   // to get to a track by the vector index, which correspondig to the
   // tablewidget index, operator[] overload
-  const CTrack &operator[](const size_t &idx) const;
-  CTrack &operator[](const size_t &idx);
+  const CTrack& operator[](const size_t& idx) const;
+  CTrack& operator[](const size_t& idx);
 
   // to be able iterate through the different vectors
   auto begin() { return _playlist_obj_vector.begin(); }
@@ -85,22 +85,22 @@ public:
   int calculatePlaylistTotalTime();
 
   // playlist operations
-  void addTrack(CTrack &track);
-  void removeTrack(const QString &id);
+  void addTrack(CTrack& track);
+  void removeTrack(const QString& id);
   void clear();
   void sortPlaylist(art_t wayofsorting);
-  void filterPlaylist(art_t wayoffiltering, const QString &text);
+  void filterPlaylist(art_t wayoffiltering, const QString& text);
   void copyFilteredToMainwindow();
 
   // not really necessary
-  static const char
-      *sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];
+  static const char*
+      sortMethodsTXT[int(CPlaylistContainer::art_t::numberOfMethods)];
 
   // playlist setter and getter attribute name and id
-  void setPllID(const int &id) { _PllID = id; }
-  void setPllName(const QString &name) { _PllName = name; }
-  const int &getPllID() { return _PllID; }
-  const QString &getPllName() { return _PllName; }
+  void setPllID(const int& id) { _PllID = id; }
+  void setPllName(const QString& name) { _PllName = name; }
+  const int& getPllID() { return _PllID; }
+  const QString& getPllName() { return _PllName; }
 };
 
 #endif // CPLAYLISTCONTAINER_H

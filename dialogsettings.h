@@ -19,11 +19,12 @@ class DialogSettings : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogSettings(QWidget *parent = nullptr, COled *oled = nullptr,
-                          QString *apikey = nullptr, bool *statusoled = nullptr,
-                          QThread *rtcthread = nullptr,
-                          CRotaryEncoderWorker *workerrtc = nullptr,
-                          bool *statusrtc = nullptr);
+  explicit DialogSettings(QWidget* parent = nullptr, COled* oled = nullptr,
+                          QString* apikey = nullptr, bool* statusoled = nullptr,
+                          QThread* rtcthread = nullptr,
+                          CRotaryEncoderWorker* workerrtc = nullptr,
+                          bool* statusrtc = nullptr,
+                          bool* runrtcloop = nullptr);
   ~DialogSettings();
 
 public slots:
@@ -35,14 +36,16 @@ public slots:
   void saveSettings();
 
 private:
-  Ui::DialogSettings *ui;
-  COled *_oled;
-  QString *_apiKey;
-  bool *_statusOled;
-  QThread *_rtcthread;
-  CRotaryEncoderWorker *_workerrtc;
-  bool *_statusRTC;
+  Ui::DialogSettings* ui;
+  COled* _oled;
+  QString* _apiKey;
+  bool* _statusOled;
+  QThread* _rtcthread;
+  CRotaryEncoderWorker* _workerrtc;
+  bool* _statusRTC;
+  bool* _runRTCloop;
 
+  int _chipNUMBER = 0;
   uint _pinSW = 23;
   uint _pinCLK = 17;
   uint _pinDT = 27;

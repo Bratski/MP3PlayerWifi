@@ -10,7 +10,9 @@
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
+  qRegisterMetaType<bool*>("bool*"); // for pi compilation
+  qRegisterMetaType<uint*>("uint*");
   QApplication a(argc, argv);
 
   // creating Objects:
@@ -40,7 +42,7 @@ int main(int argc, char *argv[]) {
   bool success = false;
   QMetaObject::invokeMethod(&workerdb, "initialize",
                             Qt::BlockingQueuedConnection,
-                            Q_ARG(bool *, &success));
+                            Q_ARG(bool*, &success));
 
   // stop program if not succesfull
   if (!success) {

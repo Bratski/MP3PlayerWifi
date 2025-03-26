@@ -17,20 +17,20 @@ class DialogAddPlaylist : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogAddPlaylist(QWidget *parent = nullptr,
-                             CPlaylistContainer *playlist = nullptr,
-                             CDatabaseWorker *workerdb = nullptr,
-                             bool *playlistChanged = nullptr);
+  explicit DialogAddPlaylist(QWidget* parent = nullptr,
+                             CPlaylistContainer* playlist = nullptr,
+                             CDatabaseWorker* workerdb = nullptr,
+                             bool* playlistChanged = nullptr);
   ~DialogAddPlaylist();
 
 public slots:
   void addPlaylist();
 
 private:
-  Ui::DialogAddPlaylist *ui;
-  CPlaylistContainer *_playlist;
-  CDatabaseWorker *_workerdb;
-  bool *_playlistChanged;
+  Ui::DialogAddPlaylist* ui;
+  CPlaylistContainer* _playlist;
+  CDatabaseWorker* _workerdb;
+  bool* _playlistChanged;
   void readDatabase();
 };
 

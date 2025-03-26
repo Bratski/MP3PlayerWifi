@@ -51,12 +51,12 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(QWidget *parent = nullptr, COled *oled = nullptr,
-             QMediaPlayer *player = nullptr, QAudioOutput *audio = nullptr,
-             CPlaylistContainer *playlist = nullptr, CTrack *track = nullptr,
-             QThread *dbthread = nullptr, QThread *rtcthread = nullptr,
-             CDatabaseWorker *workerdb = nullptr,
-             CRotaryEncoderWorker *workerrtc = nullptr);
+  MainWindow(QWidget* parent = nullptr, COled* oled = nullptr,
+             QMediaPlayer* player = nullptr, QAudioOutput* audio = nullptr,
+             CPlaylistContainer* playlist = nullptr, CTrack* track = nullptr,
+             QThread* dbthread = nullptr, QThread* rtcthread = nullptr,
+             CDatabaseWorker* workerdb = nullptr,
+             CRotaryEncoderWorker* workerrtc = nullptr);
   ~MainWindow();
 
 public slots:
@@ -81,38 +81,38 @@ public slots:
   void undoSort();
 
   // player functions
-  void setVolume(int level);
+  void setVolume();
   void playAllSongs();
   void playNext();
   void playPrevious();
   void togglePause();
   void stopPlaying();
-  void playOneSong(QTableWidgetItem *item);
+  void playOneSong(QTableWidgetItem* item);
   void setRepeat(bool state) { _repeat = state; }
   void setShuffle(bool state);
 
   // network functions
-  void getDataFromNetwork(QNetworkReply *reply);
+  void getDataFromNetwork(QNetworkReply* reply);
 
 private:
   // pointers
-  Ui::MainWindow *ui;
-  COled *_oled;
-  QMediaPlayer *_player;
-  QAudioOutput *_audio;
-  DialogSettings *_dlgSettings;
-  DialogProgress *_dlgProgess;
-  DialogSearch *_dlgSearch;
-  DialogManagement *_dlgManagement;
-  DialogAddPlaylist *_dlgAddPlaylist;
-  CPlaylistContainer *_playlist;
-  CTrack *_track;
-  QThread *_dbthread;
-  QThread *_rtcthread;
-  CDatabaseWorker *_workerdb;
-  CRotaryEncoderWorker *_workerrtc;
+  Ui::MainWindow* ui;
+  COled* _oled;
+  QMediaPlayer* _player;
+  QAudioOutput* _audio;
+  DialogSettings* _dlgSettings;
+  DialogProgress* _dlgProgess;
+  DialogSearch* _dlgSearch;
+  DialogManagement* _dlgManagement;
+  DialogAddPlaylist* _dlgAddPlaylist;
+  CPlaylistContainer* _playlist;
+  CTrack* _track;
+  QThread* _dbthread;
+  QThread* _rtcthread;
+  CDatabaseWorker* _workerdb;
+  CRotaryEncoderWorker* _workerrtc;
 
-  QNetworkAccessManager *_network;
+  QNetworkAccessManager* _network;
 
   // attributes
   QString _playThisSong; // contains the filelocation of the music file
@@ -130,12 +130,15 @@ private:
   bool _playlistChanged = false;
   bool _imagedata = false;
   bool _cancelSaving = false;
+  bool _runRTCloop = false;
   bool _playerStopped = false;
   bool _statusOled = false;
   bool _statusRTC = true;
+  bool _switchState = false;
   bool _filelocationValid = true;
 
-  float _startVolume = 0.2; // setting the start volume to 20%
+  // float _startVolume = 0.2; // setting the start volume to 20%
+  int _level = 20;
 
   int _index = 0; // song index for the playlist vector
   int _defaultPlaylistID =
@@ -155,8 +158,8 @@ private:
   QSettings _settings{"Bratski", "MP3Player"};
 
   // methods
-  const QString convertMilliSecToTimeString(const qint64 &millisec);
-  const QString convertSecToTimeString(const int &sec);
+  const QString convertMilliSecToTimeString(const qint64& millisec);
+  const QString convertSecToTimeString(const int& sec);
   void
   handleMediaStatusChanged(QMediaPlayer::MediaStatus
                                status); // detect if a song has finished playing
@@ -167,7 +170,7 @@ private:
                                  // particular playlist
   void closingProcedure(); // contains several procedures for a secure shutdown
   void processFolder(
-      const QString &path); // recursive function to scan all the directories
+      const QString& path); // recursive function to scan all the directories
                             // and subdirectories for music files
   void setItemBackgroundColour(); // to colour the background of the current
                                   // playing song
@@ -176,7 +179,7 @@ private:
                              // non existing
   void saveSettings();       // saving the configuration settings
   void loadSettings();       // loading the configuration settings
-  int randomNumberGenerator(const int &min,
-                            const int &max); // for the shuffle modus
+  int randomNumberGenerator(const int& min,
+                            const int& max); // for the shuffle modus
 };
 #endif // MAINWINDOW_H

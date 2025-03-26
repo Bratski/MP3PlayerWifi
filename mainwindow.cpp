@@ -35,27 +35,23 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
                               Qt::BlockingQueuedConnection, Q_ARG(uint, _pinSW),
                               Q_ARG(uint, _pinCLK), Q_ARG(uint, _pinDT));
 
-    // QMetaObject::invokeMethod(_workerrtc, "setPins",
-    //                           Qt::BlockingQueuedConnection, _pinSW, _pinCLK,
-    //                           _pinDT);
     QMetaObject::invokeMethod(_workerrtc, "initialize",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(bool*, &_statusRTC));
 
     if (_statusRTC) {
-      // syncing the volume level
-      QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
-                                Qt::BlockingQueuedConnection,
-                                Q_ARG(int, int(_startVolume * 100)));
       // start the event detecting loop in the worker thread
-      QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection);
+      _runRTCloop = true;
+      QMetaObject::invokeMethod(
+          _workerrtc, "run", Qt::QueuedConnection, Q_ARG(bool*, &_runRTCloop),
+          Q_ARG(int*, &_level), Q_ARG(bool*, &_switchState));
     }
     if (!_statusRTC) {
       _rtcthread->quit();
       _rtcthread->wait();
     }
   }
-  _audio->setVolume(_startVolume);
+  _audio->setVolume(static_cast<float>(_level) / 100.0f);
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
       static_cast<int>(_audio->volume() * 100));
@@ -158,7 +154,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
                    &QTableWidget::itemDoubleClicked, this,
                    &MainWindow::playOneSong);
 
-  // Checkbox events
+  // Checkbox events, using stateChanged in stead of checkStateChanged because
+  // of pi compiling compatibility
   QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::stateChanged, this,
                    &MainWindow::setRepeat);
   QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::stateChanged, this,
@@ -173,8 +170,10 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
           &MainWindow::getDataFromNetwork);
 
   // connect the volume change on event from the _workerrtc
-  connect(_workerrtc, &CRotaryEncoderWorker::sendVolumeChange, this,
+  connect(_workerrtc, &CRotaryEncoderWorker::sendVolumeChanged, this,
           &MainWindow::setVolume);
+  connect(_workerrtc, &CRotaryEncoderWorker::sendVolumeChanged,
+          ui->horizontalSliderVolume, &QSlider::setSliderPosition);
 
   // check which audio files are supported
   // QMediaFormat mediaFormat;
@@ -197,7 +196,7 @@ MainWindow::~MainWindow() {
 // destroyed.
 void MainWindow::openSettingsDialog() {
   _dlgSettings = new DialogSettings(this, _oled, &_apiKey, &_statusOled,
-                                    _rtcthread, _workerrtc, &_statusRTC);
+                                    _rtcthread, _workerrtc, &_statusRTC, &_runRTCloop);
   _dlgSettings->show();
 }
 
@@ -436,13 +435,9 @@ void MainWindow::undoSort() {
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no
 // sound) and 1.0 (=max volume)
-void MainWindow::setVolume(int level) {
-  float audioLevel = static_cast<float>(level) / 100.0f;
+void MainWindow::setVolume() {
+  float audioLevel = static_cast<float>(_level) / 100.0f;
   _audio->setVolume(audioLevel);
-  // syncing the volume level with the rotary encoder
-  if (_statusRTC)
-    QMetaObject::invokeMethod(_workerrtc, "setRotaryCounter",
-                              Qt::BlockingQueuedConnection, Q_ARG(int, level));
 }
 
 void MainWindow::playAllSongs() {
@@ -933,15 +928,23 @@ void MainWindow::closingProcedure() {
   QMetaObject::invokeMethod(_workerdb, "closeDatabase",
                             Qt::BlockingQueuedConnection);
 
-  qDebug() << "rtcthread is running: " << _rtcthread->isRunning();
   // stop the worker rotary encoder thread for the volume changing operations
   if (_rtcthread->isRunning()) {
-    if (_statusRTC)
-      QMetaObject::invokeMethod(_workerrtc, "stop",
-                                Qt::BlockingQueuedConnection);
-    qDebug() << "rtcthread is being closed";
-    _rtcthread->quit();
-    _rtcthread->wait();
+    bool success = true;
+    if (_statusRTC) {
+      // stop the event loop in the rtcthread
+      _runRTCloop = false;
+      QMetaObject::invokeMethod(_workerdb, "disconnect",
+                                Qt::BlockingQueuedConnection,
+                                Q_ARG(bool*, &success));
+    }
+
+    if (success) {
+      qDebug() << "rtcthread is being closed";
+      _rtcthread->quit();
+      _rtcthread->wait();
+    } else
+      qDebug() << "disconnect not successful, something wrong disconnecting gpio chip";
   }
 
   // stop the worker database thread for the database operations
@@ -1040,7 +1043,7 @@ void MainWindow::initializeSettings() {
     _settings.setValue("Api Key", _apiKey);
   }
   if (!_settings.contains("Volume")) {
-    _settings.setValue("Volume", _startVolume);
+    _settings.setValue("Volume", _level);
   }
   if (!_settings.contains("Default Playlist ID")) {
     _settings.setValue("Default Playlist ID", _defaultPlaylistID);
@@ -1073,7 +1076,7 @@ void MainWindow::initializeSettings() {
 
 void MainWindow::saveSettings() {
   _settings.setValue("Api Key", _apiKey);
-  _settings.setValue("Volume", _audio->volume());
+  _settings.setValue("Volume", int(_audio->volume() * 100));
   _settings.setValue("Default Playlist ID", _playlist->getPllID());
   _settings.setValue("OLED Status", _statusOled);
   _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
@@ -1086,7 +1089,7 @@ void MainWindow::saveSettings() {
 
 void MainWindow::loadSettings() {
   _apiKey = _settings.value("Api Key").toString();
-  _startVolume = _settings.value("Volume").toFloat();
+  _level = _settings.value("Volume").toInt();
   _defaultPlaylistID = _settings.value("Default Playlist ID").toInt();
   _statusOled = _settings.value("OLED Status").toBool();
   _oled->setBus(_settings.value("OLED Bus").toString().toStdString());
