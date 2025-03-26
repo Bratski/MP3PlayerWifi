@@ -1,10 +1,10 @@
 #include "dialogaddplaylist.h"
 #include "ui_dialogaddplaylist.h"
 
-DialogAddPlaylist::DialogAddPlaylist(QWidget *parent,
-                                     CPlaylistContainer *playlist,
-                                     CDatabaseWorker *workerdb,
-                                     bool *playlistChanged)
+DialogAddPlaylist::DialogAddPlaylist(QWidget* parent,
+                                     CPlaylistContainer* playlist,
+                                     CDatabaseWorker* workerdb,
+                                     bool* playlistChanged)
     : QDialog(parent), ui(new Ui::DialogAddPlaylist), _playlist(playlist),
       _workerdb(workerdb), _playlistChanged(playlistChanged) {
   ui->setupUi(this);
@@ -39,8 +39,8 @@ void DialogAddPlaylist::addPlaylist() {
   bool success = false;
   QMetaObject::invokeMethod(_workerdb, "readDataBasePlaylist",
                             Qt::BlockingQueuedConnection,
-                            Q_ARG(CPlaylistContainer* , &tempplaylist),
-                            Q_ARG(int, id), Q_ARG(bool* , &success));
+                            Q_ARG(CPlaylistContainer*, &tempplaylist),
+                            Q_ARG(int, id), Q_ARG(bool*, &success));
 
   bool doubleTrack = false;
   // add the temporary playlist object to the global one: _playlist
@@ -70,7 +70,7 @@ void DialogAddPlaylist::readDatabase() {
   std::vector<QString> playlistsInDatabase;
 
   // for pi compilation necessary
-  std::vector<QString> *pllptr = &playlistsInDatabase;
+  std::vector<QString>* pllptr = &playlistsInDatabase;
 
   // empty the list with playlists
   ui->tableWidgetDatabase->clearContents();
@@ -81,9 +81,9 @@ void DialogAddPlaylist::readDatabase() {
 
   bool success = false;
   // find in the database
-  QMetaObject::invokeMethod(_workerdb, "getPlaylistsFromDatabase",
-                            Qt::BlockingQueuedConnection, Q_ARG(std::vector<QString> *, pllptr),
-                            Q_ARG(bool*, &success));
+  QMetaObject::invokeMethod(
+      _workerdb, "getPlaylistsFromDatabase", Qt::BlockingQueuedConnection,
+      Q_ARG(std::vector<QString>*, pllptr), Q_ARG(bool*, &success));
 
   if (success) {
     // count the number of Playlists being found
@@ -94,7 +94,7 @@ void DialogAddPlaylist::readDatabase() {
     ui->tableWidgetDatabase->setRowCount(rowCount);
 
     // populate the table with data from query
-    QTableWidgetItem *item;
+    QTableWidgetItem* item;
 
     int row = 0;
     for (size_t i = 0; i < playlistsInDatabase.size(); ++i) {

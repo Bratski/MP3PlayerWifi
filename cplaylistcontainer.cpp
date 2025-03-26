@@ -1,13 +1,13 @@
 #include "cplaylistcontainer.h"
 
 // not really necessary
-const char *CPlaylistContainer::sortMethodsTXT[int(
+const char* CPlaylistContainer::sortMethodsTXT[int(
     CPlaylistContainer::art_t::numberOfMethods)] = {
     "Random",      "by Artist", "by Album",  "by Year",      "by Genre",
     "by Database", "Title",     "undo Sort", "By MainWindow"};
 
 // const operator[] overload
-const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
+const CTrack& CPlaylistContainer::operator[](const size_t& idx) const {
   if (idx >= _playlist_ptr_mainwindow_vector.size()) {
     throw std::out_of_range("index out of range");
   }
@@ -15,7 +15,7 @@ const CTrack &CPlaylistContainer::operator[](const size_t &idx) const {
 }
 
 // non-const operator[] overload
-CTrack &CPlaylistContainer::operator[](const size_t &idx) {
+CTrack& CPlaylistContainer::operator[](const size_t& idx) {
   if (idx >= _playlist_ptr_mainwindow_vector.size()) {
     throw std::out_of_range("index out of range");
   }
@@ -25,20 +25,20 @@ CTrack &CPlaylistContainer::operator[](const size_t &idx) {
 // to calculate the total time of the displayed playlist
 int CPlaylistContainer::calculatePlaylistTotalTime() {
   int totaltime = 0;
-  for (const auto &track : _playlist_ptr_mainwindow_vector) {
+  for (const auto& track : _playlist_ptr_mainwindow_vector) {
     totaltime += track->getDuration();
   }
   return totaltime;
 }
 
 // to add a track to the playlist
-void CPlaylistContainer::addTrack(CTrack &track) {
+void CPlaylistContainer::addTrack(CTrack& track) {
   _playlist_obj_vector.push_back(track);
   _playlist_ptr_mainwindow_vector.push_back(std::make_shared<CTrack>(track));
 }
 
 // to remove a track from the playlist
-void CPlaylistContainer::removeTrack(const QString &id) {
+void CPlaylistContainer::removeTrack(const QString& id) {
   // method 1
   // track object is removed from the vector, if lambda track returns true
   // auto it1 = [id](CTrack &track) { return id == track.getID(); };
@@ -172,14 +172,14 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
 }
 
 void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
-                                        const QString &text) {
+                                        const QString& text) {
   // empty the search vector with pointers
   _playlist_ptr_filter_vector.clear();
 
   // switching to the way of filtering
   switch (wayoffiltering) {
   case art_t::byTitle:
-    for (auto &track : _playlist_obj_vector) {
+    for (auto& track : _playlist_obj_vector) {
       // is the search text corresponding to the track title, the pointer of
       // that track is added to the ptr-filter vector // TODO partially
       // corresponding suggestions?
@@ -189,7 +189,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     }
     break;
   case art_t::byAlbum:
-    for (auto &track : _playlist_obj_vector) {
+    for (auto& track : _playlist_obj_vector) {
       // same for the track album
       if (track.getAlbum().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
@@ -197,7 +197,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     }
     break;
   case art_t::byArtist:
-    for (auto &track : _playlist_obj_vector) {
+    for (auto& track : _playlist_obj_vector) {
       // same for the track artist
       if (track.getArtist().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
@@ -205,7 +205,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     }
     break;
   case art_t::byGenre:
-    for (auto &track : _playlist_obj_vector) {
+    for (auto& track : _playlist_obj_vector) {
       // same for the track genre
       if (track.getGenre().toLower() == text.toLower()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
@@ -213,7 +213,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     }
     break;
   case art_t::byYear:
-    for (auto &track : _playlist_obj_vector) {
+    for (auto& track : _playlist_obj_vector) {
       // same for the track year, if text has no numbers it is 0
       if (track.getYear() == text.toInt()) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
@@ -221,7 +221,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
     }
     break;
   case art_t::byMainWindow:
-    for (auto &track : _playlist_ptr_mainwindow_vector) {
+    for (auto& track : _playlist_ptr_mainwindow_vector) {
       _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(*track));
     }
     break;

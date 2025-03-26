@@ -1,14 +1,14 @@
 #include "cdatabaseworker.h"
 
-CDatabaseWorker::CDatabaseWorker(QObject *parent) : QObject{parent} {}
+CDatabaseWorker::CDatabaseWorker(QObject* parent) : QObject{parent} {}
 
-void CDatabaseWorker::initialize(bool *success) {
+void CDatabaseWorker::initialize(bool* success) {
   *success = createConnection();
 }
 
-void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
+void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer* playlist,
                                            int defaultPlaylistID,
-                                           bool *success) {
+                                           bool* success) {
   QSqlQuery query;
   query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist WHERE "
                 "PllID = :id ");
@@ -32,7 +32,7 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer *playlist,
 }
 
 void CDatabaseWorker::writePlaylistTracksToDatabase(
-    CPlaylistContainer *playlist, bool *success, bool *cancelsaving) {
+    CPlaylistContainer* playlist, bool* success, bool* cancelsaving) {
 
   // create a query
   QSqlQuery query;
@@ -157,7 +157,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
 }
 
 void CDatabaseWorker::readPlaylistTracksFromDatabase(
-    CPlaylistContainer *playlist, bool *success) {
+    CPlaylistContainer* playlist, bool* success) {
   // fill the playlist object with the all the tracks data from the database
   // found at that particular playlist
   QSqlQuery query;
@@ -217,8 +217,8 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
   return;
 }
 
-void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success,
-                                     bool *doubleName) {
+void CDatabaseWorker::addNewPlaylist(const QString& name, bool* success,
+                                     bool* doubleName) {
   // create a query, and check if name already exists in the database
   QSqlQuery query;
 
@@ -251,8 +251,8 @@ void CDatabaseWorker::addNewPlaylist(const QString &name, bool *success,
   return;
 }
 
-void CDatabaseWorker::getPlaylistsFromDatabase(std::vector<QString> *list,
-                                               bool *success) {
+void CDatabaseWorker::getPlaylistsFromDatabase(std::vector<QString>* list,
+                                               bool* success) {
 
   // create a query, and find in the database
   QSqlQuery query;
@@ -277,7 +277,7 @@ void CDatabaseWorker::getPlaylistsFromDatabase(std::vector<QString> *list,
   return;
 }
 
-void CDatabaseWorker::deletePlaylist(const QString &name, bool *success) {
+void CDatabaseWorker::deletePlaylist(const QString& name, bool* success) {
   QSqlQuery query;
   // creating the deletion query
   query.prepare("DELETE FROM Playlist WHERE PllName = :PllName ");
@@ -293,9 +293,9 @@ void CDatabaseWorker::deletePlaylist(const QString &name, bool *success) {
   return;
 }
 
-void CDatabaseWorker::updatePlaylistInDatabase(const QString &name,
-                                               const int &id, bool *success,
-                                               bool *doubleName) {
+void CDatabaseWorker::updatePlaylistInDatabase(const QString& name,
+                                               const int& id, bool* success,
+                                               bool* doubleName) {
 
   // check if the edited name already exists in the database
   QSqlQuery query;
@@ -328,7 +328,7 @@ void CDatabaseWorker::updatePlaylistInDatabase(const QString &name,
   return;
 }
 
-void CDatabaseWorker::cleanupDatabase(bool *success) {
+void CDatabaseWorker::cleanupDatabase(bool* success) {
   // Cleaning tables, remove orphaned tracks, albums and artists
   QSqlQuery query;
 

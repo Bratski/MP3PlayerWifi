@@ -1,8 +1,8 @@
 #include "dialogprogress.h"
 #include "ui_dialogprogress.h"
 
-DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist,
-                               QThread *dbthread, bool *cancelsaving)
+DialogProgress::DialogProgress(QWidget* parent, CPlaylistContainer* playlist,
+                               QThread* dbthread, bool* cancelsaving)
     : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist),
       _dbthread(dbthread), _cancelSaving(cancelsaving), _allowclose(false) {
   ui->setupUi(this);
@@ -18,7 +18,7 @@ DialogProgress::DialogProgress(QWidget *parent, CPlaylistContainer *playlist,
 
 DialogProgress::~DialogProgress() { delete ui; }
 
-void DialogProgress::receiveProgress(const int &progress) {
+void DialogProgress::receiveProgress(const int& progress) {
   // calculation from song number to percentage
   int numberOfTracks = _playlist->getNumberOfMainwindowTracks();
   int percentage = 100;
@@ -39,5 +39,4 @@ void DialogProgress::allowClose() {
 void DialogProgress::cancelSaving() {
   *_cancelSaving = true; // for proper abortion of the saving process in the
                          // database worker-thread
-
 }

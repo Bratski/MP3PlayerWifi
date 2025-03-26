@@ -39,7 +39,8 @@ int main(int argc, char *argv[]) {
   // Create Database,  wait until the success-bool has turned to true
   bool success = false;
   QMetaObject::invokeMethod(&workerdb, "initialize",
-                            Qt::BlockingQueuedConnection, &success);
+                            Qt::BlockingQueuedConnection,
+                            Q_ARG(bool *, &success));
 
   // stop program if not succesfull
   if (!success) {

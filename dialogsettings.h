@@ -37,10 +37,10 @@ public slots:
 private:
   Ui::DialogSettings *ui;
   COled *_oled;
-  QThread *_rtcthread;
-  CRotaryEncoderWorker *_workerrtc;
   QString *_apiKey;
   bool *_statusOled;
+  QThread *_rtcthread;
+  CRotaryEncoderWorker *_workerrtc;
   bool *_statusRTC;
 
   uint _pinSW = 23;

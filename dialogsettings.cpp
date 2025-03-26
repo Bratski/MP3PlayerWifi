@@ -1,9 +1,9 @@
 #include "dialogsettings.h"
 #include "ui_dialogsettings.h"
 
-DialogSettings::DialogSettings(QWidget *parent, COled *oled, QString *apikey,
-                               bool *statusoled, QThread *rtcthread,
-                               CRotaryEncoderWorker *workerrtc, bool *statusrtc)
+DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
+                               bool* statusoled, QThread* rtcthread,
+                               CRotaryEncoderWorker* workerrtc, bool* statusrtc)
     : QDialog(parent), ui(new Ui::DialogSettings), _oled(oled), _apiKey(apikey),
       _statusOled(statusoled), _rtcthread(rtcthread), _workerrtc(workerrtc),
       _statusRTC(statusrtc) {
@@ -85,7 +85,7 @@ void DialogSettings::initializeRTC() {
                             Q_ARG(uint, _pinDT));
   QMetaObject::invokeMethod(_workerrtc, "initialize",
                             Qt::BlockingQueuedConnection,
-                            Q_ARG(bool *, &success));
+                            Q_ARG(bool*, &success));
 
   if (!success) {
     _rtcthread->quit();
@@ -135,11 +135,14 @@ void DialogSettings::showRTCData() {
   if (_rtcthread->isRunning()) {
     uint pin1, pin2, pin3;
     QMetaObject::invokeMethod(_workerrtc, "getPinSWITCH",
-                              Qt::BlockingQueuedConnection, Q_ARG(uint*, &pin1));
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(uint*, &pin1));
     QMetaObject::invokeMethod(_workerrtc, "getPinCLK",
-                              Qt::BlockingQueuedConnection, Q_ARG(uint*, &pin2));
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(uint*, &pin2));
     QMetaObject::invokeMethod(_workerrtc, "getPinDT",
-                              Qt::BlockingQueuedConnection, Q_ARG(uint*, &pin3));
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(uint*, &pin3));
 
     ui->lineEditRTCPin1->setText(QString::number(pin1));
     ui->lineEditRTCPin2->setText(QString::number(pin2));

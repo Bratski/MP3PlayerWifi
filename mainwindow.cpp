@@ -8,11 +8,11 @@
 
 // TODO search and filter possible with partial text orders
 
-MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
-                       QAudioOutput *audio, CPlaylistContainer *playlist,
-                       CTrack *track, QThread *dbthread, QThread *rtcthread,
-                       CDatabaseWorker *workerdb,
-                       CRotaryEncoderWorker *workerrtc)
+MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
+                       QAudioOutput* audio, CPlaylistContainer* playlist,
+                       CTrack* track, QThread* dbthread, QThread* rtcthread,
+                       CDatabaseWorker* workerdb,
+                       CRotaryEncoderWorker* workerrtc)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
       _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
       _rtcthread(rtcthread), _workerdb(workerdb), _workerrtc(workerrtc) {
@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
   // turn on the rotary encoder, if it has been set the last time shutdown
   if (_statusRTC) {
     _rtcthread->start();
-    // for the raspberry pi
+    // for the raspberry pi compilation has Q_ARG to be added
     QMetaObject::invokeMethod(_workerrtc, "setPins",
                               Qt::BlockingQueuedConnection, Q_ARG(uint, _pinSW),
                               Q_ARG(uint, _pinCLK), Q_ARG(uint, _pinDT));
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
     //                           _pinDT);
     QMetaObject::invokeMethod(_workerrtc, "initialize",
                               Qt::BlockingQueuedConnection,
-                              Q_ARG(bool *, &_statusRTC));
+                              Q_ARG(bool*, &_statusRTC));
 
     if (_statusRTC) {
       // syncing the volume level
@@ -159,9 +159,9 @@ MainWindow::MainWindow(QWidget *parent, COled *oled, QMediaPlayer *player,
                    &MainWindow::playOneSong);
 
   // Checkbox events
-  QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::checkStateChanged, this,
+  QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::stateChanged, this,
                    &MainWindow::setRepeat);
-  QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::checkStateChanged, this,
+  QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::stateChanged, this,
                    &MainWindow::setShuffle);
 
   // connect the media status changed signal to handle end of media
@@ -283,7 +283,7 @@ void MainWindow::addMusicFolder() {
     // playlist
     if (!_detectedMusicFiles.empty()) {
       // inserting all the detected files in the playlist
-      for (const auto &filepath : _detectedMusicFiles) {
+      for (const auto& filepath : _detectedMusicFiles) {
 
         // Instantiate a new track object
         CTrack newtrack;
@@ -325,8 +325,8 @@ void MainWindow::saveToDatabase() {
   bool success = false;
   QMetaObject::invokeMethod(
       _workerdb, "writePlaylistTracksToDatabase", Qt::QueuedConnection,
-      Q_ARG(CPlaylistContainer *, _playlist), Q_ARG(bool *, &success),
-      Q_ARG(bool *, &_cancelSaving));
+      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success),
+      Q_ARG(bool*, &_cancelSaving));
 
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
@@ -355,11 +355,11 @@ void MainWindow::deleteTrack() {
     return;
 
   // iterate through the range
-  for (const auto &range : selectedRanges) {
+  for (const auto& range : selectedRanges) {
     // iterate through the rows in one range
     for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
       // get the item with the song id from that row
-      QTableWidgetItem *idItem =
+      QTableWidgetItem* idItem =
           ui->tableWidgetCurrentPlaylist->item(row, 0); // Column 0 (ID)
 
       // Get the song ID
@@ -452,7 +452,7 @@ void MainWindow::playAllSongs() {
     return;
 
   // check if one row has been selected, if yes, which one?
-  QList<QTableWidgetItem *> selectedItems =
+  QList<QTableWidgetItem*> selectedItems =
       ui->tableWidgetCurrentPlaylist->selectedItems();
 
   // if no items in the table are selected, and the playlist is not empty,
@@ -515,7 +515,7 @@ void MainWindow::playNext() {
         break; // leave the while loop
       } else {
         // check if the number has already been used
-        for (const int &idx : _shuffleAlreadyPlayed) {
+        for (const int& idx : _shuffleAlreadyPlayed) {
           // qDebug() << "idx: " << idx;
           if (idx == randomnumber) {
             numberInList = true;
@@ -590,7 +590,8 @@ void MainWindow::playPrevious() {
 void MainWindow::togglePause() {
   qint64 pos = _player->position();
   if (pos > 0)
-    _player->isPlaying() ? _player->pause() : _player->play();
+    (_player->playbackState() == QMediaPlayer::PlayingState) ? _player->pause()
+                                                             : _player->play();
 }
 
 void MainWindow::stopPlaying() {
@@ -610,7 +611,7 @@ void MainWindow::stopPlaying() {
   // _shuffleAlreadyPlayed.clear();
 }
 
-void MainWindow::playOneSong(QTableWidgetItem *item) {
+void MainWindow::playOneSong(QTableWidgetItem* item) {
   // to make sure the player stops after playing one song see the
   // handleMediaStatusChanged() function
   _playall = false;
@@ -634,7 +635,7 @@ void MainWindow::setShuffle(bool state) {
 }
 
 // how to deal with the response to a network reply
-void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
+void MainWindow::getDataFromNetwork(QNetworkReply* reply) {
 
   // in case the image is coming
   if (_imagedata) {
@@ -665,7 +666,7 @@ void MainWindow::getDataFromNetwork(QNetworkReply *reply) {
 
     // look for the right size in the array with different image urls to
     // different sizes, if available
-    for (const auto &value : submainarray) {
+    for (const auto& value : submainarray) {
       QJsonObject imageObject = value.toObject();
       if (_imageSize ==
           imageObject["size"].toString()) // in case the demanded size is
@@ -707,7 +708,7 @@ void MainWindow::refreshTableWidgetCurrentPlaylist() {
   ui->tableWidgetCurrentPlaylist->setRowCount(rowCount);
 
   // populate the table with data from the track vector (playlist)
-  QTableWidgetItem *item;
+  QTableWidgetItem* item;
 
   int row = 0;
   for (auto it = _playlist->beginPtr(); it != _playlist->endPtr(); ++it) {
@@ -840,7 +841,7 @@ void MainWindow::updateTrackInfoDisplay() {
 
 // converts milliseconds and returns a QString displaying the time in this
 // format "0:00:00"
-const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
+const QString MainWindow::convertMilliSecToTimeString(const qint64& millisec) {
   int sec = (millisec / 1000) % 60;
   int min = (millisec / (60 * 1000)) % 60;
   int hr = (millisec / (60 * 60 * 1000));
@@ -857,7 +858,7 @@ const QString MainWindow::convertMilliSecToTimeString(const qint64 &millisec) {
 
 // converts seconds and returns a QString displaying the time in this
 // format "0:00:00"
-const QString MainWindow::convertSecToTimeString(const int &sec) {
+const QString MainWindow::convertSecToTimeString(const int& sec) {
   int seconds = sec % 60;
   int min = (sec / 60) % 60;
   int hr = (sec / (60 * 60));
@@ -889,8 +890,8 @@ void MainWindow::readDataBasePlaylist() {
   bool success = false;
   QMetaObject::invokeMethod(
       _workerdb, "readDataBasePlaylist", Qt::BlockingQueuedConnection,
-      Q_ARG(CPlaylistContainer* , _playlist), Q_ARG(int, _defaultPlaylistID),
-      Q_ARG(bool* , &success));
+      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(int, _defaultPlaylistID),
+      Q_ARG(bool*, &success));
   if (!success)
     qDebug() << "Something went wrong reading the database";
 }
@@ -923,7 +924,8 @@ void MainWindow::closingProcedure() {
   bool success = false;
   // cleaning up the database
   QMetaObject::invokeMethod(_workerdb, "cleanupDatabase",
-                            Qt::BlockingQueuedConnection,Q_ARG(bool*, &success));
+                            Qt::BlockingQueuedConnection,
+                            Q_ARG(bool*, &success));
   if (success)
     qDebug() << "Database clean up was successfull";
 
@@ -949,7 +951,7 @@ void MainWindow::closingProcedure() {
 
 // a recursive function to go through all the subdirectories and collect all
 // the music files stored in there
-void MainWindow::processFolder(const QString &path) {
+void MainWindow::processFolder(const QString& path) {
   QDir dir(path);
   if (!dir.exists()) {
     qDebug() << "Directory does not exist:" << path;
@@ -960,7 +962,7 @@ void MainWindow::processFolder(const QString &path) {
   const QFileInfoList entries =
       dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-  for (const QFileInfo &entry : entries) {
+  for (const QFileInfo& entry : entries) {
     if (entry.isDir()) {
       // Recursively process subdirectories
       processFolder(entry.absoluteFilePath());
@@ -989,13 +991,13 @@ void MainWindow::setItemBackgroundColour() {
     if (row == _index) {
       for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
            ++col) {
-        QTableWidgetItem *item = ui->tableWidgetCurrentPlaylist->item(row, col);
+        QTableWidgetItem* item = ui->tableWidgetCurrentPlaylist->item(row, col);
         item->setBackground(Qt::darkGray);
       }
     } else {
       for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
            ++col) {
-        QTableWidgetItem *item = ui->tableWidgetCurrentPlaylist->item(row, col);
+        QTableWidgetItem* item = ui->tableWidgetCurrentPlaylist->item(row, col);
         item->setBackground(QBrush());
       }
     }
@@ -1096,7 +1098,7 @@ void MainWindow::loadSettings() {
 }
 
 int MainWindow::randomNumberGenerator(
-    const int &min, const int &max) { // Initialize a random number generator,
+    const int& min, const int& max) { // Initialize a random number generator,
                                       // within the min and max range
   std::random_device rd;
   std::mt19937 gen(rd());

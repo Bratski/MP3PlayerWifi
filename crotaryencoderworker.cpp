@@ -1,8 +1,8 @@
 #include "crotaryencoderworker.h"
 
-CRotaryEncoderWorker::CRotaryEncoderWorker(QObject *parent) : QObject{parent} {}
+CRotaryEncoderWorker::CRotaryEncoderWorker(QObject* parent) : QObject{parent} {}
 
-void CRotaryEncoderWorker::initialize(bool *success) {
+void CRotaryEncoderWorker::initialize(bool* success) {
 
   // initializing the chip
   _chip = gpiod_chip_open_by_name(_chipname);

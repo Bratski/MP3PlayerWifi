@@ -1,8 +1,8 @@
 #include "dialogsearch.h"
 #include "ui_dialogsearch.h"
 
-DialogSearch::DialogSearch(QWidget *parent, CPlaylistContainer *playlist,
-                           bool *playlistChanged)
+DialogSearch::DialogSearch(QWidget* parent, CPlaylistContainer* playlist,
+                           bool* playlistChanged)
     : QDialog(parent), ui(new Ui::DialogSearch), _playlist(playlist),
       _playlistChanged(playlistChanged) {
   ui->setupUi(this);
@@ -89,7 +89,7 @@ void DialogSearch::openFilteredPlaylist() {
   this->close();
 }
 
-void DialogSearch::filterOnItem(QTableWidgetItem *item) {
+void DialogSearch::filterOnItem(QTableWidgetItem* item) {
   // which column belongs to the item?
   int col = item->column();
 
@@ -135,7 +135,7 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
   ui->tableWidgetFoundEntries->setRowCount(rowCount);
 
   // populate the table with data from the track vector (playlist)
-  QTableWidgetItem *item;
+  QTableWidgetItem* item;
 
   int row = 0;
   // iterating through the filter pointer vector
@@ -163,7 +163,6 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
 
     item = new QTableWidgetItem((*it)->getGenre());
     ui->tableWidgetFoundEntries->setItem(row, 6, item);
-
 
     item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -196,7 +195,7 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
 // converts seconds and returns a QString displaying the time in this
 // format "0:00:00", I tried to pass this function from the mainwindow by
 // pointer, but failed! How can this be done?
-const QString DialogSearch::convertSecToTimeString(const int &sec) {
+const QString DialogSearch::convertSecToTimeString(const int& sec) {
 
   int seconds = sec % 60;
   int min = (sec / 60) % 60;
