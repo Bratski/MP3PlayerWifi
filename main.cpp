@@ -1,7 +1,7 @@
 #include "COled.h"
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
-#include "crotaryencoder.h"
+#include "crotaryencoderworker.h"
 #include "ctrack.h"
 #include "mainwindow.h"
 
@@ -14,24 +14,29 @@
 int main(int argc, char* argv[]) {
   qRegisterMetaType<bool*>("bool*"); // for pi compilation
   qRegisterMetaType<uint*>("uint*");
+  qRegisterMetaType<int*>("int*");
   QApplication a(argc, argv);
 
   // creating Objects:
-  COled oled;               // for Oled Display
-  CRotaryencoder rtc;       // for the rtc rotary encoder
+  COled oled; // for Oled Display
+
   QMediaPlayer player;      // for playing audiofiles
   QAudioOutput audioOutput; // needed for setting the audio output
   CPlaylistContainer playlist;
   CTrack track;
 
+  QThread rtcthread;
   QThread dbthread; // the thread for database operations
   CDatabaseWorker
       workerdb; // object containing all possible database operations
+  CRotaryEncoderWorker workerrtc; // for the rtc rotary encoder
 
   workerdb.moveToThread(
       &dbthread); // thread and possible operations are connected
-
   dbthread.start(); // the database thread is started
+
+  workerrtc.moveToThread(&rtcthread);
+  rtcthread.start();
 
   // Set the players audio output:
   player.setAudioOutput(&audioOutput);
@@ -48,8 +53,7 @@ int main(int argc, char* argv[]) {
   }
 
   MainWindow w(nullptr, &oled, &player, &audioOutput, &playlist, &track,
-               &dbthread, &workerdb,
-               &rtc); // passing all the objects as pointers to the main window
+               &dbthread, &rtcthread,&workerdb, &workerrtc); // passing all the objects as pointers to the main window
 
   w.show();
 

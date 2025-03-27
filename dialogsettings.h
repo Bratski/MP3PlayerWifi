@@ -2,7 +2,7 @@
 #define DIALOGSETTINGS_H
 
 #include "COled.h"
-#include "crotaryencoder.h"
+#include "crotaryencoderworker.h"
 
 #include <QDialog>
 #include <QMessageBox>
@@ -20,7 +20,7 @@ class DialogSettings : public QDialog {
 public:
   explicit DialogSettings(QWidget* parent = nullptr, COled* oled = nullptr,
                           QString* apikey = nullptr, bool* statusoled = nullptr,
-                          CRotaryencoder* rtc = nullptr,
+                          CRotaryEncoderWorker* workerrtc = nullptr,
                           bool* statusrtc = nullptr);
   ~DialogSettings();
 
@@ -37,10 +37,10 @@ private:
   COled* _oled;
   QString* _apiKey;
   bool* _statusOled;
-  CRotaryencoder* _rtc;
+  CRotaryEncoderWorker* _workerrtc;
   bool* _statusRTC;
 
-  int _chipNUMBER = 0;
+  int _chipNUMBER = 4;
   uint _pinSW = 23;
   uint _pinCLK = 17;
   uint _pinDT = 27;

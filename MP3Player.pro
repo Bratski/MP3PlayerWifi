@@ -11,7 +11,6 @@ CONFIG += c++17
 SOURCES += \
     cdatabaseworker.cpp \
     cplaylistcontainer.cpp \
-    crotaryencoder.cpp \
     crotaryencoderworker.cpp \
     ctrack.cpp \
     dbconnect.cpp \
@@ -26,7 +25,6 @@ SOURCES += \
 HEADERS += \
     cdatabaseworker.h \
     cplaylistcontainer.h \
-    crotaryencoder.h \
     crotaryencoderworker.h \
     ctrack.h \
     dbconnect.h \

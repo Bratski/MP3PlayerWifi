@@ -5,7 +5,7 @@
 #include "COled.h"
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
-#include "crotaryencoder.h"
+#include "crotaryencoderworker.h"
 #include "ctrack.h"
 
 // general Qt libraries
@@ -54,8 +54,8 @@ public:
   MainWindow(QWidget* parent = nullptr, COled* oled = nullptr,
              QMediaPlayer* player = nullptr, QAudioOutput* audio = nullptr,
              CPlaylistContainer* playlist = nullptr, CTrack* track = nullptr,
-             QThread* dbthread = nullptr, CDatabaseWorker* workerdb = nullptr,
-             CRotaryencoder* rtc = nullptr);
+             QThread* dbthread = nullptr, QThread * rtcthread=nullptr, CDatabaseWorker* workerdb = nullptr,
+             CRotaryEncoderWorker* workerrtc = nullptr);
   ~MainWindow();
 
 public slots:
@@ -80,7 +80,7 @@ public slots:
   void undoSort();
 
   // player functions
-  void setVolume();
+  void setVolume(int level);
   void playAllSongs();
   void playNext();
   void playPrevious();
@@ -107,9 +107,9 @@ private:
   CPlaylistContainer* _playlist;
   CTrack* _track;
   QThread* _dbthread;
+  QThread* _rtcthread;
   CDatabaseWorker* _workerdb;
   CRotaryEncoderWorker* _workerrtc;
-  CRotaryencoder* _rtc;
 
   QNetworkAccessManager* _network;
 
@@ -146,7 +146,7 @@ private:
   uint _pinSW = 23;
   uint _pinCLK = 17;
   uint _pinDT = 27;
-  int _chipNUMBER = 0;
+  int _chipNUMBER = 4;
 
   std::vector<QString>
       _detectedMusicFiles; // vector with all detected file paths for the

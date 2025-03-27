@@ -10,11 +10,12 @@
 
 MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
                        QAudioOutput* audio, CPlaylistContainer* playlist,
-                       CTrack* track, QThread* dbthread,
-                       CDatabaseWorker* workerdb, CRotaryencoder* rtc)
+                       CTrack* track, QThread* dbthread, QThread* rtcthread,
+                       CDatabaseWorker* workerdb,
+                       CRotaryEncoderWorker* workerrtc)
     : QMainWindow(parent), ui(new Ui::MainWindow), _oled(oled), _player(player),
       _audio(audio), _playlist(playlist), _track(track), _dbthread(dbthread),
-      _workerdb(workerdb), _rtc(rtc) {
+      _rtcthread(rtcthread), _workerdb(workerdb), _workerrtc(workerrtc) {
   ui->setupUi(this);
 
   // setting default parameters and initialize
@@ -29,17 +30,20 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
 
   // turn on the rotary encoder, if it has been set turned on at the last time
   // shutdown
-  _rtc->setPins(_pinSW, _pinCLK, _pinDT);
-  _rtc->setChipnumber(_chipNUMBER);
-  _workerrtc = _rtc->getRTCWorkerPointer();
-  _rtc->getLevelAndSwitchstatePointers(&_level, &_switchState);
+  _workerrtc->setPins(_pinSW, _pinCLK, _pinDT);
+  _workerrtc->setChipnumber(_chipNUMBER);
 
   if (_statusRTC) {
-    _statusRTC = _rtc->initialize();
-    _rtc->start();
+    bool success = false;
+    _workerrtc->initialize(&success);
+    if (success)
+      QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
+                                Q_ARG(bool*, &success));
+    _statusRTC = success;
   }
 
-  _audio->setVolume(static_cast<float>(_level) / 100.0f);
+  float volume = (static_cast<float>(_level) / 100.0f);
+  _audio->setVolume(volume);
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
       static_cast<int>(_audio->volume() * 100));
@@ -74,6 +78,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   // reading the volume slider
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
+  QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, _workerrtc,
+                   &CRotaryEncoderWorker::setCounter);
 
   // reading the time and display it in the progress bar
   QObject::connect(_player, &QMediaPlayer::positionChanged, ui->progressBarSong,
@@ -183,8 +189,8 @@ MainWindow::~MainWindow() {
 // automatically when its parent object (the one referred to by this) is
 // destroyed.
 void MainWindow::openSettingsDialog() {
-  _dlgSettings = new DialogSettings(this, _oled, &_apiKey, &_statusOled, _rtc,
-                                    &_statusRTC);
+  _dlgSettings = new DialogSettings(this, _oled, &_apiKey, &_statusOled,
+                                    _workerrtc, &_statusRTC);
   _dlgSettings->show();
 }
 
@@ -423,9 +429,10 @@ void MainWindow::undoSort() {
 
 // setting the volume level, the audio volume must be a float between 0.0 (=no
 // sound) and 1.0 (=max volume)
-void MainWindow::setVolume() {
-  float audioLevel = static_cast<float>(_level) / 100.0f;
-  _audio->setVolume(audioLevel);
+void MainWindow::setVolume(int level) {
+  _level = level;
+  float volume = static_cast<float>(_level) / 100.0f;
+  _audio->setVolume(volume);
 }
 
 void MainWindow::playAllSongs() {
@@ -919,6 +926,11 @@ void MainWindow::closingProcedure() {
   // stop the worker database thread for the database operations
   _dbthread->quit();
   _dbthread->wait();
+
+  _workerrtc->stop();
+  _workerrtc->disconnect();
+  _rtcthread->quit();
+  _rtcthread->wait();
 }
 
 // a recursive function to go through all the subdirectories and collect all
