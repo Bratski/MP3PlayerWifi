@@ -1,11 +1,12 @@
 #include "COled.h"
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
-#include "crotaryencoderworker.h"
+#include "crotaryencoder.h"
 #include "ctrack.h"
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QMetaType>
 #include <QThread>
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
@@ -17,19 +18,16 @@ int main(int argc, char* argv[]) {
 
   // creating Objects:
   COled oled;               // for Oled Display
+  CRotaryencoder rtc;       // for the rtc rotary encoder
   QMediaPlayer player;      // for playing audiofiles
   QAudioOutput audioOutput; // needed for setting the audio output
   CPlaylistContainer playlist;
   CTrack track;
 
-  QThread rtcthread; // the thread for the rtc coder
-  QThread dbthread;  // the thread for database operations
+  QThread dbthread; // the thread for database operations
   CDatabaseWorker
       workerdb; // object containing all possible database operations
-  CRotaryEncoderWorker workerrtc; // object containing rotary encoder operations
 
-  workerrtc.moveToThread(&rtcthread); // thread for rtc, not started yet, only
-                                      // if it is been activated
   workerdb.moveToThread(
       &dbthread); // thread and possible operations are connected
 
@@ -49,10 +47,9 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  MainWindow w(
-      nullptr, &oled, &player, &audioOutput, &playlist, &track, &dbthread,
-      &rtcthread, &workerdb,
-      &workerrtc); // passing all the objects as pointers to the main window
+  MainWindow w(nullptr, &oled, &player, &audioOutput, &playlist, &track,
+               &dbthread, &workerdb,
+               &rtc); // passing all the objects as pointers to the main window
 
   w.show();
 

@@ -46,21 +46,16 @@ void CRotaryEncoderWorker::initialize(bool* success) {
 
 void CRotaryEncoderWorker::run(bool* runRTCloop, int* level,
                                bool* switchstate) {
-  // saving the pointers
-  _runRTCloop = runRTCloop;
-  _level = level;
-  _switchstate = switchstate;
-
-  qDebug() << "event detecting loop started";
+  qDebug() << "Event detecting loop started";
   // main loop picking up the events
   int last_clk_state = gpiod_line_get_value(_line2);
-  while (*_runRTCloop) {
+  while (*runRTCloop) {
     // Read switch state
     if (gpiod_line_event_wait(_line1, nullptr) > 0) {
       gpiod_line_event event;
       if (gpiod_line_event_read(_line1, &event) == 0) {
         *switchstate = (event.event_type == GPIOD_LINE_EVENT_RISING_EDGE);
-        emit sendSwitchPressed();
+        emit sendSwitchPressed(*_switchstate);
         qDebug() << "Button state: " << *switchstate;
       }
     }
@@ -93,67 +88,34 @@ void CRotaryEncoderWorker::run(bool* runRTCloop, int* level,
     // Small delay to reduce CPU usage
     usleep(1000); // 1ms
   }
+  emit eventloopstopped();
 }
 
-// in case the pointers are already known, to restart the loop
-void CRotaryEncoderWorker::run() {
-  qDebug() << "event detecting loop started";
-  // main loop picking up the events
-  int last_clk_state = gpiod_line_get_value(_line2);
-  while (*_runRTCloop) {
-    // Read switch state
-    if (gpiod_line_event_wait(_line1, nullptr) > 0) {
-      gpiod_line_event event;
-      if (gpiod_line_event_read(_line1, &event) == 0) {
-        *_switchstate = (event.event_type == GPIOD_LINE_EVENT_RISING_EDGE);
-        emit sendSwitchPressed();
-        qDebug() << "Button state: " << *_switchstate;
-      }
-    }
-
-    // Reading CLK and DT states
-    int current_clk = gpiod_line_get_value(_line2);
-
-    if (current_clk != last_clk_state) {
-      // CLK state changed, check DT pin to determine direction
-      int current_dt = gpiod_line_get_value(_line3);
-
-      if (current_clk == current_dt) {
-        --*_level;
-        if (*_level < 0) {
-          *_level = 0;
-        }
-        emit sendVolumeChanged(*_level);
-        qDebug() << "Rotation: Counter-clockwise | Count: " << *_level;
-      } else {
-        ++*_level;
-        if (*_level > 100) {
-          *_level = 100;
-        }
-        emit sendVolumeChanged(*_level);
-        qDebug() << "Rotation: Clockwise | Count: " << *_level;
-      }
-    }
-    last_clk_state = current_clk;
-
-    // Small delay to reduce CPU usage
-    usleep(1000); // 1ms
+void CRotaryEncoderWorker::disconnect() {
+  // properly closing the chip and lines, only if they are not a nullptr
+  if (_line1) {
+    gpiod_line_release(_line1);
+    qDebug() << "Line1 successfully released";
   }
-}
-
-void CRotaryEncoderWorker::disconnect(bool* success) {
-  // properly closing the chip and lines
-  gpiod_line_release(_line1);
-  gpiod_line_release(_line2);
-  gpiod_line_release(_line3);
-  gpiod_chip_close(_chip);
-  *success = true;
-  qDebug() << "lines and chip successfully released";
+  if (_line2) {
+    gpiod_line_release(_line2);
+    qDebug() << "Line2 successfully released";
+  }
+  if (_line3) {
+    gpiod_line_release(_line3);
+    qDebug() << "Line3 successfully released";
+  }
+  if (_chip) {
+    gpiod_chip_close(_chip);
+    qDebug() << "Chip successfully closed";
+  } else if (!_line1 && !_line2 && !_line3)
+    qDebug() << "No chips or lines to be closed or released";
 }
 
 void CRotaryEncoderWorker::setChipnumber(const int chipnumber) {
   QString chipname = "gpiochip" + QString::number(chipnumber);
   _chipname = chipname.toStdString().c_str();
+  qDebug() << "Chip succesfully set";
 }
 
 void CRotaryEncoderWorker::getChipnumber(int* chipnumber) {

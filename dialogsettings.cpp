@@ -2,18 +2,14 @@
 #include "ui_dialogsettings.h"
 
 DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
-                               bool* statusoled, QThread* rtcthread,
-                               CRotaryEncoderWorker* workerrtc, bool* statusrtc,
-                               bool* runrtcloop)
+                               bool* statusoled, CRotaryencoder* rtc,
+                               bool* statusrtc)
     : QDialog(parent), ui(new Ui::DialogSettings), _oled(oled), _apiKey(apikey),
-      _statusOled(statusoled), _rtcthread(rtcthread), _workerrtc(workerrtc),
-      _statusRTC(statusrtc), _runRTCloop(runrtcloop) {
+      _statusOled(statusoled), _rtc(rtc), _statusRTC(statusrtc) {
   ui->setupUi(this);
 
   // initialize
   setWindowTitle("Settings");
-  // stop the event loop for the RTC
-  *_runRTCloop = false;
   showOledData();
   showRTCData();
   ui->checkBoxOled->setChecked(*_statusOled);
@@ -62,9 +58,7 @@ void DialogSettings::initializeOled() {
 }
 
 void DialogSettings::initializeRTC() {
-  // hasnt the thread been started yet?
-  if (!_rtcthread->isRunning())
-    _rtcthread->start();
+
   // get the pin numbers from the textlines in the dialog
   QString chipNUMBER, pinSW, pinCLK, pinDT;
 
@@ -85,29 +79,20 @@ void DialogSettings::initializeRTC() {
   if (pinDT.toInt(&ok))
     _pinSW = pinDT.toInt();
 
+  // set pins and chip numbers
+  _rtc->setChipnumber(_chipNUMBER);
+  _rtc->setPins(_pinSW, _pinCLK, _pinDT);
+
   // invoke the initialisation
-  QMetaObject::invokeMethod(_workerrtc, "setPins", Qt::BlockingQueuedConnection,
-                            Q_ARG(uint, _pinSW), Q_ARG(uint, _pinCLK),
-                            Q_ARG(uint, _pinDT));
-  QMetaObject::invokeMethod(_workerrtc, "setChipnumber",
-                            Qt::BlockingQueuedConnection,
-                            Q_ARG(int, _chipNUMBER));
-  QMetaObject::invokeMethod(_workerrtc, "initialize",
-                            Qt::BlockingQueuedConnection,
-                            Q_ARG(bool*, _statusRTC));
+  *_statusRTC = _rtc->initialize();
 
   // send message successful or not
-  if (!*_statusRTC) {
-    _rtcthread->quit();
-    _rtcthread->wait();
+  if (!*_statusRTC && !_rtc->start()) {
     QMessageBox::warning(this, "Error",
                          "Rotary Encoder could NOT be initialized");
   }
 
   else {
-    // start the rtc event loop
-    *_runRTCloop = true;
-    QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection);
     QMessageBox::information(this, "Success",
                              "Rotary Encoder succesfully initialized");
   }
@@ -120,12 +105,6 @@ void DialogSettings::toggleRTCButtons(bool checked) {
   ui->lineEditRTCPin2->setEnabled(*_statusRTC);
   ui->lineEditRTCPin3->setEnabled(*_statusRTC);
   ui->pushButtonInitializeRTC->setEnabled(*_statusRTC);
-
-  if (!*_statusRTC && _rtcthread->isRunning()) {
-    *_runRTCloop = false;
-    _rtcthread->quit();
-    _rtcthread->wait();
-  }
 }
 
 void DialogSettings::saveSettings() {
@@ -139,18 +118,10 @@ void DialogSettings::showOledData() {
 }
 
 void DialogSettings::showRTCData() {
-  if (_rtcthread->isRunning() && *_statusRTC) {
-    QMetaObject::invokeMethod(
-        _workerrtc, "getPins", Qt::BlockingQueuedConnection,
-        Q_ARG(uint*, &_pinSW), Q_ARG(uint*, &_pinCLK), Q_ARG(uint*, &_pinDT));
-    QMetaObject::invokeMethod(_workerrtc, "getChipnumber",
-                              Qt::BlockingQueuedConnection,
-                              Q_ARG(int*, &_chipNUMBER));
-  }
-  ui->lineEditChipNumber->setText(QString::number(_chipNUMBER));
-  ui->lineEditRTCPin1->setText(QString::number(_pinSW));
-  ui->lineEditRTCPin2->setText(QString::number(_pinCLK));
-  ui->lineEditRTCPin3->setText(QString::number(_pinDT));
+  ui->lineEditChipNumber->setText(QString::number(_rtc->getChipnumber()));
+  ui->lineEditRTCPin1->setText(QString::number(_rtc->getPinSWITCH()));
+  ui->lineEditRTCPin2->setText(QString::number(_rtc->getPinCLK()));
+  ui->lineEditRTCPin3->setText(QString::number(_rtc->getPinDT()));
 }
 
 void DialogSettings::toggleOledButtons(bool checked) {

@@ -14,8 +14,7 @@ public:
 public slots:
   void initialize(bool* success);
   void run(bool* runRTCloop, int* level, bool* switchstate);
-  void run();
-  void disconnect(bool* success);
+  void disconnect();
   void setChipnumber(const int chipnumber);
   void getChipnumber(int* chipnumber);
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
@@ -23,17 +22,18 @@ public slots:
 
 signals:
   void sendVolumeChanged(int& level);
-  void sendSwitchPressed();
+  void sendSwitchPressed(bool& switchstate);
+  void eventloopstopped();
 
 private:
   uint _pin1; // SWITCH
   uint _pin2; // CLK
   uint _pin3; // DT
   const char* _chipname = "gpiochip0";
-  gpiod_line* _line1;
-  gpiod_line* _line2;
-  gpiod_line* _line3;
-  gpiod_chip* _chip;
+  gpiod_line* _line1 = nullptr;
+  gpiod_line* _line2 = nullptr;
+  gpiod_line* _line3 = nullptr;
+  gpiod_chip* _chip = nullptr;
   bool* _runRTCloop;
   int* _level;
   bool* _switchstate;
