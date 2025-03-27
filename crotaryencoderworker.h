@@ -23,7 +23,7 @@ public slots:
   void getChipnumber(int* chipnumber);
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
   void getPins(uint* pin1, uint* pin2, uint* pin3);
-  void setCounter(const int& counter) { _counter = counter; }
+  void setCounter(const int counter) { _counter = counter; } // not working as reference, try a copy
 
   const int& getChipnumber() { return _chipnumber; }
   const uint& getPinSW() { return _pin1; }

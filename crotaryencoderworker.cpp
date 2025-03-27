@@ -3,9 +3,10 @@
 CRotaryEncoderWorker::CRotaryEncoderWorker(QObject* parent) : QObject{parent} {}
 
 void CRotaryEncoderWorker::stop() {
-    QMutexLocker locker(&m_mutex);
-    _runRTCloop = false;
-    m_waitCondition.wakeAll();  // Wake up if waiting
+  // to make the event detecting loop stop
+  QMutexLocker locker(&m_mutex);
+  _runRTCloop = false;
+  m_waitCondition.wakeAll(); // Wake up if waiting
 }
 
 void CRotaryEncoderWorker::initialize(bool* success) {
@@ -94,13 +95,14 @@ void CRotaryEncoderWorker::initialize(bool* success) {
   return;
 }
 
-
 void CRotaryEncoderWorker::run(bool* success) {
   qDebug() << "Event detecting loop started";
   *success = true;
+  _runRTCloop = true;
   // main loop picking up the events
   int last_clk_state = gpiod_line_get_value(_line2);
   while (true) {
+    // this should gently stop the detecting event loop
     {
       QMutexLocker locker(&m_mutex);
       if (!_runRTCloop)
@@ -170,7 +172,7 @@ void CRotaryEncoderWorker::disconnect() {
     _chip = nullptr;
     qDebug() << "Chip successfully closed";
   } else if (!_line1 && !_line2 && !_line3)
-    qDebug() << "No chips or lines to be closed or released";
+    qDebug() << "No lines to be released";
 }
 
 void CRotaryEncoderWorker::setChipnumber(const int chipnumber) {

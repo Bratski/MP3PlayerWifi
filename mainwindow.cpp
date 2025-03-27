@@ -78,6 +78,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   // reading the volume slider
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
+
+  // does not work yet: synchronize the rtc with the horizontal slider volume
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, _workerrtc,
                    &CRotaryEncoderWorker::setCounter);
 

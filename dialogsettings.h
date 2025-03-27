@@ -31,6 +31,7 @@ public slots:
   void toggleOledButtons(bool checked);
   void toggleRTCButtons(bool checked);
   void saveSettings();
+  void cancel();
 
 private:
   Ui::DialogSettings* ui;
@@ -44,6 +45,7 @@ private:
   uint _pinSW = 23;
   uint _pinCLK = 17;
   uint _pinDT = 27;
+  bool _initialisationSuccessful = false;
 
   void showOledData();
   void showRTCData();

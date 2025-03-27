@@ -10,6 +10,7 @@ DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
 
   // initialize
   setWindowTitle("Settings");
+  _workerrtc->stop();
   showOledData();
   showRTCData();
   ui->checkBoxOled->setChecked(*_statusOled);
@@ -17,10 +18,11 @@ DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
   toggleOledButtons(*_statusOled);
   toggleRTCButtons(*_statusRTC);
   ui->lineEditApiKey->setText(*_apiKey);
+  _initialisationSuccessful = *_statusRTC;
 
   // connect button
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
-                   &DialogSettings::close);
+                   &DialogSettings::cancel);
   QObject::connect(ui->pushButtonAutoDetectOled, SIGNAL(clicked(bool)), this,
                    SLOT(autodetectOled()));
   QObject::connect(ui->pushButtonInitializeOled, SIGNAL(clicked(bool)), this,
@@ -89,11 +91,12 @@ void DialogSettings::initializeRTC() {
 
   // start the event loop
   if (success) {
-    success = false;
+    // success = false; // useless because its a queuedconnection
     QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
                               Q_ARG(bool*, &success));
   }
   *_statusRTC = success;
+  _initialisationSuccessful = success;
   // send message successful or not
   if (!*_statusRTC) {
     QMessageBox::warning(this, "Error",
@@ -116,10 +119,28 @@ void DialogSettings::toggleRTCButtons(bool checked) {
 }
 
 void DialogSettings::saveSettings() {
-  if (!*_statusRTC)
-    _workerrtc->stop();
+    if (!_initialisationSuccessful) {
+        _workerrtc->stop();
+        _workerrtc->disconnect();
+    } else {
+        bool success;
+        QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
+                                  Q_ARG(bool*, &success));
+    }
   *_apiKey = ui->lineEditApiKey->text();
   this->close();
+}
+
+void DialogSettings::cancel()
+{
+    if (!_initialisationSuccessful) {
+        _workerrtc->stop();
+        _workerrtc->disconnect();
+    } else {
+        bool success;
+        QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection, Q_ARG(bool*, &success));
+    }
+    this->close();
 }
 
 void DialogSettings::showOledData() {
