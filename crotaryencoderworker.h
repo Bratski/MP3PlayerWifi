@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QMutex>
 #include <QObject>
-#include <QWaitCondition>
+// #include <QWaitCondition>
 #include <gpiod.h>
 #include <unistd.h>
 
@@ -23,7 +23,11 @@ public slots:
   void getChipnumber(int* chipnumber);
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
   void getPins(uint* pin1, uint* pin2, uint* pin3);
-  void setCounter(const int counter) { _counter = counter; } // not working as reference, try a copy
+  void setCounter(const int counter) {
+    QMutexLocker locker(&m_mutex);
+    _counter = counter;
+    // m_waitCondition.wakeAll();
+  } // not working as reference, try with Mutex
 
   const int& getChipnumber() { return _chipnumber; }
   const uint& getPinSW() { return _pin1; }
@@ -51,8 +55,9 @@ private:
   gpiod_line* _line3 = nullptr;
   gpiod_chip* _chip = nullptr;
 
-  QWaitCondition m_waitCondition;
-  QMutex m_mutex;
+  // QWaitCondition m_waitCondition; // not necessary, or even contraproductive
+  // (extra overhead) because usleep is used, and it is a continous loop
+  QMutex m_mutex; //
   bool _runRTCloop = true;
   bool _switchstate = false;
 };

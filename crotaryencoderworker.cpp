@@ -6,7 +6,9 @@ void CRotaryEncoderWorker::stop() {
   // to make the event detecting loop stop
   QMutexLocker locker(&m_mutex);
   _runRTCloop = false;
-  m_waitCondition.wakeAll(); // Wake up if waiting
+  // m_waitCondition
+  //     .wakeAll(); // Wake up if waiting, Releases the mutex while waiting,
+  // Automatically re-acquires the mutex when waking up
 }
 
 void CRotaryEncoderWorker::initialize(bool* success) {
@@ -104,7 +106,8 @@ void CRotaryEncoderWorker::run(bool* success) {
   while (true) {
     // this should gently stop the detecting event loop
     {
-      QMutexLocker locker(&m_mutex);
+      QMutexLocker locker(
+          &m_mutex); // auto lock and unlock, what is within the scope
       if (!_runRTCloop)
         break;
     }
