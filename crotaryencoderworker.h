@@ -23,11 +23,10 @@ public slots:
   void getChipnumber(int* chipnumber);
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
   void getPins(uint* pin1, uint* pin2, uint* pin3);
-  void setCounter(const int counter) {
+  void setCounter(int counter) {
     QMutexLocker locker(&m_mutex);
     _counter = counter;
-    // m_waitCondition.wakeAll();
-  } // not working as reference, try with Mutex
+  } // not working, try with Mutex, still not working??
 
   const int& getChipnumber() { return _chipnumber; }
   const uint& getPinSW() { return _pin1; }
@@ -48,8 +47,10 @@ private:
   const char* _chipname2 = "gpiochip2";
   const char* _chipname3 = "gpiochip3";
   const char* _chipname4 = "gpiochip4";
+
   int _chipnumber = 4;
-  int _counter = 0;
+  bool _switchstate = false;
+
   gpiod_line* _line1 = nullptr;
   gpiod_line* _line2 = nullptr;
   gpiod_line* _line3 = nullptr;
@@ -58,8 +59,8 @@ private:
   // QWaitCondition m_waitCondition; // not necessary, or even contraproductive
   // (extra overhead) because usleep is used, and it is a continous loop
   QMutex m_mutex; //
+  int _counter = 0;
   bool _runRTCloop = true;
-  bool _switchstate = false;
 };
 
 #endif // CROTARYENCODERWORKER_H

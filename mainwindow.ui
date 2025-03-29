@@ -337,7 +337,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaSkipBackward"/>
+         <iconset theme="media-skip-backward"/>
         </property>
        </widget>
       </item>
@@ -359,7 +359,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaPlaybackStart"/>
+         <iconset theme="media-playback-start"/>
         </property>
        </widget>
       </item>
@@ -381,7 +381,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaSkipForward"/>
+         <iconset theme="media-skip-forward"/>
         </property>
        </widget>
       </item>
@@ -403,7 +403,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaPlaybackPause"/>
+         <iconset theme="media-playback-pause"/>
         </property>
        </widget>
       </item>
@@ -425,7 +425,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaPlaybackStop"/>
+         <iconset theme="media-playback-stop"/>
         </property>
        </widget>
       </item>
@@ -573,7 +573,7 @@
      <x>0</x>
      <y>0</y>
      <width>1049</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
@@ -640,7 +640,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
+    <iconset theme="application-exit"/>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -651,7 +651,7 @@
   </action>
   <action name="actionAddFile">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
+    <iconset theme="document-open"/>
    </property>
    <property name="text">
     <string>Music File</string>
@@ -662,7 +662,7 @@
   </action>
   <action name="actionAddFolder">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
+    <iconset theme="folder-open"/>
    </property>
    <property name="text">
     <string>Music Folder</string>
@@ -673,7 +673,7 @@
   </action>
   <action name="actionOther_Playlist">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+    <iconset theme="list-add"/>
    </property>
    <property name="text">
     <string>Other Playlist</string>
@@ -684,7 +684,7 @@
   </action>
   <action name="actionDeleteTrack">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditDelete"/>
+    <iconset theme="edit-delete"/>
    </property>
    <property name="text">
     <string>selected Song(s)</string>
@@ -695,7 +695,7 @@
   </action>
   <action name="actionDeletePlaylist">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::ListRemove"/>
+    <iconset theme="list-remove"/>
    </property>
    <property name="text">
     <string>this Playlist</string>
@@ -706,7 +706,7 @@
   </action>
   <action name="actionby_Artist">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+    <iconset theme="mail-forward"/>
    </property>
    <property name="text">
     <string>by Artist</string>
@@ -714,7 +714,7 @@
   </action>
   <action name="actionby_Album_Year">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+    <iconset theme="mail-forward"/>
    </property>
    <property name="text">
     <string>by Album Year</string>
@@ -722,7 +722,7 @@
   </action>
   <action name="actionby_Genre">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+    <iconset theme="mail-forward"/>
    </property>
    <property name="text">
     <string>by Genre</string>
@@ -730,7 +730,7 @@
   </action>
   <action name="actionOled_Display">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::VideoDisplay"/>
+    <iconset theme="video-display"/>
    </property>
    <property name="text">
     <string>Oled and RTC</string>
@@ -741,7 +741,7 @@
   </action>
   <action name="actionundo_Sort">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditUndo"/>
+    <iconset theme="edit-undo"/>
    </property>
    <property name="text">
     <string>undo Sort</string>
@@ -749,7 +749,7 @@
   </action>
   <action name="actionHelp_Window">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::HelpAbout"/>
+    <iconset theme="help-about"/>
    </property>
    <property name="text">
     <string>Help Window</string>
@@ -760,7 +760,7 @@
   </action>
   <action name="actionManagement">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::DocumentNew"/>
+    <iconset theme="document-new"/>
    </property>
    <property name="text">
     <string>Management</string>
@@ -771,7 +771,7 @@
   </action>
   <action name="actionby_Album">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailForward"/>
+    <iconset theme="mail-forward"/>
    </property>
    <property name="text">
     <string>by Album</string>
@@ -779,7 +779,7 @@
   </action>
   <action name="actionSearchfilter">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditFind"/>
+    <iconset theme="edit-find"/>
    </property>
    <property name="text">
     <string>Filter Playlist</string>
@@ -790,7 +790,7 @@
   </action>
   <action name="actionSave_Playlist">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+    <iconset theme="document-save"/>
    </property>
    <property name="text">
     <string>Save Playlist</string>
@@ -801,7 +801,7 @@
   </action>
   <action name="actionby_Database">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditUndo"/>
+    <iconset theme="edit-undo"/>
    </property>
    <property name="text">
     <string>undo Filter</string>
@@ -812,7 +812,7 @@
   </action>
   <action name="actionRandom">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailReplyAll"/>
+    <iconset theme="mail-reply-all"/>
    </property>
    <property name="text">
     <string>Random</string>
@@ -820,7 +820,6 @@
   </action>
  </widget>
  <tabstops>
-  <tabstop>pushButtonPlay</tabstop>
   <tabstop>pushButtonStop</tabstop>
   <tabstop>pushButtonNext</tabstop>
   <tabstop>pushButtonPrevious</tabstop>

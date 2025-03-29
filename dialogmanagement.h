@@ -16,6 +16,8 @@
 #include <QList>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+// deal with single and double click mouse events
+#include <QTimer>
 
 namespace Ui {
 class DialogManagement;
@@ -36,6 +38,7 @@ public slots:
   void addNewPlaylist();
   void deletePlaylist();
   void namePlaylistEdited(QTableWidgetItem* item);
+  void dealWithMouseOneTimeClick(QTableWidgetItem* item);
 
 signals:
   void saveToDBMainWindow();
@@ -44,9 +47,12 @@ private:
   Ui::DialogManagement* ui;
   CPlaylistContainer* _playlist;
   CDatabaseWorker* _workerdb;
+  int _lastrow;
   bool* _playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();
+  bool _firstckick = true;
+
 };
 
 #endif // DIALOGMANAGEMENT_H

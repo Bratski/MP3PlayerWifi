@@ -136,6 +136,11 @@ private:
   bool _switchState = false;
   bool _filelocationValid = true;
 
+  // // alternative method preventing the savetodb() process from stopped at shutdown process
+  // std::promise<bool> promise;
+  // std::future<bool> future = promise.get_future();
+
+
   // float _startVolume = 0.2; // setting the start volume to 20%
   int _level = 20;
 

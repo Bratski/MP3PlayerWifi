@@ -158,7 +158,7 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::WindowClose"/>
+        <iconset theme="window-close"/>
        </property>
       </widget>
      </item>
@@ -168,7 +168,7 @@
         <string>Open</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+        <iconset theme="list-add"/>
        </property>
       </widget>
      </item>

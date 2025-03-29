@@ -32,7 +32,7 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
+        <iconset theme="application-exit"/>
        </property>
       </widget>
      </item>

@@ -61,7 +61,7 @@
         <string>Add</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::DocumentNew"/>
+        <iconset theme="document-new"/>
        </property>
       </widget>
      </item>
@@ -75,7 +75,7 @@
         <string>Delete</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::EditDelete"/>
+        <iconset theme="edit-delete"/>
        </property>
       </widget>
      </item>
@@ -85,7 +85,7 @@
         <string>Export</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::DocumentSend"/>
+        <iconset theme="document-send"/>
        </property>
       </widget>
      </item>
@@ -99,7 +99,7 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
+        <iconset theme="application-exit"/>
        </property>
       </widget>
      </item>
@@ -109,7 +109,7 @@
         <string>Open</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+        <iconset theme="list-add"/>
        </property>
       </widget>
      </item>

@@ -79,9 +79,19 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
 
-  // does not work yet: synchronize the rtc with the horizontal slider volume
-  QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, _workerrtc,
-                   &CRotaryEncoderWorker::setCounter);
+  // Does not work yet: synchronize the rtc with the horizontal slider volume
+  // position
+  // QObject::connect(ui->horizontalSliderVolume,
+  // &QSlider::valueChanged, _workerrtc,
+  //                  &CRotaryEncoderWorker::setCounter);
+
+  // This is working, because _workingrtc lives in another thread, the lambda
+  // function forces a queued connection
+  QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged,
+                   [this](int counter) {
+                     //qDebug() << "Slider value changed to:" << counter;
+                     emit _workerrtc->setCounter(counter); // Alternative syntax
+                   });
 
   // reading the time and display it in the progress bar
   QObject::connect(_player, &QMediaPlayer::positionChanged, ui->progressBarSong,
@@ -318,10 +328,12 @@ void MainWindow::saveToDatabase() {
 
   // start the database thread operation
   bool success = false;
-  QMetaObject::invokeMethod(
-      _workerdb, "writePlaylistTracksToDatabase", Qt::QueuedConnection,
-      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success),
-      Q_ARG(bool*, &_cancelSaving));
+  QMetaObject::invokeMethod(_workerdb,
+                            "writePlaylistTracksToDatabase",
+                            Qt::QueuedConnection,
+                            Q_ARG(CPlaylistContainer*, _playlist),
+                            Q_ARG(bool*, &success),
+                            Q_ARG(bool*, &_cancelSaving));
 
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
@@ -905,8 +917,10 @@ void MainWindow::closingProcedure() {
   // edited (_playlistChanged is set true)
 
   if (_playlistChanged) {
-    // msg.exec() returns "3" if norole, "2" if yesrole
-    if (msg.exec() == 2) {
+    // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if norole, "0" if yesrole
+    int nr = msg.exec();
+    qDebug() << "return value int msg.exec: " << nr;
+    if (nr == 2 || nr == 0) {
       saveToDatabase();
     }
   }

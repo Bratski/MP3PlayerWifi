@@ -25,8 +25,11 @@ DialogManagement::DialogManagement(QWidget* parent,
                    &DialogManagement::deletePlaylist);
 
   // event of an item has been edited in the table widget
-  QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemChanged, this,
-                   &DialogManagement::namePlaylistEdited);
+  QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemClicked, this,
+                   &DialogManagement::dealWithMouseOneTimeClick);
+  // QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemChanged,
+  // this,
+  //                  &DialogManagement::namePlaylistEdited);
   QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemDoubleClicked,
                    this, &DialogManagement::openPlaylist);
 }
@@ -74,8 +77,11 @@ void DialogManagement::openPlaylist() {
     msg.setIcon(QMessageBox::Warning);
     msg.setText("Do you want to save the changes to the playlist?");
 
-    // msg.exec() returns "3" if norole, "2" if yesrole
-    if (msg.exec() == 2) {
+    // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if
+    // norole, "0" if yesrole
+    int nr = msg.exec();
+    qDebug() << "return value int msg.exec: " << nr;
+    if (nr == 2 || nr == 0) {
       emit saveToDBMainWindow();
     }
   }
@@ -202,8 +208,11 @@ void DialogManagement::deletePlaylist() {
       msg.setText("Are you sure to delete this playlist: " + name +
                   " inclusive its contents?");
 
-      // msg.exec() returns "3" if norole, "2" if yesrole
-      if (msg.exec() == 3) {
+      // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if
+      // norole, "0" if yesrole
+      int nr = msg.exec();
+      qDebug() << "return value int msg.exec: " << nr;
+      if (nr == 3 || nr == 1) {
         _isEditing = false;
         return;
       }
@@ -258,6 +267,30 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem* item) {
   readDatabase();
 }
 
+void DialogManagement::dealWithMouseOneTimeClick(QTableWidgetItem* item) {
+  // create a short break of 400 ms (arbitrary but is the time a regular double
+  // click is needed for) to check if a second click is coming
+
+  QTimer::singleShot(400, this, [this, item]() {
+    // did the row change?
+    if (_lastrow != item->row())
+      _firstckick = true;
+
+    // is this the first one click on the row?
+    if (_firstckick) {
+      _lastrow = item->row();
+      _firstckick = false;
+      return;
+    }
+    // edit the row if it was not the first one click, and the row did not
+    // change
+    if (item->row() == _lastrow && item &&
+        item == ui->tableWidgetPlaylists->currentItem()) {
+      ui->tableWidgetPlaylists->editItem(item);
+    }
+  });
+}
+
 void DialogManagement::readDatabase() {
   // If the flag is set, ignore the signal to avoid recursion
   if (_isEditing) {
@@ -304,6 +337,8 @@ void DialogManagement::readDatabase() {
       if (i % 2 == 0) {
         item = new QTableWidgetItem(playlistsInDatabase[i]);
         item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        item->setFlags(item->flags() &
+                       ~Qt::ItemIsEditable); // make the item read only
         ui->tableWidgetPlaylists->setItem(row, 0, item);
       }
       // Playlist Name

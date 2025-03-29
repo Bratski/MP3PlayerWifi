@@ -52,7 +52,7 @@
         <string>cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
+        <iconset theme="application-exit"/>
        </property>
       </widget>
      </item>
@@ -62,7 +62,7 @@
         <string>add</string>
        </property>
        <property name="icon">
-        <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+        <iconset theme="list-add"/>
        </property>
       </widget>
      </item>
