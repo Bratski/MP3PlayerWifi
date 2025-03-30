@@ -41,10 +41,6 @@ private:
   CRotaryEncoderWorker* _workerrtc;
   bool* _statusRTC;
 
-  int _chipNUMBER = 4;
-  uint _pinSW = 23;
-  uint _pinCLK = 17;
-  uint _pinDT = 27;
   bool _initialisationSuccessful = false;
 
   void showOledData();

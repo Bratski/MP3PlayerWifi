@@ -7,6 +7,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QMutex>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -26,7 +27,7 @@ public slots:
       bool* success);
   void writePlaylistTracksToDatabase(
       CPlaylistContainer* playlist, // saves all the tracks from a playlist
-      bool* success, bool* cancelsaving);
+      bool* success);
   void readPlaylistTracksFromDatabase(
       CPlaylistContainer* playlist, // reads all the tracks from a playlist
       bool* success);
@@ -46,6 +47,10 @@ public slots:
   cleanupDatabase(bool* success); // checks if there are orphaned tracks, albums
                                   // and artist, if so they are deleted
   void closeDatabase();           // closes the database
+  void cancelSaving() {
+    QMutexLocker locker(&mutex);
+    _cancelSaving = true;
+  }
 
 signals:                                  // for progress bar functionality
   void sendProgress(const int& progress); // sends the amount of tracks being
@@ -56,6 +61,8 @@ signals:                                  // for progress bar functionality
 private:
   int _tracknr; // to be able to count the number of tracks being saved, for
                 // progress bar functionality
+  QMutex mutex;
+  bool _cancelSaving = false;
 };
 
 #endif // CDATABASEWORKER_H

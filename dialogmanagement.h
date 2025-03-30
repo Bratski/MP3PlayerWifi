@@ -48,11 +48,14 @@ private:
   CPlaylistContainer* _playlist;
   CDatabaseWorker* _workerdb;
   int _lastrow;
+  int _activeplaylistid;
   bool* _playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();
   bool _firstckick = true;
 
+  // to colour the background of the current playlist
+  void setItemBackgroundColour();
 };
 
 #endif // DIALOGMANAGEMENT_H

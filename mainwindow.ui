@@ -820,9 +820,10 @@
   </action>
  </widget>
  <tabstops>
+  <tabstop>pushButtonPlay</tabstop>
   <tabstop>pushButtonStop</tabstop>
-  <tabstop>pushButtonNext</tabstop>
   <tabstop>pushButtonPrevious</tabstop>
+  <tabstop>pushButtonNext</tabstop>
   <tabstop>pushButtonPause</tabstop>
   <tabstop>horizontalSliderVolume</tabstop>
   <tabstop>checkBoxRepeatAll</tabstop>

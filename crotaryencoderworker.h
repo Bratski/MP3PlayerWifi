@@ -24,7 +24,7 @@ public slots:
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
   void getPins(uint* pin1, uint* pin2, uint* pin3);
   void setCounter(int counter) {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex);
     _counter = counter;
   } // not working, try with Mutex, still not working??
 
@@ -35,7 +35,7 @@ public slots:
 
 signals:
   void sendVolumeChanged(const int counter);
-  void sendSwitchPressed(bool& switchstate);
+  void sendSwitchPressed();
   void eventLoopStopped();
 
 private:
@@ -49,7 +49,6 @@ private:
   const char* _chipname4 = "gpiochip4";
 
   int _chipnumber = 4;
-  bool _switchstate = false;
 
   gpiod_line* _line1 = nullptr;
   gpiod_line* _line2 = nullptr;
@@ -58,7 +57,7 @@ private:
 
   // QWaitCondition m_waitCondition; // not necessary, or even contraproductive
   // (extra overhead) because usleep is used, and it is a continous loop
-  QMutex m_mutex; //
+  QMutex mutex; //
   int _counter = 0;
   bool _runRTCloop = true;
 };

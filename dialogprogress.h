@@ -1,6 +1,7 @@
 #ifndef DIALOGPROGRESS_H
 #define DIALOGPROGRESS_H
 
+#include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 #include <QCloseEvent>
 #include <QDialog>
@@ -18,7 +19,7 @@ public:
   explicit DialogProgress(QWidget* parent = nullptr,
                           CPlaylistContainer* playlist = nullptr,
                           QThread* dbthread = nullptr,
-                          bool* cancelsaving = nullptr);
+                          CDatabaseWorker* workerdb = nullptr);
   ~DialogProgress();
 
 public slots:
@@ -42,9 +43,10 @@ private:
   Ui::DialogProgress* ui;
   CPlaylistContainer* _playlist;
   QThread* _dbthread;
-  bool* _cancelSaving; // for proper aborting
-  bool _allowclose;    // to be able to block all the functions while saving is
-                       // running
+  CDatabaseWorker* _workerdb;
+  bool _cancelSaving; // for proper aborting
+  bool _allowclose;   // to be able to block all the functions while saving is
+                      // running
 };
 
 #endif // DIALOGPROGRESS_H

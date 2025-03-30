@@ -52,7 +52,7 @@ void DialogSettings::initializeOled() {
 
   if (!_oled->initialize()) {
     *_statusOled = false;
-    QMessageBox::warning(this, "Error", "no Oled-display could be initialized");
+    QMessageBox::warning(this, "Error", "NO Oled-display could be initialized");
   } else {
     QMessageBox::information(this, "Success",
                              "Oled-display succesfully initialized");
@@ -63,6 +63,8 @@ void DialogSettings::initializeRTC() {
 
   // get the pin numbers from the textlines in the dialog
   QString chipNUMBER, pinSW, pinCLK, pinDT;
+  int chipnumber = 4;
+  uint pinsw = 22, pinclk = 17, pindt = 27;
 
   chipNUMBER = ui->lineEditChipNumber->text();
   pinSW = ui->lineEditRTCPin1->text();
@@ -73,17 +75,17 @@ void DialogSettings::initializeRTC() {
   bool ok;
 
   if (chipNUMBER.toInt(&ok))
-    _chipNUMBER = chipNUMBER.toInt();
+    chipnumber = chipNUMBER.toInt();
   if (pinSW.toInt(&ok))
-    _pinSW = pinSW.toInt();
+    pinsw = pinSW.toInt();
   if (pinCLK.toInt(&ok))
-    _pinSW = pinSW.toInt();
+    pinclk = pinCLK.toInt();
   if (pinDT.toInt(&ok))
-    _pinSW = pinDT.toInt();
+    pindt = pinDT.toInt();
 
   // set pins and chip numbers
-  _workerrtc->setChipnumber(_chipNUMBER);
-  _workerrtc->setPins(_pinSW, _pinCLK, _pinDT);
+  _workerrtc->setChipnumber(chipnumber);
+  _workerrtc->setPins(pinsw, pinclk, pindt);
 
   // invoke the initialisation
   bool success = false;
@@ -100,7 +102,7 @@ void DialogSettings::initializeRTC() {
   // send message successful or not
   if (!*_statusRTC) {
     QMessageBox::warning(this, "Error",
-                         "Rotary Encoder could NOT be initialized");
+                         "NO Rotary Encoder could be initialized");
   }
 
   else {
@@ -119,28 +121,28 @@ void DialogSettings::toggleRTCButtons(bool checked) {
 }
 
 void DialogSettings::saveSettings() {
-    if (!_initialisationSuccessful) {
-        _workerrtc->stop();
-        _workerrtc->disconnect();
-    } else {
-        bool success;
-        QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
-                                  Q_ARG(bool*, &success));
-    }
+  if (!_initialisationSuccessful) {
+    _workerrtc->stop();
+    _workerrtc->disconnect();
+  } else {
+    bool success;
+    QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
+                              Q_ARG(bool*, &success));
+  }
   *_apiKey = ui->lineEditApiKey->text();
   this->close();
 }
 
-void DialogSettings::cancel()
-{
-    if (!_initialisationSuccessful) {
-        _workerrtc->stop();
-        _workerrtc->disconnect();
-    } else {
-        bool success;
-        QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection, Q_ARG(bool*, &success));
-    }
-    this->close();
+void DialogSettings::cancel() {
+  if (!_initialisationSuccessful) {
+    _workerrtc->stop();
+    _workerrtc->disconnect();
+  } else {
+    bool success;
+    QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
+                              Q_ARG(bool*, &success));
+  }
+  this->close();
 }
 
 void DialogSettings::showOledData() {

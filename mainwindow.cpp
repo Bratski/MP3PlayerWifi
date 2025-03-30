@@ -89,7 +89,7 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   // function forces a queued connection
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged,
                    [this](int counter) {
-                     //qDebug() << "Slider value changed to:" << counter;
+                     // qDebug() << "Slider value changed to:" << counter;
                      emit _workerrtc->setCounter(counter); // Alternative syntax
                    });
 
@@ -209,11 +209,17 @@ void MainWindow::openSettingsDialog() {
 void MainWindow::openSearchDialog() {
   _dlgSearch = new DialogSearch(this, _playlist, &_playlistChanged);
 
+  // because it can contain lots of entries, some menu stretching buttons are
+  // added to be able to maximize the window
+  _dlgSearch->setWindowFlags(windowFlags() | Qt::WindowSystemMenuHint |
+                             Qt::WindowMinMaxButtonsHint |
+                             Qt::WindowCloseButtonHint);
+
   // prepare a connection, in case the management dialog is closed, the
   // tableWidgetCurrentPlaylist will be updated
   connect(_dlgSearch, &QDialog::finished, this,
           &MainWindow::refreshTableWidgetCurrentPlaylist);
-  _dlgSearch->exec();
+  _dlgSearch->show();
 }
 
 void MainWindow::openManagementDialog() {
@@ -311,9 +317,8 @@ void MainWindow::addMusicFolder() {
 
 void MainWindow::saveToDatabase() {
   // display the progress bar
-  _dlgProgess = new DialogProgress(this, _playlist, _dbthread, &_cancelSaving);
+  _dlgProgess = new DialogProgress(this, _playlist, _dbthread, _workerdb);
   _dlgProgess->open();
-  _cancelSaving = false;
 
   // Connect signals from the database thread to the progress dialog
   connect(_workerdb, &CDatabaseWorker::sendProgress, _dlgProgess,
@@ -328,20 +333,18 @@ void MainWindow::saveToDatabase() {
 
   // start the database thread operation
   bool success = false;
-  QMetaObject::invokeMethod(_workerdb,
-                            "writePlaylistTracksToDatabase",
-                            Qt::QueuedConnection,
-                            Q_ARG(CPlaylistContainer*, _playlist),
-                            Q_ARG(bool*, &success),
-                            Q_ARG(bool*, &_cancelSaving));
+  QMetaObject::invokeMethod(
+      _workerdb, "writePlaylistTracksToDatabase", Qt::QueuedConnection,
+      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success));
 
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
   loop.exec();
 
-  if (_cancelSaving)
-    QMessageBox::warning(this, "Warning",
-                         "Saving playlist to database has NOT completed!!");
+  if (!success)
+    QMessageBox::warning(
+        this, "Warning",
+        "Saving playlist to database has NOT been completed!!");
 
   // set the bool playlist, in case the files have been successfully saved in
   // the database
@@ -917,9 +920,10 @@ void MainWindow::closingProcedure() {
   // edited (_playlistChanged is set true)
 
   if (_playlistChanged) {
-    // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if norole, "0" if yesrole
+    // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if
+    // norole, "0" if yesrole
     int nr = msg.exec();
-    qDebug() << "return value int msg.exec: " << nr;
+    // qDebug() << "return value int msg.exec: " << nr;
     if (nr == 2 || nr == 0) {
       saveToDatabase();
     }
@@ -1082,10 +1086,10 @@ void MainWindow::saveSettings() {
   _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
   _settings.setValue("OLED Adress", QString::fromStdString(_oled->getAdress()));
   _settings.setValue("RTC Status", _statusRTC);
-  _settings.setValue("RTC Chipnumber", _chipNUMBER);
-  _settings.setValue("RTC Pin 1 SWITCH", _pinSW);
-  _settings.setValue("RTC Pin 2 CLK", _pinCLK);
-  _settings.setValue("RTC Pin 3 DT", _pinDT);
+  _settings.setValue("RTC Chipnumber", _workerrtc->getChipnumber());
+  _settings.setValue("RTC Pin 1 SWITCH", _workerrtc->getPinSW());
+  _settings.setValue("RTC Pin 2 CLK", _workerrtc->getPinCLK());
+  _settings.setValue("RTC Pin 3 DT", _workerrtc->getPinDT());
 }
 
 void MainWindow::loadSettings() {

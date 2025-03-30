@@ -4,11 +4,8 @@ CRotaryEncoderWorker::CRotaryEncoderWorker(QObject* parent) : QObject{parent} {}
 
 void CRotaryEncoderWorker::stop() {
   // to make the event detecting loop stop
-  QMutexLocker locker(&m_mutex);
+  QMutexLocker locker(&mutex);
   _runRTCloop = false;
-  // m_waitCondition
-  //     .wakeAll(); // Wake up if waiting, Releases the mutex while waiting,
-  // Automatically re-acquires the mutex when waking up
 }
 
 void CRotaryEncoderWorker::initialize(bool* success) {
@@ -73,26 +70,29 @@ void CRotaryEncoderWorker::initialize(bool* success) {
   if (gpiod_line_request_input_flags(
           _line2, "rotary-encoder", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP) < 0) {
     qDebug() << "Failed CLK line:" << strerror(errno);
+    disconnect();
     *success = false;
     return;
   }
   if (gpiod_line_request_input_flags(
           _line3, "rotary-encoder", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP) < 0) {
     qDebug() << "Failed DT line:" << strerror(errno);
+    disconnect();
     *success = false;
     return;
   }
 
   // Switch pin causing troubles!
-  // if (gpiod_line_request_input_flags(
-  //         _line1, "button-monitor", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP) <
-  //         0) {
-  //   qDebug() << "Failed button line:" << strerror(errno);
-  //   *success = false;
-  //   return;
-  // }
+  if (gpiod_line_request_rising_edge_events_flags(
+          _line1, "button-monitor", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP) < 0) {
+    qDebug() << "Failed SWITCH line:" << strerror(errno);
+    disconnect();
+    *success = false;
+    return;
+  }
 
-  qDebug() << "GPIO succesfully initialized";
+  qDebug() << "GPIO succesfully initialized pinSW:" << _pin1
+           << " pinCLK: " << _pin2 << " pin DT: " << _pin3;
   *success = true;
   return;
 }
@@ -101,25 +101,23 @@ void CRotaryEncoderWorker::run(bool* success) {
   qDebug() << "Event detecting loop started";
   *success = true;
   _runRTCloop = true;
+  int last_value = 1; // start with pullup high
   // main loop picking up the events
   int last_clk_state = gpiod_line_get_value(_line2);
   while (true) {
     // this should gently stop the detecting event loop
     {
       QMutexLocker locker(
-          &m_mutex); // auto lock and unlock, what is within the scope
+          &mutex); // auto lock and unlock, what is within the scope
       if (!_runRTCloop)
         break;
     }
 
-    // Read switch state // Switch pin causing troubles!
-    if (gpiod_line_event_wait(_line1, nullptr) > 0) {
-      gpiod_line_event event;
-      if (gpiod_line_event_read(_line1, &event) == 0) {
-        _switchstate = (event.event_type == GPIOD_LINE_EVENT_RISING_EDGE);
-        emit sendSwitchPressed(_switchstate);
-        qDebug() << "Button state: " << _switchstate;
-      }
+    // Read switch state, on falling edge
+    int current_value = gpiod_line_get_value(_line1);
+    if (last_value == 1 && current_value == 0) {
+      qDebug() << "Button pressed";
+      emit sendSwitchPressed();
     }
 
     // Reading CLK and DT states
@@ -146,7 +144,7 @@ void CRotaryEncoderWorker::run(bool* success) {
       }
       last_clk_state = current_clk;
     }
-
+    last_value = current_value;
     // Small delay to reduce CPU usage
     usleep(1000); // 1ms
   }
@@ -192,7 +190,8 @@ void CRotaryEncoderWorker::setPins(const uint SWITCH, const uint CLK,
   this->_pin1 = SWITCH;
   this->_pin2 = CLK;
   this->_pin3 = DT;
-  qDebug() << "Pins succesfully set";
+  qDebug() << "Pins succesfully set: SWITCH: " << _pin1 << " CLK: " << _pin2
+           << " DT: " << _pin3;
 }
 
 void CRotaryEncoderWorker::getPins(uint* pin1, uint* pin2, uint* pin3) {

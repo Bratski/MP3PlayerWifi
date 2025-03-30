@@ -2,9 +2,9 @@
 #include "ui_dialogprogress.h"
 
 DialogProgress::DialogProgress(QWidget* parent, CPlaylistContainer* playlist,
-                               QThread* dbthread, bool* cancelsaving)
+                               QThread* dbthread, CDatabaseWorker* workerdb)
     : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist),
-      _dbthread(dbthread), _cancelSaving(cancelsaving), _allowclose(false) {
+      _dbthread(dbthread), _allowclose(false), _workerdb(workerdb) {
   ui->setupUi(this);
 
   setWindowTitle("Saving Music Files to Database...");
@@ -37,6 +37,6 @@ void DialogProgress::allowClose() {
 }
 
 void DialogProgress::cancelSaving() {
-  *_cancelSaving = true; // for proper abortion of the saving process in the
-                         // database worker-thread
+  _workerdb->cancelSaving(); // for proper abortion of the saving process in the
+                             // database worker-thread
 }

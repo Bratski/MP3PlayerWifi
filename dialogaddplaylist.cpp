@@ -11,11 +11,14 @@ DialogAddPlaylist::DialogAddPlaylist(QWidget* parent,
 
   // initialize the window
   setWindowTitle("Add Playlist");
+  ui->tableWidgetDatabase->hideColumn(0);
   readDatabase();
 
   // connecting the pushbutton events to functions
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
                    &DialogAddPlaylist::close);
+  QObject::connect(ui->tableWidgetDatabase, &QTableWidget::itemDoubleClicked,
+                   this, &DialogAddPlaylist::addPlaylist);
   QObject::connect(ui->pushButtonAdd, &QPushButton::clicked, this,
                    &DialogAddPlaylist::addPlaylist);
 }

@@ -2,6 +2,12 @@
 <ui version="4.0">
  <class>DialogSearch</class>
  <widget class="QDialog" name="DialogSearch">
+  <property name="windowModality">
+   <enum>Qt::WindowModality::NonModal</enum>
+  </property>
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,8 +19,14 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="windowIcon">
+   <iconset theme="edit-find"/>
+  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -176,6 +188,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tableWidgetFoundEntries</tabstop>
+  <tabstop>lineEditSearch</tabstop>
+  <tabstop>comboBoxSongElements</tabstop>
+  <tabstop>pushButtonFilter</tabstop>
+  <tabstop>pushButtonOK</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

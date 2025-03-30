@@ -11,8 +11,9 @@ DialogManagement::DialogManagement(QWidget* parent,
 
   // initialize the window
   setWindowTitle("Playlist Management");
+  _activeplaylistid = _playlist->getPllID();
   readDatabase();
-  // ui->tableWidgetPlaylists->hideColumn(0);
+  ui->tableWidgetPlaylists->hideColumn(0);
 
   // setting the button connections
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
@@ -27,9 +28,8 @@ DialogManagement::DialogManagement(QWidget* parent,
   // event of an item has been edited in the table widget
   QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemClicked, this,
                    &DialogManagement::dealWithMouseOneTimeClick);
-  // QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemChanged,
-  // this,
-  //                  &DialogManagement::namePlaylistEdited);
+  QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemChanged, this,
+                   &DialogManagement::namePlaylistEdited);
   QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemDoubleClicked,
                    this, &DialogManagement::openPlaylist);
 }
@@ -80,7 +80,7 @@ void DialogManagement::openPlaylist() {
     // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if
     // norole, "0" if yesrole
     int nr = msg.exec();
-    qDebug() << "return value int msg.exec: " << nr;
+    // qDebug() << "return value int msg.exec: " << nr;
     if (nr == 2 || nr == 0) {
       emit saveToDBMainWindow();
     }
@@ -211,7 +211,7 @@ void DialogManagement::deletePlaylist() {
       // msg.exec() returns on x86 "3" if norole, "2" if yesrole on ARM64 "1" if
       // norole, "0" if yesrole
       int nr = msg.exec();
-      qDebug() << "return value int msg.exec: " << nr;
+      // qDebug() << "return value int msg.exec: " << nr;
       if (nr == 3 || nr == 1) {
         _isEditing = false;
         return;
@@ -252,7 +252,7 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem* item) {
   bool doubleName = false;
   // update the database
   QMetaObject::invokeMethod(_workerdb, "updatePlaylistInDatabase",
-                            Qt::QueuedConnection, Q_ARG(QString, name),
+                            Qt::BlockingQueuedConnection, Q_ARG(QString, name),
                             Q_ARG(int, id), Q_ARG(bool*, &success),
                             Q_ARG(bool*, &doubleName));
 
@@ -260,6 +260,12 @@ void DialogManagement::namePlaylistEdited(QTableWidgetItem* item) {
     QMessageBox::warning(this, "Error",
                          "Name already in use, choose another name");
   }
+
+  // change the name of the current playlist, only if the playlist is activated
+  // in the main window!
+  if (!doubleName && success && id == _activeplaylistid)
+    _playlist->setPllName(name);
+
   // prevents interfering with the namePlaylistEdited function
   _isEditing = false;
 
@@ -353,6 +359,25 @@ void DialogManagement::readDatabase() {
     ui->tableWidgetPlaylists->resizeColumnsToContents();
     ui->tableWidgetPlaylists->setAlternatingRowColors(true);
   }
+  // colour the activited playlist
+  setItemBackgroundColour();
+
   // prevents interfering with the namePlaylistEdited function
   _isEditing = false;
+}
+
+void DialogManagement::setItemBackgroundColour() {
+  // to colour the background of the current playing song
+  int rowactive;
+  for (int row = 0; row < ui->tableWidgetPlaylists->rowCount(); ++row) {
+    for (int col = 0; col < ui->tableWidgetPlaylists->columnCount(); ++col) {
+      QTableWidgetItem* item = ui->tableWidgetPlaylists->item(row, col);
+      if (item->text().toInt() == _playlist->getPllID() ||
+          rowactive == item->row()) {
+        rowactive = item->row();
+        item->setBackground(Qt::darkGray);
+      } else
+        item->setBackground(QBrush());
+    }
+  }
 }

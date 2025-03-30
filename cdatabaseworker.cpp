@@ -32,7 +32,7 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer* playlist,
 }
 
 void CDatabaseWorker::writePlaylistTracksToDatabase(
-    CPlaylistContainer* playlist, bool* success, bool* cancelsaving) {
+    CPlaylistContainer* playlist, bool* success) {
 
   // create a query
   QSqlQuery query;
@@ -143,10 +143,14 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     qDebug() << "Track " << (*it)->getTitle() << " saved";
     // if the cancel button is clicked on the dialogProgress Bar, the saving
     // process is aborted at this point
-    if (*cancelsaving) {
-      emit progressReady();
-      *success = false;
-      return;
+    {
+      QMutexLocker locker(&mutex);
+      if (_cancelSaving) {
+        emit progressReady();
+        _cancelSaving = false;
+        *success = false;
+        return;
+      }
     }
   }
 

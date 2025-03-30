@@ -212,6 +212,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>checkBoxOled</tabstop>
+  <tabstop>pushButtonAutoDetectOled</tabstop>
+  <tabstop>pushButtonInitializeOled</tabstop>
+  <tabstop>lineEditi2cAdress</tabstop>
+  <tabstop>lineEditi2cBus</tabstop>
+  <tabstop>checkBoxRTC</tabstop>
+  <tabstop>lineEditChipNumber</tabstop>
+  <tabstop>lineEditRTCPin1</tabstop>
+  <tabstop>lineEditRTCPin2</tabstop>
+  <tabstop>lineEditRTCPin3</tabstop>
+  <tabstop>pushButtonInitializeRTC</tabstop>
+  <tabstop>lineEditApiKey</tabstop>
+  <tabstop>pushButtonSave</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

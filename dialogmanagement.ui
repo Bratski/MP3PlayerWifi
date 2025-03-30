@@ -117,6 +117,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tableWidgetPlaylists</tabstop>
+  <tabstop>lineEditNewPlaylist</tabstop>
+  <tabstop>pushButtonAdd</tabstop>
+  <tabstop>pushButtonOpen</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>pushButtonDelete</tabstop>
+  <tabstop>pushButtonExport</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
