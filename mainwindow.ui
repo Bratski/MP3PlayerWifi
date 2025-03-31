@@ -573,7 +573,7 @@
      <x>0</x>
      <y>0</y>
      <width>1049</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
@@ -613,6 +613,7 @@
     <addaction name="actionby_Album"/>
     <addaction name="actionby_Album_Year"/>
     <addaction name="actionby_Genre"/>
+    <addaction name="actionby_Tracknumber"/>
     <addaction name="actionRandom"/>
     <addaction name="actionundo_Sort"/>
    </widget>
@@ -816,6 +817,14 @@
    </property>
    <property name="text">
     <string>Random</string>
+   </property>
+  </action>
+  <action name="actionby_Tracknumber">
+   <property name="icon">
+    <iconset theme="mail-forward"/>
+   </property>
+   <property name="text">
+    <string>by Tracknumber</string>
    </property>
   </action>
  </widget>

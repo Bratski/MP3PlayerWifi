@@ -54,7 +54,8 @@ public:
   MainWindow(QWidget* parent = nullptr, COled* oled = nullptr,
              QMediaPlayer* player = nullptr, QAudioOutput* audio = nullptr,
              CPlaylistContainer* playlist = nullptr, CTrack* track = nullptr,
-             QThread* dbthread = nullptr, QThread * rtcthread=nullptr, CDatabaseWorker* workerdb = nullptr,
+             QThread* dbthread = nullptr, QThread* rtcthread = nullptr,
+             CDatabaseWorker* workerdb = nullptr,
              CRotaryEncoderWorker* workerrtc = nullptr);
   ~MainWindow();
 
@@ -76,6 +77,7 @@ public slots:
   void sortByArtist();
   void sortByDatabase();
   void sortByGenre();
+  void sortByTracknumber();
   void sortRandom();
   void undoSort();
 
@@ -136,10 +138,9 @@ private:
   bool _switchState = false;
   bool _filelocationValid = true;
 
-  // // alternative method preventing the savetodb() process from stopped at shutdown process
-  // std::promise<bool> promise;
-  // std::future<bool> future = promise.get_future();
-
+  // // alternative method preventing the savetodb() process from stopped at
+  // shutdown process std::promise<bool> promise; std::future<bool> future =
+  // promise.get_future();
 
   // float _startVolume = 0.2; // setting the start volume to 20%
   int _level = 20;

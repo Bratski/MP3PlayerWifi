@@ -89,21 +89,21 @@
        <item>
         <widget class="QLabel" name="labelPin1">
          <property name="text">
-          <string>GPIO Pin 1:</string>
+          <string>GPIO Pin SW:</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="labelPin2">
          <property name="text">
-          <string>GPIO Pin 2:</string>
+          <string>GPIO Pin CLK:</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="labelPin3">
          <property name="text">
-          <string>GPIO Pin 3:</string>
+          <string>GPIO Pin DT:</string>
          </property>
         </widget>
        </item>

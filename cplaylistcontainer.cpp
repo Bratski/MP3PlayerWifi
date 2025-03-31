@@ -3,8 +3,8 @@
 // not really necessary
 const char* CPlaylistContainer::sortMethodsTXT[int(
     CPlaylistContainer::art_t::numberOfMethods)] = {
-    "Random",      "by Artist", "by Album",  "by Year",      "by Genre",
-    "by Database", "Title",     "undo Sort", "By MainWindow"};
+    "Random",      "by Artist", "by Album",  "by Year",       "by Genre",
+    "by Database", "Title",     "undo Sort", "By MainWindow", "By Tracknumber"};
 
 // const operator[] overload
 const CTrack& CPlaylistContainer::operator[](const size_t& idx) const {
@@ -108,6 +108,12 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
     return tr1->getGenre().toLower() > tr2->getGenre().toLower();
   };
 
+  // for the tracknumbers
+  auto sortbytracknumber = [](const std::shared_ptr<CTrack> tr1,
+                              const std::shared_ptr<CTrack> tr2) {
+    return tr1->getNumber() < tr2->getNumber();
+  };
+
   // switching to the way of sorting
   switch (wayofsorting) {
   case art_t::random:
@@ -148,6 +154,13 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
     std::sort(_playlist_ptr_mainwindow_vector.begin(),
               _playlist_ptr_mainwindow_vector.end(), sortbygenre);
     break;
+  case art_t::byTracknumber:
+    // copy the main window ptr vector to the ptr undo sort vector
+    _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
+    // sort the pointer-vector by tracknumber
+    std::sort(_playlist_ptr_mainwindow_vector.begin(),
+              _playlist_ptr_mainwindow_vector.end(), sortbytracknumber);
+    break;
   case art_t::byDatabase:
     // copy the main window ptr vector to the ptr undo sort vector
     _playlist_ptr_undosort_vector = _playlist_ptr_mainwindow_vector;
@@ -173,6 +186,7 @@ void CPlaylistContainer::sortPlaylist(art_t wayofsorting) {
 
 void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
                                         const QString& text) {
+
   // empty the search vector with pointers
   _playlist_ptr_filter_vector.clear();
 
@@ -180,10 +194,9 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   switch (wayoffiltering) {
   case art_t::byTitle:
     for (auto& track : _playlist_obj_vector) {
-      // is the search text corresponding to the track title, the pointer of
-      // that track is added to the ptr-filter vector // TODO partially
-      // corresponding suggestions?
-      if (track.getTitle().toLower() == text.toLower()) {
+      // is the search text partially corresponding to the track title, the
+      // pointer of that track is added to the ptr-filter vector
+      if (filterSuggestions(text, track.getTitle())) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -191,7 +204,9 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   case art_t::byAlbum:
     for (auto& track : _playlist_obj_vector) {
       // same for the track album
-      if (track.getAlbum().toLower() == text.toLower()) {
+      // if (track.getAlbum().toLower() == text.toLower()) {
+      // QString album = track.getAlbum();
+      if (filterSuggestions(text, track.getAlbum())) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -199,7 +214,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   case art_t::byArtist:
     for (auto& track : _playlist_obj_vector) {
       // same for the track artist
-      if (track.getArtist().toLower() == text.toLower()) {
+      if (filterSuggestions(text, track.getArtist())) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -207,7 +222,7 @@ void CPlaylistContainer::filterPlaylist(art_t wayoffiltering,
   case art_t::byGenre:
     for (auto& track : _playlist_obj_vector) {
       // same for the track genre
-      if (track.getGenre().toLower() == text.toLower()) {
+      if (filterSuggestions(text, track.getGenre())) {
         _playlist_ptr_filter_vector.push_back(std::make_shared<CTrack>(track));
       }
     }
@@ -235,4 +250,22 @@ void CPlaylistContainer::copyFilteredToMainwindow() {
   _playlist_ptr_filter_vector.swap(_playlist_ptr_mainwindow_vector);
   // clearing the filter ptr vector for a next search
   _playlist_ptr_filter_vector.clear();
+}
+
+bool CPlaylistContainer::filterSuggestions(const QString& text,
+                                           const QString& subject) {
+
+  // prevent from crashing
+  if (text.size() > subject.size() || text.isEmpty() || subject.isEmpty())
+    return false;
+
+  // returns true or false if there is a partial match with the track name
+  QString positives = "";
+  for (int i = 0; i < text.size(); ++i) {
+    if (subject[i].toLower() == text[i].toLower())
+      positives.push_back(text[i]);
+    else
+      break;
+  }
+  return positives.size() == text.size();
 }

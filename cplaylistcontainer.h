@@ -57,6 +57,7 @@ public:
     byTitle,
     undoSort,
     byMainWindow,
+    byTracknumber,
     numberOfMethods
   };
   CPlaylistContainer() = default;
@@ -101,6 +102,9 @@ public:
   void setPllName(const QString& name) { _PllName = name; }
   const int& getPllID() { return _PllID; }
   const QString& getPllName() { return _PllName; }
+
+private:
+  bool filterSuggestions(const QString& text, const QString& subject);
 };
 
 #endif // CPLAYLISTCONTAINER_H

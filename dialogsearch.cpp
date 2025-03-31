@@ -36,9 +36,13 @@ void DialogSearch::filterPlaylist() {
   QString text = ui->lineEditSearch->text();
 
   // qDebug() << "text: " << text;
-
+  int selectedIndex;
   // check which combobox element is selected, determines the ways of filtering
-  int selectedIndex = ui->comboBoxSongElements->currentIndex();
+  if (text.isEmpty())
+    selectedIndex = -1; // filter default, the whole playlist, in case no text
+                        // is in the editline
+  else
+    selectedIndex = ui->comboBoxSongElements->currentIndex();
 
   // qDebug() << "selected index: " << selectedIndex;
 

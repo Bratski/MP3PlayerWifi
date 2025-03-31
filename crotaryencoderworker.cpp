@@ -92,7 +92,7 @@ void CRotaryEncoderWorker::initialize(bool* success) {
   }
 
   qDebug() << "GPIO succesfully initialized pinSW:" << _pin1
-           << " pinCLK: " << _pin2 << " pin DT: " << _pin3;
+           << " pin CLK: " << _pin2 << " pin DT: " << _pin3;
   *success = true;
   return;
 }

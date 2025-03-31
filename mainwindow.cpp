@@ -1,11 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// TODO read and save settings from a config file for _defaultID(last playlist)
-// volume, OLED settings, API key etc...
-
-// TODO undosort after a filter operation
-
 // TODO search and filter possible with partial text orders
 
 MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
@@ -138,6 +133,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
                    &MainWindow::sortByDatabase);
   QObject::connect(ui->actionby_Genre, &QAction::triggered, this,
                    &MainWindow::sortByGenre);
+  QObject::connect(ui->actionby_Tracknumber, &QAction::triggered, this,
+                   &MainWindow::sortByTracknumber);
   QObject::connect(ui->actionRandom, &QAction::triggered, this,
                    &MainWindow::sortRandom);
   QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
@@ -161,7 +158,7 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
                    &MainWindow::playOneSong);
 
   // Checkbox events, using stateChanged in stead of checkStateChanged because
-  // of pi compiling compatibility
+  // of pi compiling compatibility QT 6.4.2
   QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::stateChanged, this,
                    &MainWindow::setRepeat);
   QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::stateChanged, this,
@@ -248,9 +245,10 @@ void MainWindow::openAddPlaylistDialog() {
 
 void MainWindow::addMusicFile() {
   // open standard file browser
-  QString filter = "Mp3 Files (*.mp3);; Flac Files (*.flac) ;; WMA Files "
-                   "(*.wma) ;; Wave Files (*.wav) ;; AAC Files (*.aac) ;; AC3 "
-                   "Files (*.ac3) ;; EAC3 (*.eac3) ;; ALAC Files (*.alac)";
+  QString filter =
+      "Mp3 Files (*.mp3);; Flac Files (*.flac) ;; WMA Files "
+      "(*.wma) ;; Wave Files (*.wav) ;; AAC Files (*.aac) ;; AC3 "
+      "Files (*.ac3) ;; EAC3 Files (*.eac3) ;; ALAC Files (*.alac)";
   QString fileLocation = QFileDialog::getOpenFileName(
       this, "Open a file", qApp->applicationDirPath(),
       //"/home/bart/Nextcloud/CPlusPlusProjects/qtgui/MP3PlayerWorking",
@@ -431,6 +429,13 @@ void MainWindow::sortByGenre() {
   setItemBackgroundColour();
 }
 
+void MainWindow::sortByTracknumber() {
+  _playlist->sortPlaylist(CPlaylistContainer::art_t::byTracknumber);
+  _playlistChanged = true;
+  refreshTableWidgetCurrentPlaylist();
+  setItemBackgroundColour();
+}
+
 void MainWindow::sortRandom() {
   _playlist->sortPlaylist(CPlaylistContainer::art_t::random);
   _playlistChanged = true;
@@ -557,7 +562,7 @@ void MainWindow::playNext() {
       // if repeat all is disabled, stop playing and stop going to play the next
       // song, reset the index to 0
       else {
-        _player->stop();
+        stopPlaying();
         return;
       }
     }
@@ -946,9 +951,10 @@ void MainWindow::closingProcedure() {
   // stop the worker database thread for the database operations
   _dbthread->quit();
   _dbthread->wait();
-
+  // disconnecting and stop rotary encoder
   _workerrtc->stop();
   _workerrtc->disconnect();
+  // stop the thread for the rotary encoder
   _rtcthread->quit();
   _rtcthread->wait();
 }
@@ -996,13 +1002,13 @@ void MainWindow::setItemBackgroundColour() {
       for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
            ++col) {
         QTableWidgetItem* item = ui->tableWidgetCurrentPlaylist->item(row, col);
-        item->setBackground(Qt::darkGray);
+        item->setBackground(Qt::darkGray); // darkgrey
       }
     } else {
       for (int col = 0; col < ui->tableWidgetCurrentPlaylist->columnCount();
            ++col) {
         QTableWidgetItem* item = ui->tableWidgetCurrentPlaylist->item(row, col);
-        item->setBackground(QBrush());
+        item->setBackground(QBrush()); // default system colour
       }
     }
   }
@@ -1075,7 +1081,7 @@ void MainWindow::initializeSettings() {
     _settings.setValue("RTC Pin 3 DT", _pinDT);
   }
 
-  qDebug() << "Settings initialized with default values!";
+  // qDebug() << "Settings initialized with default values!";
 }
 
 void MainWindow::saveSettings() {

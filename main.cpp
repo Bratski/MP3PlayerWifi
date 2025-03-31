@@ -6,16 +6,29 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QIcon>
 #include <QMetaType>
 #include <QThread>
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QMediaPlayer>
 
 int main(int argc, char* argv[]) {
-  qRegisterMetaType<bool*>("bool*"); // for pi compilation
+  // for pi compilation Qt 6.4.2 compatibility
+  qRegisterMetaType<bool*>("bool*");
   qRegisterMetaType<uint*>("uint*");
   qRegisterMetaType<int*>("int*");
+
   QApplication a(argc, argv);
+
+  // // ensure icons are working across different qt versions
+  // // Set icon theme before creating main window
+  QIcon::setThemeName("Yaru"); // or "oxygen", "Adwaita", etc.
+  // Alternatively, use fallback search paths
+  QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << "/usr/share/icons");
+
+  // check the current settings for icons
+  qDebug() << "themeSearchPaths:" << QIcon::themeSearchPaths()
+           << QIcon::themeName();
 
   // creating Objects:
   COled oled; // for Oled Display
@@ -32,11 +45,11 @@ int main(int argc, char* argv[]) {
   CRotaryEncoderWorker workerrtc; // for the rtc rotary encoder
 
   workerdb.moveToThread(
-      &dbthread); // thread and possible operations are connected
+      &dbthread);   // thread and possible operations are connected
   dbthread.start(); // the database thread is started
 
-  workerrtc.moveToThread(&rtcthread);
-  rtcthread.start();
+  workerrtc.moveToThread(&rtcthread); // thread for rotary encoder functionality
+  rtcthread.start();                  // thread is started
 
   // Set the players audio output:
   player.setAudioOutput(&audioOutput);
@@ -52,8 +65,10 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  MainWindow w(nullptr, &oled, &player, &audioOutput, &playlist, &track,
-               &dbthread, &rtcthread,&workerdb, &workerrtc); // passing all the objects as pointers to the main window
+  MainWindow w(
+      nullptr, &oled, &player, &audioOutput, &playlist, &track, &dbthread,
+      &rtcthread, &workerdb,
+      &workerrtc); // passing all the objects as pointers to the main window
 
   w.show();
 

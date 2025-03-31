@@ -4,7 +4,7 @@
 DialogProgress::DialogProgress(QWidget* parent, CPlaylistContainer* playlist,
                                QThread* dbthread, CDatabaseWorker* workerdb)
     : QDialog(parent), ui(new Ui::DialogProgress), _playlist(playlist),
-      _dbthread(dbthread), _allowclose(false), _workerdb(workerdb) {
+      _dbthread(dbthread), _workerdb(workerdb), _allowclose(false) {
   ui->setupUi(this);
 
   setWindowTitle("Saving Music Files to Database...");
