@@ -1,6 +1,6 @@
 #include "dbconnect.h"
 
-bool createConnection() {
+bool createConnection(const QString& playlistName, const int& playlistID) {
   {
     // Check for available database drivers
     qDebug() << "Available database drivers:" << QSqlDatabase::drivers();
@@ -90,8 +90,6 @@ bool createConnection() {
 
     // Create the default playlist table, at least one empty playlist is
     // available Step 1: Check if the playlist with the given ID exists
-    QString playlistName = "default Playlist";
-    int playlistID = 1;
 
     query.prepare("SELECT PllID FROM Playlist WHERE PllID = :PllID");
     query.bindValue(":PllID", playlistID);

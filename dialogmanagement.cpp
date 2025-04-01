@@ -309,7 +309,7 @@ void DialogManagement::readDatabase() {
   // temporare QString vector
   std::vector<QString> playlistsInDatabase;
 
-  // for pi compilation necessary
+  // for pi compilation necessary QT 6.4.2
   std::vector<QString>* pllptr = &playlistsInDatabase;
 
   // empty the list with playlists

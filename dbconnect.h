@@ -7,5 +7,5 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-bool createConnection();
+bool createConnection(const QString& playlistName, const int& playlistID);
 #endif // DBCONNECT_H

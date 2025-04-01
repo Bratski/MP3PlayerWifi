@@ -3,7 +3,7 @@
 CDatabaseWorker::CDatabaseWorker(QObject* parent) : QObject{parent} {}
 
 void CDatabaseWorker::initialize(bool* success) {
-  *success = createConnection();
+  *success = createConnection(_defaultPlaylistName, _defaultPlaylistID);
 }
 
 void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer* playlist,
@@ -68,6 +68,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
   for (auto it = playlist->beginPtr(); it != playlist->endPtr(); ++it) {
 
     // qDebug() << "artist: " << (*it)->getArtist();
+    // qDebug() << "title: " << (*it)->getTitle();
+    // qDebug() << "playlist: " << playlist->getPllName();
 
     // for one track:
     ++_tracknr;

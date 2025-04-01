@@ -75,3 +75,23 @@ DISTFILES += \
 QMAKE_LINK += -v
 message("Resolved LIBDIR: $$QMAKE_LIBDIR")
 message("Resolved LIBS: $$LIBS")
+
+# # Default to dynamic linking
+# CONFIG += dynamic
+
+# # # Override for release builds
+# # CONFIG(release, debug|release) {
+# #     CONFIG += static
+# #     LIBS += -static
+# # }
+
+# # Release configuration
+# CONFIG(release, debug|release) {
+#     CONFIG += static
+#     # Prevent linking against .so files
+#     QMAKE_LFLAGS += -static
+#     # Explicitly link against static libraries
+#     LIBS += -L$$[QT_INSTALL_LIBS] -lQt6Core -lQt6Gui -lQt6Widgets -lQt6Multimedia
+#     # For taglib
+#     LIBS += -L$$PWD/myTaglib -ltag
+# }

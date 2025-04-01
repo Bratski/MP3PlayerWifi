@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   _workerrtc->setPins(_pinSW, _pinCLK, _pinDT);
   _workerrtc->setChipnumber(_chipNUMBER);
 
+  // set the playlistname and id from the database
+
   if (_statusRTC) {
     bool success = false;
     _workerrtc->initialize(&success);
@@ -159,10 +161,20 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
 
   // Checkbox events, using stateChanged in stead of checkStateChanged because
   // of pi compiling compatibility QT 6.4.2
+
+#if (QT_VERSION > QT_VERSION_CHECK(6, 4, 2))
+  QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::checkStateChanged, this,
+                   &MainWindow::setRepeat);
+  QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::checkStateChanged, this,
+                   &MainWindow::setShuffle);
+#endif
+
+#if (QT_VERSION <= QT_VERSION_CHECK(6, 4, 2))
   QObject::connect(ui->checkBoxRepeatAll, &QCheckBox::stateChanged, this,
                    &MainWindow::setRepeat);
   QObject::connect(ui->checkBoxPlayShuffle, &QCheckBox::stateChanged, this,
                    &MainWindow::setShuffle);
+#endif
 
   // connect the media status changed signal to handle end of media
   connect(_player, &QMediaPlayer::mediaStatusChanged, this,
@@ -1053,7 +1065,10 @@ void MainWindow::initializeSettings() {
     _settings.setValue("Volume", _level);
   }
   if (!_settings.contains("Default Playlist ID")) {
-    _settings.setValue("Default Playlist ID", _defaultPlaylistID);
+    _settings.setValue("Default Playlist ID", _workerdb->getDefaultPllID());
+  }
+  if (!_settings.contains("Default Playlist Name")) {
+    _settings.setValue("Default Playlist Name", _workerdb->getDefaultPllName());
   }
   if (!_settings.contains("OLED Status")) {
     _settings.setValue("OLED Status", _statusOled);
@@ -1088,6 +1103,7 @@ void MainWindow::saveSettings() {
   _settings.setValue("Api Key", _apiKey);
   _settings.setValue("Volume", int(_audio->volume() * 100));
   _settings.setValue("Default Playlist ID", _playlist->getPllID());
+  _settings.setValue("Default Playlist Name", _playlist->getPllName());
   _settings.setValue("OLED Status", _statusOled);
   _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
   _settings.setValue("OLED Adress", QString::fromStdString(_oled->getAdress()));
@@ -1101,7 +1117,8 @@ void MainWindow::saveSettings() {
 void MainWindow::loadSettings() {
   _apiKey = _settings.value("Api Key").toString();
   _level = _settings.value("Volume").toInt();
-  _defaultPlaylistID = _settings.value("Default Playlist ID").toInt();
+  _playlist->setPllID(_settings.value("Default Playlist ID").toInt());
+  _playlist->setPllName(_settings.value("Default Playlist Name").toString());
   _statusOled = _settings.value("OLED Status").toBool();
   _oled->setBus(_settings.value("OLED Bus").toString().toStdString());
   _oled->setAdress(_settings.value("OLED Adress").toString().toStdString());

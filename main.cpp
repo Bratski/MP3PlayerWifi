@@ -13,10 +13,12 @@
 #include <QtMultimedia/QMediaPlayer>
 
 int main(int argc, char* argv[]) {
-  // for pi compilation Qt 6.4.2 compatibility
+// for pi compilation Qt 6.4.2 compatibility
+#if (QT_VERSION <= QT_VERSION_CHECK(6, 4, 2))
   qRegisterMetaType<bool*>("bool*");
   qRegisterMetaType<uint*>("uint*");
   qRegisterMetaType<int*>("int*");
+#endif
 
   QApplication a(argc, argv);
 

@@ -17,6 +17,9 @@ class CDatabaseWorker : public QObject {
   Q_OBJECT
 public:
   explicit CDatabaseWorker(QObject* parent = nullptr);
+  const QString& getDefaultPllName() { return _defaultPlaylistName; }
+  const int& getDefaultPllID() { return _defaultPlaylistID; }
+
 public slots:
   void
   initialize(bool* success); // checks if a database exists and is correctly
@@ -63,6 +66,9 @@ private:
                 // progress bar functionality
   QMutex mutex;
   bool _cancelSaving = false;
+  // default Playlist Settings
+  const QString _defaultPlaylistName = "default Playlist";
+  const int _defaultPlaylistID = 1;
 };
 
 #endif // CDATABASEWORKER_H
