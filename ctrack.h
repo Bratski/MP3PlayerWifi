@@ -9,6 +9,7 @@
 #include <taglib/tag.h>
 
 class CTrack {
+private:
   QString _TraID;
   QString _TraTitle;
   QString _TraArtist;

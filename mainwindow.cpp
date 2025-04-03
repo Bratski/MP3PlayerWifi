@@ -16,6 +16,16 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   // setting default parameters and initialize
   _network = new QNetworkAccessManager();
   setWindowTitle("Bratskis MP3 Player Nitro");
+
+  // does not work yet
+  // QString iconPath = "/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets24.png"; // or "C:\\path\\to\\your\\icon.png"
+  // qDebug() << "Icon exists:" << QFile::exists(iconPath);
+  // setWindowFlags(windowFlags() | Qt::WindowSystemMenuHint);
+  // setWindowIcon(QIcon(iconPath));
+
+
+  // setWindowIcon(
+  //     QIcon("/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets.png"));
   initializeSettings();
   loadSettings();
   // turn on oled, if it has been set the last time shutdown
@@ -194,7 +204,7 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   // QMediaFormat mediaFormat;
   // const QList<QMediaFormat::AudioCodec> supportedAudioCodecs =
   //     mediaFormat.supportedAudioCodecs(QMediaFormat::Decode);
-  // for (auto &codec : supportedAudioCodecs) {
+  // for (auto& codec : supportedAudioCodecs) {
   //   qDebug() << codec;
   // }
 }
@@ -912,10 +922,11 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 // open first (default) playlist in the database-table "playlist" on start up:
 void MainWindow::readDataBasePlaylist() {
   bool success = false;
+  // fill the playlist with the database tracks
   QMetaObject::invokeMethod(
-      _workerdb, "readDataBasePlaylist", Qt::BlockingQueuedConnection,
-      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(int, _defaultPlaylistID),
-      Q_ARG(bool*, &success));
+      _workerdb, "readPlaylistTracksFromDatabase", Qt::BlockingQueuedConnection,
+      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success));
+
   if (!success)
     qDebug() << "Something went wrong reading the database";
 }
@@ -1000,7 +1011,7 @@ void MainWindow::processFolder(const QString& path) {
           fileExtension4 == ".ac3" || fileExtension4 == ".wma" ||
           fileExtension4 == ".wav" || fileExtension5 == ".flac" ||
           fileExtension5 == ".eac3" || fileExtension5 == ".alac") {
-        qDebug() << "File:" << entry.absoluteFilePath();
+        // qDebug() << "File:" << entry.absoluteFilePath();
         _detectedMusicFiles.push_back(filefound);
       }
     }

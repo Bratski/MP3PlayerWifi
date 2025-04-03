@@ -4,7 +4,7 @@ CRotaryEncoderWorker::CRotaryEncoderWorker(QObject* parent) : QObject{parent} {}
 
 void CRotaryEncoderWorker::stop() {
   // to make the event detecting loop stop
-  QMutexLocker locker(&mutex);
+  QMutexLocker locker(&_mutex);
   _runRTCloop = false;
 }
 
@@ -108,7 +108,7 @@ void CRotaryEncoderWorker::run(bool* success) {
     // this should gently stop the detecting event loop
     {
       QMutexLocker locker(
-          &mutex); // auto lock and unlock, what is within the scope
+          &_mutex); // auto lock and unlock, what is within the scope
       if (!_runRTCloop)
         break;
     }

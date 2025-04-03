@@ -6,31 +6,6 @@ void CDatabaseWorker::initialize(bool* success) {
   *success = createConnection(_defaultPlaylistName, _defaultPlaylistID);
 }
 
-void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer* playlist,
-                                           int defaultPlaylistID,
-                                           bool* success) {
-  QSqlQuery query;
-  query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist WHERE "
-                "PllID = :id ");
-  query.bindValue(":id", defaultPlaylistID);
-
-  if (!query.exec()) {
-    *success = false;
-    return;
-  }
-  // execute only if a playlist has been found
-  if (query.next()) {
-    playlist->setPllID(query.value(0).toInt());
-    playlist->setPllName(query.value(1).toString());
-    readPlaylistTracksFromDatabase(playlist, success);
-    if (!*success) {
-      *success = false;
-      return;
-    }
-  }
-  *success = true;
-}
-
 void CDatabaseWorker::writePlaylistTracksToDatabase(
     CPlaylistContainer* playlist, bool* success) {
 
@@ -142,11 +117,11 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
       *success = false;
       return;
     }
-    qDebug() << "Track " << (*it)->getTitle() << " saved";
+    // qDebug() << "Track " << (*it)->getTitle() << " saved";
     // if the cancel button is clicked on the dialogProgress Bar, the saving
     // process is aborted at this point
     {
-      QMutexLocker locker(&mutex);
+      QMutexLocker locker(&_mutex);
       if (_cancelSaving) {
         emit progressReady();
         _cancelSaving = false;
@@ -215,7 +190,7 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
                       bitrate, samplerate, channels, filelocation);
       playlist->addTrack(newtrack);
       // Debug output for each track
-      qDebug() << "Added track:" << title << "by" << artist;
+      // qDebug() << "Added track:" << title << "by" << artist;
     } else
       qDebug() << "Track: " << title << " file location invalid";
   }

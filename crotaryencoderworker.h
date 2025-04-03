@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QMutex>
 #include <QObject>
-// #include <QWaitCondition>
 #include <gpiod.h>
 #include <unistd.h>
 
@@ -24,9 +23,9 @@ public slots:
   void setPins(const uint SWITCH, const uint CLK, const uint DT);
   void getPins(uint* pin1, uint* pin2, uint* pin3);
   void setCounter(int counter) {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     _counter = counter;
-  } // not working, try with Mutex, still not working??
+  }
 
   const int& getChipnumber() { return _chipnumber; }
   const uint& getPinSW() { return _pin1; }
@@ -39,16 +38,16 @@ signals:
   void eventLoopStopped();
 
 private:
-  uint _pin1 = 23; // SWITCH
-  uint _pin2 = 17; // CLK
-  uint _pin3 = 27; // DT
+  uint _pin1 = 23; // default SWITCH
+  uint _pin2 = 17; // default CLK
+  uint _pin3 = 27; // default DT
   const char* _chipname0 = "gpiochip0";
   const char* _chipname1 = "gpiochip1";
   const char* _chipname2 = "gpiochip2";
   const char* _chipname3 = "gpiochip3";
   const char* _chipname4 = "gpiochip4";
 
-  int _chipnumber = 4;
+  int _chipnumber = 4; // default chipnumber
 
   gpiod_line* _line1 = nullptr;
   gpiod_line* _line2 = nullptr;
@@ -57,7 +56,7 @@ private:
 
   // QWaitCondition m_waitCondition; // not necessary, or even contraproductive
   // (extra overhead) because usleep is used, and it is a continous loop
-  QMutex mutex; //
+  QMutex _mutex; //
   int _counter = 0;
   bool _runRTCloop = true;
 };

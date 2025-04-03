@@ -368,7 +368,7 @@ void DialogManagement::readDatabase() {
 
 void DialogManagement::setItemBackgroundColour() {
   // to colour the background of the current playing song
-  int rowactive;
+  int rowactive = -1;
   for (int row = 0; row < ui->tableWidgetPlaylists->rowCount(); ++row) {
     for (int col = 0; col < ui->tableWidgetPlaylists->columnCount(); ++col) {
       QTableWidgetItem* item = ui->tableWidgetPlaylists->item(row, col);

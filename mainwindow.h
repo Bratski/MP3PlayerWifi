@@ -112,7 +112,6 @@ private:
   QThread* _rtcthread;
   CDatabaseWorker* _workerdb;
   CRotaryEncoderWorker* _workerrtc;
-
   QNetworkAccessManager* _network;
 
   // attributes
@@ -173,7 +172,7 @@ private:
   void updateTrackInfoDisplay(); // sends the info to the mainwindow info field
                                  // and oled display
   void readDataBasePlaylist();   // reads all the tracks from the database of a
-                                 // particular playlist
+                                 // particular playlist at start up
   void closingProcedure(); // contains several procedures for a secure shutdown
   void processFolder(
       const QString& path); // recursive function to scan all the directories

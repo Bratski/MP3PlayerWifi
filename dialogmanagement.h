@@ -16,7 +16,7 @@
 #include <QList>
 #include <QTableWidget>
 #include <QTableWidgetItem>
-// deal with single and double click mouse events
+// to deal with single and double click mouse events
 #include <QTimer>
 
 namespace Ui {

@@ -71,7 +71,8 @@ int main(int argc, char* argv[]) {
       nullptr, &oled, &player, &audioOutput, &playlist, &track, &dbthread,
       &rtcthread, &workerdb,
       &workerrtc); // passing all the objects as pointers to the main window
-
+  // w.setWindowIcon(
+  //     QIcon("/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets.png"));
   w.show();
 
   return a.exec();

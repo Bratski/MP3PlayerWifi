@@ -24,10 +24,6 @@ public slots:
   void
   initialize(bool* success); // checks if a database exists and is correctly
                              // configured, if not it will create a default one
-  void readDataBasePlaylist(
-      CPlaylistContainer* playlist,
-      int defaultPlaylistID, // reads all the tracks from a particular playlist
-      bool* success);
   void writePlaylistTracksToDatabase(
       CPlaylistContainer* playlist, // saves all the tracks from a playlist
       bool* success);
@@ -51,7 +47,7 @@ public slots:
                                   // and artist, if so they are deleted
   void closeDatabase();           // closes the database
   void cancelSaving() {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     _cancelSaving = true;
   }
 
@@ -64,7 +60,7 @@ signals:                                  // for progress bar functionality
 private:
   int _tracknr; // to be able to count the number of tracks being saved, for
                 // progress bar functionality
-  QMutex mutex;
+  QMutex _mutex;
   bool _cancelSaving = false;
   // default Playlist Settings
   const QString _defaultPlaylistName = "default Playlist";
