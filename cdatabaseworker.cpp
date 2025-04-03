@@ -10,7 +10,7 @@ void CDatabaseWorker::checkPllIDExisting(int pllid, bool* isexisting) {
   if (!query.exec()) {
     qDebug() << "Database Error, Failed to execute query: "
              << query.lastError().text();
-    *isexisting = true;
+    *isexisting = false;
     return;
   }
 
@@ -39,7 +39,9 @@ void CDatabaseWorker::getPlaylistNameFromDatabase(QString* name, int pllid,
   if (query.first()) {
     *name = query.value(0).toString();
     *success = true;
+    return;
   }
+  *success = false;
 }
 
 void CDatabaseWorker::initialize(bool* success) {
