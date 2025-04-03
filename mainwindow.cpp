@@ -18,11 +18,11 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   setWindowTitle("Bratskis MP3 Player Nitro");
 
   // does not work yet
-  // QString iconPath = "/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets24.png"; // or "C:\\path\\to\\your\\icon.png"
-  // qDebug() << "Icon exists:" << QFile::exists(iconPath);
-  // setWindowFlags(windowFlags() | Qt::WindowSystemMenuHint);
-  // setWindowIcon(QIcon(iconPath));
-
+  // QString iconPath =
+  // "/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets24.png";
+  // // or "C:\\path\\to\\your\\icon.png" qDebug() << "Icon exists:" <<
+  // QFile::exists(iconPath); setWindowFlags(windowFlags() |
+  // Qt::WindowSystemMenuHint); setWindowIcon(QIcon(iconPath));
 
   // setWindowIcon(
   //     QIcon("/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets.png"));
@@ -59,8 +59,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
   ui->tableWidgetCurrentPlaylist->hideColumn(11);
   ui->tableWidgetCurrentPlaylist->setColumnWidth(1, 300);
-  ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   readDataBasePlaylist();
+  ui->labelCurrentPlaylist->setText(_playlist->getPllName());
   refreshTableWidgetCurrentPlaylist();
 
   // connecting all the button, menu, sliders and checkbox actions to functions:
@@ -344,6 +344,8 @@ void MainWindow::saveToDatabase() {
   connect(_workerdb, &CDatabaseWorker::sendProgress, _dlgProgess,
           &DialogProgress::receiveProgress);
   connect(_workerdb, &CDatabaseWorker::progressReady, _dlgProgess,
+          &DialogProgress::allowClose);
+  connect(_workerdb, &CDatabaseWorker::error, _dlgProgess,
           &DialogProgress::allowClose);
 
   // Create an event loop to block until the database operation is done,
@@ -919,16 +921,47 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
   }
 }
 
-// open first (default) playlist in the database-table "playlist" on start up:
+// open first (default) playlist in the database-table "playlist" on start up
 void MainWindow::readDataBasePlaylist() {
+  // security check if the pllid coming from the config file is actually
+  // existing in the database
+  bool isExisting = false;
+  QMetaObject::invokeMethod(
+      _workerdb, "checkPllIDExisting", Qt::BlockingQueuedConnection,
+      Q_ARG(int, _playlist->getPllID()), Q_ARG(bool*, &isExisting));
+
+  if (!isExisting) {
+    // if not in the database available set the default values:
+    qDebug() << "setting default value playlist";
+    _playlist->setPllID(_workerdb->getDefaultPllID());
+    _playlist->setPllName(_workerdb->getDefaultPllName());
+  } else {
+    // getting the name from the database, NOT from the config file!
+    QString name;
+    bool success = false;
+    QMetaObject::invokeMethod(
+        _workerdb, "getPlaylistNameFromDatabase", Qt::BlockingQueuedConnection,
+        Q_ARG(QString*, &name), Q_ARG(int, _playlist->getPllID()),
+        Q_ARG(bool*, &success));
+
+    if (success) {
+      // qDebug() << "Playlist Name: " << name;
+      _playlist->setPllName(name);
+    }
+  }
   bool success = false;
   // fill the playlist with the database tracks
   QMetaObject::invokeMethod(
       _workerdb, "readPlaylistTracksFromDatabase", Qt::BlockingQueuedConnection,
       Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success));
 
-  if (!success)
+  // should never be reached, in case the database wasnt created properly on
+  // starting up
+  if (!success) {
+    QMessageBox::warning(this, "Error",
+                         "Could not read the tracks from the Database");
     qDebug() << "Something went wrong reading the database";
+  }
 }
 
 void MainWindow::closingProcedure() {
@@ -1078,9 +1111,10 @@ void MainWindow::initializeSettings() {
   if (!_settings.contains("Default Playlist ID")) {
     _settings.setValue("Default Playlist ID", _workerdb->getDefaultPllID());
   }
-  if (!_settings.contains("Default Playlist Name")) {
-    _settings.setValue("Default Playlist Name", _workerdb->getDefaultPllName());
-  }
+  // if (!_settings.contains("Default Playlist Name")) {
+  //   _settings.setValue("Default Playlist Name",
+  //   _workerdb->getDefaultPllName());
+  // }
   if (!_settings.contains("OLED Status")) {
     _settings.setValue("OLED Status", _statusOled);
   }
@@ -1114,7 +1148,7 @@ void MainWindow::saveSettings() {
   _settings.setValue("Api Key", _apiKey);
   _settings.setValue("Volume", int(_audio->volume() * 100));
   _settings.setValue("Default Playlist ID", _playlist->getPllID());
-  _settings.setValue("Default Playlist Name", _playlist->getPllName());
+  // _settings.setValue("Default Playlist Name", _playlist->getPllName());
   _settings.setValue("OLED Status", _statusOled);
   _settings.setValue("OLED Bus", QString::fromStdString(_oled->getBus()));
   _settings.setValue("OLED Adress", QString::fromStdString(_oled->getAdress()));
@@ -1129,7 +1163,7 @@ void MainWindow::loadSettings() {
   _apiKey = _settings.value("Api Key").toString();
   _level = _settings.value("Volume").toInt();
   _playlist->setPllID(_settings.value("Default Playlist ID").toInt());
-  _playlist->setPllName(_settings.value("Default Playlist Name").toString());
+  // _playlist->setPllName(_settings.value("Default Playlist Name").toString());
   _statusOled = _settings.value("OLED Status").toBool();
   _oled->setBus(_settings.value("OLED Bus").toString().toStdString());
   _oled->setAdress(_settings.value("OLED Adress").toString().toStdString());

@@ -12,6 +12,7 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QMessageBox>
 
 class CDatabaseWorker : public QObject {
   Q_OBJECT
@@ -19,6 +20,7 @@ public:
   explicit CDatabaseWorker(QObject* parent = nullptr);
   const QString& getDefaultPllName() { return _defaultPlaylistName; }
   const int& getDefaultPllID() { return _defaultPlaylistID; }
+
 
 public slots:
   void
@@ -50,12 +52,15 @@ public slots:
     QMutexLocker locker(&_mutex);
     _cancelSaving = true;
   }
+  void checkPllIDExisting(int pllid, bool* isexisting);
+  void getPlaylistNameFromDatabase(QString* name, int pllid, bool* success);
 
 signals:                                  // for progress bar functionality
   void sendProgress(const int& progress); // sends the amount of tracks being
                                           // saved for the progress bar
   void progressReady(); // sends a signal to let the progress bar know the
                         // process is finished or properly cancelled
+  void error();
 
 private:
   int _tracknr; // to be able to count the number of tracks being saved, for

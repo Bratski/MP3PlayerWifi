@@ -2,6 +2,46 @@
 
 CDatabaseWorker::CDatabaseWorker(QObject* parent) : QObject{parent} {}
 
+void CDatabaseWorker::checkPllIDExisting(int pllid, bool* isexisting) {
+  QSqlQuery query;
+  query.prepare("SELECT PllID FROM Playlist WHERE PllID = :PllID");
+  query.bindValue(":PllID", pllid);
+
+  if (!query.exec()) {
+    qDebug() << "Database Error, Failed to execute query: "
+             << query.lastError().text();
+    *isexisting = true;
+    return;
+  }
+
+  if (query.next()) {
+    // Playlist does exist
+    *isexisting = true;
+  } else {
+    qDebug() << "Playlist with ID " << pllid
+             << " does NOT exist in the database!";
+    *isexisting = false;
+  }
+}
+
+void CDatabaseWorker::getPlaylistNameFromDatabase(QString* name, int pllid,
+                                                  bool* success) {
+  QSqlQuery query;
+  query.prepare("SELECT PllName FROM Playlist WHERE PllID = :pllId ");
+  query.bindValue(":pllId", pllid);
+
+  if (!query.exec()) {
+    qDebug() << "error getting the playlist name, based in the ID";
+    *success = false;
+    return;
+  }
+
+  if (query.first()) {
+    *name = query.value(0).toString();
+    *success = true;
+  }
+}
+
 void CDatabaseWorker::initialize(bool* success) {
   *success = createConnection(_defaultPlaylistName, _defaultPlaylistID);
 }
@@ -20,6 +60,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.bindValue(":pllID", playlist->getPllID());
     if (!query.exec()) {
       qDebug() << "error deleting tracks from the playlist";
+      emit error(); // secures the closing of the progressbar, it will be
+                    // staying in a blocked state otherways
       *success = false;
       return;
     }
@@ -35,6 +77,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
   query.bindValue(":pllID", playlist->getPllID());
   if (!query.exec()) {
     qDebug() << "error deleting tracks from the playlist";
+    emit error(); // secures the closing of the progressbar, it will be
+                  // staying in a blocked state otherways
     *success = false;
     return;
   }
@@ -45,6 +89,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     // qDebug() << "artist: " << (*it)->getArtist();
     // qDebug() << "title: " << (*it)->getTitle();
     // qDebug() << "playlist: " << playlist->getPllName();
+    // qDebug() << "playlist ID save: " << playlist->getPllID();
 
     // for one track:
     ++_tracknr;
@@ -57,6 +102,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.bindValue(":artGenre", (*it)->getGenre());
     if (!query.exec()) {
       qDebug() << "error inserting artist";
+      emit error(); // secures the closing of the progressbar, it will be
+                    // staying in a blocked state otherways
       *success = false;
       return;
     }
@@ -73,6 +120,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         (*it)->getArtist()); // Reuse the artist name to get the ArtID
     if (!query.exec()) {
       qDebug() << "error inserting album";
+      emit error(); // secures the closing of the progressbar, it will be
+                    // staying in a blocked state otherways
       *success = false;
       return;
     }
@@ -98,22 +147,25 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
                     (*it)->getAlbum()); // Reuse the album name to get the AlbID
     if (!query.exec()) {
       qDebug() << "error inserting track";
+      emit error(); // secures the closing of the progressbar, it will be
+                    // staying in a blocked state otherways
       *success = false;
       return;
     }
     // associate the track with the playlist
     query.prepare(
         "INSERT INTO TrackPlaylist (TraFK, PllFK) VALUES ((SELECT TraID FROM "
-        "Track WHERE TraName = :traTitle), (SELECT PllID FROM Playlist WHERE "
-        "PllName = :pllName)) ON CONFLICT(TraFK, PllFK) DO NOTHING ");
+        "Track WHERE TraName = :traTitle), :pllId) ON CONFLICT(TraFK, PllFK) "
+        "DO NOTHING ");
     query.bindValue(
         ":traTitle",
         (*it)->getTitle()); // Reuse the track title to get the TraID
-    query.bindValue(
-        ":pllName",
-        playlist->getPllName()); // Reuse the playlist name to get the PllID
+    query.bindValue(":pllId",
+                    playlist->getPllID()); // Use the PllID directly
     if (!query.exec()) {
       qDebug() << "error inserting playlist";
+      emit error(); // secures the closing of the progressbar, it will be
+                    // staying in a blocked state otherways
       *success = false;
       return;
     }
@@ -141,6 +193,7 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
     CPlaylistContainer* playlist, bool* success) {
   // fill the playlist object with the all the tracks data from the database
   // found at that particular playlist
+  // qDebug() << "pll ID read: " << playlist->getPllID();
   QSqlQuery query;
   query.prepare(
       "SELECT Track.TraID, Track.TraName, Artist.ArtName, Album.AlbName, "
@@ -168,10 +221,8 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
     // to make sure the track id is unique, a character is added to the
     // incrementing number, to identify its origin: "F" from file, "D" from
     // database
-    id =
-        "D" +
-        query.value(0)
-            .toString(); // to identify its origin, a "D" from DATABASE is added
+    id = "D" + query.value(0).toString(); // to identify its origin, a "D"
+                                          // from DATABASE is added
     title = query.value(1).toString();
     artist = query.value(2).toString();
     album = query.value(3).toString();

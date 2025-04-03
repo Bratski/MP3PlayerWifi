@@ -133,7 +133,7 @@ private:
   bool _runRTCloop = false;
   bool _playerStopped = false;
   bool _statusOled = false;
-  bool _statusRTC = true;
+  bool _statusRTC = false;
   bool _switchState = false;
   bool _filelocationValid = true;
 
