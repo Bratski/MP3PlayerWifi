@@ -7,12 +7,12 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QMessageBox>
 #include <QMutex>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QMessageBox>
 
 class CDatabaseWorker : public QObject {
   Q_OBJECT
@@ -21,8 +21,8 @@ public:
   const QString& getDefaultPllName() { return _defaultPlaylistName; }
   const int& getDefaultPllID() { return _defaultPlaylistID; }
 
-
 public slots:
+  void readDataBasePlaylist(CPlaylistContainer* playlist, bool* success);
   void
   initialize(bool* success); // checks if a database exists and is correctly
                              // configured, if not it will create a default one
@@ -52,8 +52,6 @@ public slots:
     QMutexLocker locker(&_mutex);
     _cancelSaving = true;
   }
-  void checkPllIDExisting(int pllid, bool* isexisting);
-  void getPlaylistNameFromDatabase(QString* name, int pllid, bool* success);
 
 signals:                                  // for progress bar functionality
   void sendProgress(const int& progress); // sends the amount of tracks being

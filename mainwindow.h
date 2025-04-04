@@ -143,10 +143,7 @@ private:
 
   // float _startVolume = 0.2; // setting the start volume to 20%
   int _level = 20;
-
-  int _index = 0; // song index for the playlist vector
-  int _defaultPlaylistID =
-      1; // at startup open the first playlist in the database by default
+  int _index = 0;   // song index for the playlist vector
   int _trackID = 0; // to be able to give manually added tracks a unique id
   uint _pinSW = 23;
   uint _pinCLK = 17;

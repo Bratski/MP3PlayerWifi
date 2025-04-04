@@ -2,46 +2,30 @@
 
 CDatabaseWorker::CDatabaseWorker(QObject* parent) : QObject{parent} {}
 
-void CDatabaseWorker::checkPllIDExisting(int pllid, bool* isexisting) {
+void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer* playlist,
+                                           bool* success) {
   QSqlQuery query;
-  query.prepare("SELECT PllID FROM Playlist WHERE PllID = :PllID");
-  query.bindValue(":PllID", pllid);
+  query.prepare("SELECT Playlist.PllID, Playlist.PllName FROM Playlist WHERE "
+                "PllID = :id ");
+  query.bindValue(":id", playlist->getPllID());
 
   if (!query.exec()) {
-    qDebug() << "Database Error, Failed to execute query: "
-             << query.lastError().text();
-    *isexisting = false;
-    return;
-  }
-
-  if (query.next()) {
-    // Playlist does exist
-    *isexisting = true;
-  } else {
-    qDebug() << "Playlist with ID " << pllid
-             << " does NOT exist in the database!";
-    *isexisting = false;
-  }
-}
-
-void CDatabaseWorker::getPlaylistNameFromDatabase(QString* name, int pllid,
-                                                  bool* success) {
-  QSqlQuery query;
-  query.prepare("SELECT PllName FROM Playlist WHERE PllID = :pllId ");
-  query.bindValue(":pllId", pllid);
-
-  if (!query.exec()) {
-    qDebug() << "error getting the playlist name, based in the ID";
     *success = false;
     return;
   }
-
-  if (query.first()) {
-    *name = query.value(0).toString();
+  // execute only if a playlist has been found
+  if (query.next()) {
+    playlist->setPllID(query.value(0).toInt());
+    playlist->setPllName(query.value(1).toString());
+    readPlaylistTracksFromDatabase(playlist, success);
     *success = true;
-    return;
   }
-  *success = false;
+  // set default values for the playlist
+  else {
+    playlist->setPllID(_defaultPlaylistID);
+    playlist->setPllName(_defaultPlaylistName);
+    *success = false;
+  }
 }
 
 void CDatabaseWorker::initialize(bool* success) {

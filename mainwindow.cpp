@@ -923,45 +923,16 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 // open first (default) playlist in the database-table "playlist" on start up
 void MainWindow::readDataBasePlaylist() {
-  // security check if the pllid coming from the config file is actually
-  // existing in the database
-  bool isExisting = false;
-  QMetaObject::invokeMethod(
-      _workerdb, "checkPllIDExisting", Qt::BlockingQueuedConnection,
-      Q_ARG(int, _playlist->getPllID()), Q_ARG(bool*, &isExisting));
-
-  if (!isExisting) {
-    // if not in the database available set the default values:
-    qDebug() << "setting default value playlist";
-    _playlist->setPllID(_workerdb->getDefaultPllID());
-    _playlist->setPllName(_workerdb->getDefaultPllName());
-  } else {
-    // getting the name from the database, NOT from the config file!
-    QString name;
-    bool success = false;
-    QMetaObject::invokeMethod(
-        _workerdb, "getPlaylistNameFromDatabase", Qt::BlockingQueuedConnection,
-        Q_ARG(QString*, &name), Q_ARG(int, _playlist->getPllID()),
-        Q_ARG(bool*, &success));
-
-    if (success) {
-      // qDebug() << "Playlist Name: " << name;
-      _playlist->setPllName(name);
-    }
-  }
   bool success = false;
   // fill the playlist with the database tracks
   QMetaObject::invokeMethod(
-      _workerdb, "readPlaylistTracksFromDatabase", Qt::BlockingQueuedConnection,
+      _workerdb, "readDataBasePlaylist", Qt::BlockingQueuedConnection,
       Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success));
 
-  // should never be reached, in case the database wasnt created properly on
-  // starting up
-  if (!success) {
-    QMessageBox::warning(this, "Error",
-                         "Could not read the tracks from the Database");
+  if (!success)
     qDebug() << "Something went wrong reading the database";
-  }
+  else
+    qDebug() << "The database successfully being read";
 }
 
 void MainWindow::closingProcedure() {
