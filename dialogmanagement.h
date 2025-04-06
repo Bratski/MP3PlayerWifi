@@ -9,6 +9,12 @@
 #include <QMessageBox>
 #include <QThread>
 
+// for import and export XML functionalities
+#include <QFile>
+#include <QFileDialog>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+
 // for the SQL Database management
 #include <QtSql/QSqlQuery>
 
@@ -39,6 +45,8 @@ public slots:
   void deletePlaylist();
   void namePlaylistEdited(QTableWidgetItem* item);
   void dealWithMouseOneTimeClick(QTableWidgetItem* item);
+  void importXML();
+  void exportXML();
 
 signals:
   void saveToDBMainWindow();

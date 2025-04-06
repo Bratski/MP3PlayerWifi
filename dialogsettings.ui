@@ -144,7 +144,8 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="window-close"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/actions/cancel.png</normaloff>:/icons/actions/cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -154,7 +155,8 @@
         <string>Save</string>
        </property>
        <property name="icon">
-        <iconset theme="list-add"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/actions/dialog-apply.png</normaloff>:/icons/actions/dialog-apply.png</iconset>
        </property>
       </widget>
      </item>
@@ -228,6 +230,8 @@
   <tabstop>pushButtonSave</tabstop>
   <tabstop>pushButtonCancel</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

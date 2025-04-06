@@ -95,3 +95,6 @@ message("Resolved LIBS: $$LIBS")
 #     # For taglib
 #     LIBS += -L$$PWD/myTaglib -ltag
 # }
+
+RESOURCES += \
+    icons.qrc

@@ -52,7 +52,8 @@
         <string>cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="application-exit"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/actions/cancel.png</normaloff>:/icons/actions/cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -62,7 +63,8 @@
         <string>add</string>
        </property>
        <property name="icon">
-        <iconset theme="list-add"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/legacy/list-add.png</normaloff>:/icons/legacy/list-add.png</iconset>
        </property>
       </widget>
      </item>
@@ -75,6 +77,8 @@
   <tabstop>pushButtonAdd</tabstop>
   <tabstop>pushButtonCancel</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -24,6 +24,10 @@ DialogManagement::DialogManagement(QWidget* parent,
                    &DialogManagement::addNewPlaylist);
   QObject::connect(ui->pushButtonDelete, &QPushButton::clicked, this,
                    &DialogManagement::deletePlaylist);
+  QObject::connect(ui->pushButtonExport, &QPushButton::clicked, this,
+                   &DialogManagement::exportXML);
+  QObject::connect(ui->pushButtonImport, &QPushButton::clicked, this,
+                   &DialogManagement::importXML);
 
   // event of an item has been edited in the table widget
   QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemClicked, this,
@@ -295,6 +299,148 @@ void DialogManagement::dealWithMouseOneTimeClick(QTableWidgetItem* item) {
       ui->tableWidgetPlaylists->editItem(item);
     }
   });
+}
+
+void DialogManagement::importXML() { // TODO
+  // if the flag is set, ignore the signal to avoid recursion
+  if (_isEditing) {
+    return;
+  }
+
+  // Set the flag to true to prevent recursive calls
+  _isEditing = true;
+
+  // open file browser, select xml file to import
+
+  // create a playlist vector and add the xml file output
+
+  // prevents interfering with the namePlaylistEdited function
+  _isEditing = false;
+}
+
+void DialogManagement::exportXML() {
+  // if the flag is set, ignore the signal to avoid recursion
+  if (_isEditing) {
+    return;
+  }
+
+  // Set the flag to true to prevent recursive calls
+  _isEditing = true;
+
+  // which playlist is selected in the management table? Only one playlist at
+  // the time?! check if one row has been selected, if yes, which one? If not
+  // return with error message
+
+  QList<QTableWidgetSelectionRange> selectedRanges =
+      ui->tableWidgetPlaylists->selectedRanges();
+
+  if (selectedRanges.size() == 0) {
+    QMessageBox::warning(this, "Error",
+                         "No playlist has been selected to be exported!");
+    _isEditing = false;
+    return;
+  }
+
+  // if yes, is it only one row or more?
+  if (selectedRanges.first().rowCount() != 1) {
+    QMessageBox::warning(this, "Error",
+                         "Only 1 Playlist can be selected to be exported!");
+    _isEditing = false;
+    return;
+  }
+
+  // get the items at the selected row
+  int selectedRow = selectedRanges.first().topRow();
+  QTableWidgetItem* idItem =
+      ui->tableWidgetPlaylists->item(selectedRow, 0); // Column 0 (ID)
+  QTableWidgetItem* nameItem =
+      ui->tableWidgetPlaylists->item(selectedRow, 1); // Column 1 (Name)
+
+  // create a new playlist object for export
+  CPlaylistContainer playlistExport;
+  //_playlist->clear();
+
+  // extract the PllID and PllName from the items and set the _playlist name and
+  // id
+  playlistExport.setPllID(idItem->text().toInt());
+  playlistExport.setPllName(nameItem->text());
+
+  bool success = false;
+  // fill the playlist with the database tracks
+  QMetaObject::invokeMethod(
+      _workerdb, "readDataBasePlaylist", Qt::BlockingQueuedConnection,
+      Q_ARG(CPlaylistContainer*, &playlistExport), Q_ARG(bool*, &success));
+
+  if (!success) {
+    QMessageBox::warning(
+        this, "Error",
+        "Selected Playlist could not be read from the database!");
+    return;
+  }
+
+  // open filebrowser to select/create file and location where the xml file
+  // should be saved
+  QFile file = QFileDialog::getSaveFileName(
+      this, "Export to ", qApp->applicationDirPath(), "XML Files (*.xml)");
+
+  // add the extension to the filename, in case it does not end with .xml
+  if (!file.fileName().endsWith(".xml"))
+    file.setFileName(file.fileName() + ".xml");
+  // qDebug() << "filename: " << file.fileName();
+
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QMessageBox::warning(this, "Error",
+                         file.fileName() + " could not be opened");
+    return;
+  }
+
+  // start the xmlwriter
+  QXmlStreamWriter xmlWriter(&file);
+  xmlWriter.setAutoFormatting(true); // For human-readable output
+
+  // read the selected playlist and convert this to xml
+  xmlWriter.writeStartDocument();
+
+  // Root element playlist
+  xmlWriter.writeStartElement("Playlist");
+  xmlWriter.writeAttribute("ID", QString::number(playlistExport.getPllID()));
+  xmlWriter.writeTextElement("Name", playlistExport.getPllName());
+
+  // Write each track as an XML element
+  for (auto it = playlistExport.beginPtr(); it != playlistExport.endPtr();
+       ++it) {
+    xmlWriter.writeStartElement("Track");
+
+    xmlWriter.writeAttribute("ID", (*it)->getID());
+    xmlWriter.writeTextElement("Title", (*it)->getTitle());
+    xmlWriter.writeTextElement("Artist", (*it)->getArtist());
+    xmlWriter.writeTextElement("Album", (*it)->getAlbum());
+    xmlWriter.writeTextElement("Year", QString::number((*it)->getYear()));
+    xmlWriter.writeTextElement("Number", QString::number((*it)->getNumber()));
+    xmlWriter.writeTextElement("Genre", (*it)->getGenre());
+    xmlWriter.writeTextElement("Duration",
+                               QString::number((*it)->getDuration()));
+    xmlWriter.writeTextElement("Bitrate", QString::number((*it)->getBitrate()));
+    xmlWriter.writeTextElement("Samplerate",
+                               QString::number((*it)->getSamplerate()));
+    xmlWriter.writeTextElement("Channels",
+                               QString::number((*it)->getChannels()));
+    xmlWriter.writeTextElement("FileLocation", (*it)->getFileLocation());
+
+    xmlWriter.writeEndElement();
+  }
+  xmlWriter.writeEndElement();
+  xmlWriter.writeEndDocument();
+
+  // and save it to the file
+  file.close();
+
+  QMessageBox::information(this, "Success",
+                           "Playlist " + playlistExport.getPllName() +
+                               " successfully exported to " + file.fileName());
+
+  // prevents interfering with the namePlaylistEdited function
+  _isEditing = false;
 }
 
 void DialogManagement::readDatabase() {

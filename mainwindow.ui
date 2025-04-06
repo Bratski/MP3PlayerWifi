@@ -169,7 +169,14 @@
          <string>Repeat All</string>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaPlaylistRepeat"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-playlist-repeat.svg</normaloff>:/icons/48/media-playlist-repeat.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -185,7 +192,14 @@
          <string>Play Shuffle</string>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaPlaylistShuffle"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-playlist-shuffle.svg</normaloff>:/icons/48/media-playlist-shuffle.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -341,7 +355,14 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="media-skip-backward"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-skip-backward.svg</normaloff>:/icons/48/media-skip-backward.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -363,7 +384,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="media-playback-start"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-playback-start.svg</normaloff>:/icons/48/media-playback-start.svg</iconset>
         </property>
        </widget>
       </item>
@@ -385,7 +407,14 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="media-skip-forward"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-skip-forward.svg</normaloff>:/icons/48/media-skip-forward.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -407,7 +436,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="media-playback-pause"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-playback-pause.svg</normaloff>:/icons/48/media-playback-pause.svg</iconset>
         </property>
        </widget>
       </item>
@@ -429,7 +459,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="media-playback-stop"/>
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/48/media-playback-stop.svg</normaloff>:/icons/48/media-playback-stop.svg</iconset>
         </property>
        </widget>
       </item>
@@ -577,7 +608,7 @@
      <x>0</x>
      <y>0</y>
      <width>1049</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuManagement">
@@ -645,7 +676,8 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
    <property name="icon">
-    <iconset theme="application-exit"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/cancel.png</normaloff>:/icons/actions/cancel.png</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -656,7 +688,8 @@
   </action>
   <action name="actionAddFile">
    <property name="icon">
-    <iconset theme="document-open"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
    </property>
    <property name="text">
     <string>Music File</string>
@@ -667,7 +700,8 @@
   </action>
   <action name="actionAddFolder">
    <property name="icon">
-    <iconset theme="folder-open"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/folder-new.png</normaloff>:/icons/actions/folder-new.png</iconset>
    </property>
    <property name="text">
     <string>Music Folder</string>
@@ -678,7 +712,8 @@
   </action>
   <action name="actionOther_Playlist">
    <property name="icon">
-    <iconset theme="list-add"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/legacy/list-add.png</normaloff>:/icons/legacy/list-add.png</iconset>
    </property>
    <property name="text">
     <string>Other Playlist</string>
@@ -689,7 +724,8 @@
   </action>
   <action name="actionDeleteTrack">
    <property name="icon">
-    <iconset theme="edit-delete"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
    </property>
    <property name="text">
     <string>selected Song(s)</string>
@@ -700,7 +736,8 @@
   </action>
   <action name="actionDeletePlaylist">
    <property name="icon">
-    <iconset theme="list-remove"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/legacy/list-remove.png</normaloff>:/icons/legacy/list-remove.png</iconset>
    </property>
    <property name="text">
     <string>this Playlist</string>
@@ -711,7 +748,8 @@
   </action>
   <action name="actionby_Artist">
    <property name="icon">
-    <iconset theme="mail-forward"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/mail-forward.png</normaloff>:/icons/actions/mail-forward.png</iconset>
    </property>
    <property name="text">
     <string>by Artist</string>
@@ -719,7 +757,8 @@
   </action>
   <action name="actionby_Album_Year">
    <property name="icon">
-    <iconset theme="mail-forward"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/mail-forward.png</normaloff>:/icons/actions/mail-forward.png</iconset>
    </property>
    <property name="text">
     <string>by Album Year</string>
@@ -727,7 +766,8 @@
   </action>
   <action name="actionby_Genre">
    <property name="icon">
-    <iconset theme="mail-forward"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/mail-forward.png</normaloff>:/icons/actions/mail-forward.png</iconset>
    </property>
    <property name="text">
     <string>by Genre</string>
@@ -735,7 +775,8 @@
   </action>
   <action name="actionOled_Display">
    <property name="icon">
-    <iconset theme="video-display"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
    </property>
    <property name="text">
     <string>Oled and RTC</string>
@@ -746,7 +787,8 @@
   </action>
   <action name="actionundo_Sort">
    <property name="icon">
-    <iconset theme="edit-undo"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/edit-undo.png</normaloff>:/icons/actions/edit-undo.png</iconset>
    </property>
    <property name="text">
     <string>undo Sort</string>
@@ -754,7 +796,8 @@
   </action>
   <action name="actionHelp_Window">
    <property name="icon">
-    <iconset theme="help-about"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/help-contents.png</normaloff>:/icons/actions/help-contents.png</iconset>
    </property>
    <property name="text">
     <string>Help Window</string>
@@ -765,7 +808,8 @@
   </action>
   <action name="actionManagement">
    <property name="icon">
-    <iconset theme="document-new"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">
     <string>Management</string>
@@ -776,7 +820,8 @@
   </action>
   <action name="actionby_Album">
    <property name="icon">
-    <iconset theme="mail-forward"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/mail-forward.png</normaloff>:/icons/actions/mail-forward.png</iconset>
    </property>
    <property name="text">
     <string>by Album</string>
@@ -784,7 +829,8 @@
   </action>
   <action name="actionSearchfilter">
    <property name="icon">
-    <iconset theme="edit-find"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
    </property>
    <property name="text">
     <string>Filter Playlist</string>
@@ -795,7 +841,8 @@
   </action>
   <action name="actionSave_Playlist">
    <property name="icon">
-    <iconset theme="document-save"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/document-save.png</normaloff>:/icons/actions/document-save.png</iconset>
    </property>
    <property name="text">
     <string>Save Playlist</string>
@@ -806,7 +853,8 @@
   </action>
   <action name="actionby_Database">
    <property name="icon">
-    <iconset theme="edit-undo"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/edit-undo.png</normaloff>:/icons/actions/edit-undo.png</iconset>
    </property>
    <property name="text">
     <string>undo Filter</string>
@@ -817,7 +865,8 @@
   </action>
   <action name="actionRandom">
    <property name="icon">
-    <iconset theme="mail-reply-all"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/mail-reply-all.png</normaloff>:/icons/actions/mail-reply-all.png</iconset>
    </property>
    <property name="text">
     <string>Random</string>
@@ -825,7 +874,8 @@
   </action>
   <action name="actionby_Tracknumber">
    <property name="icon">
-    <iconset theme="mail-forward"/>
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/actions/mail-forward.png</normaloff>:/icons/actions/mail-forward.png</iconset>
    </property>
    <property name="text">
     <string>by Tracknumber</string>
@@ -844,6 +894,8 @@
   <tabstop>horizontalSliderSong</tabstop>
   <tabstop>tableWidgetCurrentPlaylist</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

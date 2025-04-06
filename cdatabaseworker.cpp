@@ -18,7 +18,6 @@ void CDatabaseWorker::readDataBasePlaylist(CPlaylistContainer* playlist,
     playlist->setPllID(query.value(0).toInt());
     playlist->setPllName(query.value(1).toString());
     readPlaylistTracksFromDatabase(playlist, success);
-    *success = true;
   }
   // set default values for the playlist
   else {
@@ -231,7 +230,9 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
     } else
       qDebug() << "Track: " << title << " file location invalid";
   }
+
   *success = true;
+  emit progressReady();
   return;
 }
 

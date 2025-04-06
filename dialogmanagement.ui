@@ -61,37 +61,55 @@
         <string>Add</string>
        </property>
        <property name="icon">
-        <iconset theme="document-new"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QPushButton" name="pushButtonDelete">
        <property name="text">
         <string>Delete</string>
        </property>
        <property name="icon">
-        <iconset theme="edit-delete"/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButtonExport">
-       <property name="text">
-        <string>Export</string>
-       </property>
-       <property name="icon">
-        <iconset theme="document-send"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item row="3" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="pushButtonExport">
+       <property name="text">
+        <string>Export</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/legacy/document-export.png</normaloff>:/icons/legacy/document-export.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonImport">
+       <property name="text">
+        <string>Import</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/legacy/document-import.png</normaloff>:/icons/legacy/document-import.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="pushButtonCancel">
@@ -99,7 +117,8 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="application-exit"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/actions/cancel.png</normaloff>:/icons/actions/cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -109,7 +128,8 @@
         <string>Open</string>
        </property>
        <property name="icon">
-        <iconset theme="list-add"/>
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/legacy/list-add.png</normaloff>:/icons/legacy/list-add.png</iconset>
        </property>
       </widget>
      </item>
@@ -123,9 +143,10 @@
   <tabstop>pushButtonAdd</tabstop>
   <tabstop>pushButtonOpen</tabstop>
   <tabstop>pushButtonCancel</tabstop>
-  <tabstop>pushButtonDelete</tabstop>
   <tabstop>pushButtonExport</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>
