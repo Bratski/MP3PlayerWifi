@@ -22,16 +22,6 @@ int main(int argc, char* argv[]) {
 
   QApplication a(argc, argv);
 
-  // // ensure icons are working across different qt versions
-  // // Set icon theme before creating main window
-  QIcon::setThemeName("Yaru"); // or "oxygen", "Adwaita", etc.
-  // Alternatively, use fallback search paths
-  QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << "/usr/share/icons");
-
-  // check the current settings for icons
-  qDebug() << "themeSearchPaths:" << QIcon::themeSearchPaths()
-           << QIcon::themeName();
-
   // creating Objects:
   COled oled; // for Oled Display
 
@@ -71,8 +61,7 @@ int main(int argc, char* argv[]) {
       nullptr, &oled, &player, &audioOutput, &playlist, &track, &dbthread,
       &rtcthread, &workerdb,
       &workerrtc); // passing all the objects as pointers to the main window
-  // w.setWindowIcon(
-  //     QIcon("/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets.png"));
+
   w.show();
 
   return a.exec();

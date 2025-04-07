@@ -362,13 +362,13 @@ void DialogManagement::importXML() { // TODO
       //   qDebug() << "pll id: " << playlistImport.getPllID();
       // }
 
-      if (xml.name() == "Name") {
+      if (xml.name() == QLatin1String("Name")) {
         xml.readNext();
         playlistImport.setPllName(xml.text().toString());
         qDebug() << "pll name: " << playlistImport.getPllName();
       }
 
-      if (xml.name() == "Track") {
+      if (xml.name() == QLatin1String("Track")) {
 
         // Read attributes
         QXmlStreamAttributes attributes = xml.attributes();
@@ -378,40 +378,40 @@ void DialogManagement::importXML() { // TODO
 
         // Read child elements
         while (!(xml.tokenType() == QXmlStreamReader::EndElement &&
-                 xml.name() == "Track")) {
+                 xml.name() == QLatin1String("Track"))) {
 
           if (xml.tokenType() == QXmlStreamReader::StartElement) {
-            if (xml.name() == "Title") {
+            if (xml.name() == QLatin1String("Title")) {
               xml.readNext();
               TraTitle = xml.text().toString();
-            } else if (xml.name() == "Artist") {
+            } else if (xml.name() == QLatin1String("Artist")) {
               xml.readNext();
               TraArtist = xml.text().toString();
-            } else if (xml.name() == "Album") {
+            } else if (xml.name() == QLatin1String("Album")) {
               xml.readNext();
               TraAlbum = xml.text().toString();
-            } else if (xml.name() == "Year") {
+            } else if (xml.name() == QLatin1String("Year")) {
               xml.readNext();
               TraYear = xml.text().toInt();
-            } else if (xml.name() == "Number") {
+            } else if (xml.name() == QLatin1String("Number")) {
               xml.readNext();
               TraNumber = xml.text().toInt();
-            } else if (xml.name() == "Genre") {
+            } else if (xml.name() == QLatin1String("Genre")) {
               xml.readNext();
               TraGenre = xml.text().toString();
-            } else if (xml.name() == "Duration") {
+            } else if (xml.name() == QLatin1String("Duration")) {
               xml.readNext();
               TraDuration = xml.text().toInt();
-            } else if (xml.name() == "Bitrate") {
+            } else if (xml.name() == QLatin1String("Bitrate")) {
               xml.readNext();
               TraBitrate = xml.text().toInt();
-            } else if (xml.name() == "Samplerate") {
+            } else if (xml.name() == QLatin1String("Samplerate")) {
               xml.readNext();
               TraSamplerate = xml.text().toInt();
-            } else if (xml.name() == "Channels") {
+            } else if (xml.name() == QLatin1String("Channels")) {
               xml.readNext();
               TraChannels = xml.text().toInt();
-            } else if (xml.name() == "FileLocation") {
+            } else if (xml.name() == QLatin1String("FileLocation")) {
               xml.readNext();
               TraFileLocation = xml.text().toString();
             }
@@ -643,7 +643,7 @@ void DialogManagement::readDatabase() {
   // Set the flag to true to prevent recursive calls
   _isEditing = true;
 
-  qDebug() << "readDatabase is executed";
+  // qDebug() << "readDatabase is executed";
   // temporare QString vector
   std::vector<QString> playlistsInDatabase;
 

@@ -81,26 +81,28 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     // check if the track attributes are empty or not, preventing SQL database
     // from returning "Not Null" errors
     QString TraID;
-    (*it)->getID().isEmpty() ? TraID = "00" : TraID = (*it)->getID();
     QString TraTitle;
-    (*it)->getTitle().isEmpty() ? TraTitle = "unknown"
-                                : TraTitle = (*it)->getTitle();
     QString TraArtist;
-    (*it)->getArtist().isEmpty() ? TraArtist = "unknown"
-                                 : TraArtist = (*it)->getArtist();
     QString TraAlbum;
-    (*it)->getAlbum().isEmpty() ? TraAlbum = "unknown"
-                                : TraAlbum = (*it)->getAlbum();
     int TraYear = (*it)->getYear();
     int TraNumber = (*it)->getNumber();
     QString TraGenre;
-    (*it)->getGenre().isEmpty() ? TraGenre = "unknown"
-                                : TraGenre = (*it)->getGenre();
     int TraDuration = (*it)->getDuration();
     int TraBitrate = (*it)->getBitrate();
-    int TraSamplerate = (*it)->getBitrate();
+    int TraSamplerate = (*it)->getSamplerate();
     int TraChannels = (*it)->getChannels();
     QString TraFileLocation;
+
+    // only the QStrings preventing to be NULL
+    (*it)->getID().isEmpty() ? TraID = "00" : TraID = (*it)->getID();
+    (*it)->getTitle().isEmpty() ? TraTitle = "unknown"
+                                : TraTitle = (*it)->getTitle();
+    (*it)->getArtist().isEmpty() ? TraArtist = "unknown"
+                                 : TraArtist = (*it)->getArtist();
+    (*it)->getAlbum().isEmpty() ? TraAlbum = "unknown"
+                                : TraAlbum = (*it)->getAlbum();
+    (*it)->getGenre().isEmpty() ? TraGenre = "unknown"
+                                : TraGenre = (*it)->getGenre();
     (*it)->getFileLocation().isEmpty()
         ? TraFileLocation = "unknown"
         : TraFileLocation = (*it)->getFileLocation();
@@ -108,6 +110,7 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     // for one track:
     ++_tracknr;
     emit sendProgress(_tracknr); // to be able to run the progress bar
+
     //  Insert or update artists
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
                   "VALUES (:artName, :artGenre) "

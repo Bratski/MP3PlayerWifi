@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
 
   // setWindowIcon(
   //     QIcon("/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/fiets.png"));
+
   initializeSettings();
   loadSettings();
   // turn on oled, if it has been set the last time shutdown
@@ -86,11 +87,6 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
 
-  // Does not work yet: synchronize the rtc with the horizontal slider volume
-  // position
-  // QObject::connect(ui->horizontalSliderVolume,
-  // &QSlider::valueChanged, _workerrtc,
-  //                  &CRotaryEncoderWorker::setCounter);
 
   // This is working, because _workingrtc lives in another thread, the lambda
   // function forces a queued connection
@@ -350,7 +346,7 @@ void MainWindow::saveToDatabase(CPlaylistContainer* playlist) {
   connect(_workerdb, &CDatabaseWorker::error, _dlgProgess,
           &DialogProgress::allowClose);
 
-  // Create an event loop to block until the database operation is done,
+  // Create an event loop to block all programm functions until the database operation is done,
   // necessary to display the progressbar properly
   QEventLoop loop;
   connect(_workerdb, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
@@ -834,7 +830,7 @@ void MainWindow::updateTrackInfoDisplay() {
 
   // in case the filelocation is invalid
   if (!_filelocationValid) {
-    // set the outputs, but turn them to a red colour
+    // set the outputs, but turn them into a red colour
     ui->labelCurrentSong->setStyleSheet("color:#FF0000");
     ui->labelcurrentAlbum->setStyleSheet("color:#FF0000");
     ui->labelcurrentArtist->setStyleSheet("color:#FF0000");
