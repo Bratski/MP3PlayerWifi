@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   QObject::connect(ui->actionAddFolder, &QAction::triggered, this,
                    &MainWindow::addMusicFolder);
   QObject::connect(ui->actionSave_Playlist, &QAction::triggered, this,
-                   &MainWindow::saveToDatabase);
+                   &MainWindow::savePlaylist);
   QObject::connect(ui->actionDeleteTrack, &QAction::triggered, this,
                    &MainWindow::deleteTrack);
   QObject::connect(ui->actionDeletePlaylist, &QAction::triggered, this,
@@ -335,9 +335,11 @@ void MainWindow::addMusicFolder() {
     QMessageBox::warning(this, "Error", "Files could not be opened");
 }
 
-void MainWindow::saveToDatabase() {
+void MainWindow::savePlaylist() { saveToDatabase(_playlist); }
+
+void MainWindow::saveToDatabase(CPlaylistContainer* playlist) {
   // display the progress bar
-  _dlgProgess = new DialogProgress(this, _playlist, _dbthread, _workerdb);
+  _dlgProgess = new DialogProgress(this, playlist, _dbthread, _workerdb);
   _dlgProgess->open();
 
   // Connect signals from the database thread to the progress dialog
@@ -357,7 +359,7 @@ void MainWindow::saveToDatabase() {
   bool success = false;
   QMetaObject::invokeMethod(
       _workerdb, "writePlaylistTracksToDatabase", Qt::QueuedConnection,
-      Q_ARG(CPlaylistContainer*, _playlist), Q_ARG(bool*, &success));
+      Q_ARG(CPlaylistContainer*, playlist), Q_ARG(bool*, &success));
 
   // Block until the database operation is complete, necessary to display the
   // progressbar properly
@@ -957,7 +959,7 @@ void MainWindow::closingProcedure() {
     int nr = msg.exec();
     // qDebug() << "return value int msg.exec: " << nr;
     if (nr == 2 || nr == 0) {
-      saveToDatabase();
+      saveToDatabase(_playlist);
     }
   }
 

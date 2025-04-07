@@ -377,7 +377,7 @@
         <property name="minimumSize">
          <size>
           <width>40</width>
-          <height>0</height>
+          <height>28</height>
          </size>
         </property>
         <property name="text">
@@ -400,7 +400,7 @@
         <property name="minimumSize">
          <size>
           <width>40</width>
-          <height>0</height>
+          <height>28</height>
          </size>
         </property>
         <property name="text">
@@ -429,7 +429,7 @@
         <property name="minimumSize">
          <size>
           <width>40</width>
-          <height>0</height>
+          <height>28</height>
          </size>
         </property>
         <property name="text">
@@ -438,6 +438,12 @@
         <property name="icon">
          <iconset resource="icons.qrc">
           <normaloff>:/icons/48/media-playback-pause.svg</normaloff>:/icons/48/media-playback-pause.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -452,7 +458,7 @@
         <property name="minimumSize">
          <size>
           <width>40</width>
-          <height>0</height>
+          <height>28</height>
          </size>
         </property>
         <property name="text">

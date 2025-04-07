@@ -36,9 +36,18 @@ DialogManagement::DialogManagement(QWidget* parent,
                    &DialogManagement::namePlaylistEdited);
   QObject::connect(ui->tableWidgetPlaylists, &QTableWidget::itemDoubleClicked,
                    this, &DialogManagement::openPlaylist);
+
+  // refresh table after saving db operation and importing a xml playlist file
+  QObject::connect(_workerdb, &CDatabaseWorker::progressReady, this,
+                   &DialogManagement::readDatabase);
 }
 
-DialogManagement::~DialogManagement() { delete ui; }
+DialogManagement::~DialogManagement() {
+  // for (auto pllptr : _importedplaylists) {
+  //   delete pllptr;
+  // }
+  delete ui;
+}
 
 void DialogManagement::openPlaylist() {
   // If the flag is set, ignore the signal to avoid recursion
@@ -86,7 +95,7 @@ void DialogManagement::openPlaylist() {
     int nr = msg.exec();
     // qDebug() << "return value int msg.exec: " << nr;
     if (nr == 2 || nr == 0) {
-      emit saveToDBMainWindow();
+      emit saveToDBMainWindow(_playlist);
     }
   }
 
@@ -311,11 +320,190 @@ void DialogManagement::importXML() { // TODO
   _isEditing = true;
 
   // open file browser, select xml file to import
+  QFile file = QFileDialog::getOpenFileName(this, "XML file to import",
+                                            qApp->applicationDirPath(),
+                                            "XML Files (*.xml)");
 
-  // create a playlist vector and add the xml file output
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QMessageBox::warning(this, "Error",
+                         file.fileName() + " could not be opened");
+    _isEditing = false;
+    return;
+  }
+  // create a playlist vector
+  CPlaylistContainer playlistImport;
+  // track elements
+  QString TraID;
+  QString TraTitle;
+  QString TraArtist;
+  QString TraAlbum;
+  int TraYear;
+  int TraNumber;
+  QString TraGenre;
+  int TraDuration;
+  int TraBitrate;
+  int TraSamplerate;
+  int TraChannels;
+  QString TraFileLocation;
 
+  // and add the xml file output
+  QXmlStreamReader xml(&file);
+
+  while (!xml.atEnd() && !xml.hasError()) {
+    QXmlStreamReader::TokenType token = xml.readNext();
+
+    if (token == QXmlStreamReader::StartElement) {
+      // if (xml.name() == "Playlist") {
+      //   // Read attributes
+      //   QXmlStreamAttributes attributes = xml.attributes();
+      //   if (attributes.hasAttribute("ID")) {
+      //     playlistImport.setPllID(attributes.value("ID").toInt());
+      //   }
+      //   qDebug() << "pll id: " << playlistImport.getPllID();
+      // }
+
+      if (xml.name() == "Name") {
+        xml.readNext();
+        playlistImport.setPllName(xml.text().toString());
+        qDebug() << "pll name: " << playlistImport.getPllName();
+      }
+
+      if (xml.name() == "Track") {
+
+        // Read attributes
+        QXmlStreamAttributes attributes = xml.attributes();
+        if (attributes.hasAttribute("ID")) {
+          TraID = attributes.value("ID").toString();
+        }
+
+        // Read child elements
+        while (!(xml.tokenType() == QXmlStreamReader::EndElement &&
+                 xml.name() == "Track")) {
+
+          if (xml.tokenType() == QXmlStreamReader::StartElement) {
+            if (xml.name() == "Title") {
+              xml.readNext();
+              TraTitle = xml.text().toString();
+            } else if (xml.name() == "Artist") {
+              xml.readNext();
+              TraArtist = xml.text().toString();
+            } else if (xml.name() == "Album") {
+              xml.readNext();
+              TraAlbum = xml.text().toString();
+            } else if (xml.name() == "Year") {
+              xml.readNext();
+              TraYear = xml.text().toInt();
+            } else if (xml.name() == "Number") {
+              xml.readNext();
+              TraNumber = xml.text().toInt();
+            } else if (xml.name() == "Genre") {
+              xml.readNext();
+              TraGenre = xml.text().toString();
+            } else if (xml.name() == "Duration") {
+              xml.readNext();
+              TraDuration = xml.text().toInt();
+            } else if (xml.name() == "Bitrate") {
+              xml.readNext();
+              TraBitrate = xml.text().toInt();
+            } else if (xml.name() == "Samplerate") {
+              xml.readNext();
+              TraSamplerate = xml.text().toInt();
+            } else if (xml.name() == "Channels") {
+              xml.readNext();
+              TraChannels = xml.text().toInt();
+            } else if (xml.name() == "FileLocation") {
+              xml.readNext();
+              TraFileLocation = xml.text().toString();
+            }
+          }
+
+          xml.readNext();
+        }
+      }
+
+      if (!TraID.isEmpty()) {
+        qDebug() << "Track ID: " << TraID;
+        qDebug() << "Track Title: " << TraTitle;
+        qDebug() << "Track Artist: " << TraArtist;
+        qDebug() << "Track Album: " << TraAlbum;
+        qDebug() << "Track Year: " << TraYear;
+        qDebug() << "Track Number: " << TraNumber;
+        qDebug() << "Track Genre: " << TraGenre;
+        qDebug() << "Track Duration: " << TraDuration;
+        qDebug() << "Track Bitrate: " << TraBitrate;
+        qDebug() << "Track Samplerate: " << TraSamplerate;
+        qDebug() << "Track Channels: " << TraChannels;
+        qDebug() << "Track Filelocation: " << TraFileLocation;
+
+        CTrack newtrack(TraID, TraTitle, TraArtist, TraAlbum, TraYear,
+                        TraNumber, TraGenre, TraDuration, TraBitrate,
+                        TraSamplerate, TraChannels, TraFileLocation);
+        playlistImport.addTrack(newtrack);
+      }
+    }
+  }
+
+  // in case the xml file is not readable, or corrupt
+  if (xml.hasError()) {
+    QMessageBox::warning(this, "XML Error",
+                         "XML file corrupt, error: " + xml.errorString());
+    file.close();
+    _isEditing = false;
+    return;
+  }
+
+  file.close();
+
+  // check if the playlist name already exists in the database, if so give it
+  // another name, add the playlist
+
+  bool success = false;
+  while (!success) {
+    bool doubleName = false;
+    // add a new playlist with the name to the database
+    QMetaObject::invokeMethod(
+        _workerdb, "addNewPlaylist", Qt::BlockingQueuedConnection,
+        Q_ARG(QString, playlistImport.getPllName()), Q_ARG(bool*, &success),
+        Q_ARG(bool*, &doubleName));
+
+    if (doubleName) {
+      bool ok;
+      QString otherpllname = QInputDialog::getText(
+          this, tr("Playlistname already in use"),
+          tr("Please enter another name: "), QLineEdit::Normal, QString(), &ok);
+      if (!otherpllname.isEmpty() && ok)
+        playlistImport.setPllName(otherpllname);
+      else {
+        _isEditing = false;
+        return;
+      }
+    }
+  }
+
+  // get the pll id, if the new list name was added to the database
+  // successfully, if not cancel import
+  success = false;
+  QMetaObject::invokeMethod(
+      _workerdb, "setPllIDbasedOnName", Qt::BlockingQueuedConnection,
+      Q_ARG(CPlaylistContainer*, &playlistImport), Q_ARG(bool*, &success));
+
+  if (!success) {
+    QMessageBox::warning(
+        this, "Error",
+        "Playlistname could not be bound to an id in the current database");
+    _isEditing = false;
+    return;
+  }
+
+  qDebug() << "Playlist ID in the database: " << playlistImport.getPllID();
   // prevents interfering with the namePlaylistEdited function
   _isEditing = false;
+
+  // save the playlist vector to the database
+  emit saveToDBMainWindow(&playlistImport);
+
+  // refresh the table in de management window, emit when ready, because
+  // readDatabase is not refreshed as savetoDBMW is a Queued Operation!
 }
 
 void DialogManagement::exportXML() {
@@ -327,9 +515,9 @@ void DialogManagement::exportXML() {
   // Set the flag to true to prevent recursive calls
   _isEditing = true;
 
-  // which playlist is selected in the management table? Only one playlist at
-  // the time?! check if one row has been selected, if yes, which one? If not
-  // return with error message
+  // which playlist is selected in the management table? Only one playlist
+  // at the time?! check if one row has been selected, if yes, which one?
+  // If not return with error message
 
   QList<QTableWidgetSelectionRange> selectedRanges =
       ui->tableWidgetPlaylists->selectedRanges();
@@ -360,8 +548,8 @@ void DialogManagement::exportXML() {
   CPlaylistContainer playlistExport;
   //_playlist->clear();
 
-  // extract the PllID and PllName from the items and set the _playlist name and
-  // id
+  // extract the PllID and PllName from the items and set the _playlist
+  // name and id
   playlistExport.setPllID(idItem->text().toInt());
   playlistExport.setPllName(nameItem->text());
 
@@ -375,11 +563,12 @@ void DialogManagement::exportXML() {
     QMessageBox::warning(
         this, "Error",
         "Selected Playlist could not be read from the database!");
+    _isEditing = false;
     return;
   }
 
-  // open filebrowser to select/create file and location where the xml file
-  // should be saved
+  // open filebrowser to select/create file and location where the xml
+  // file should be saved
   QFile file = QFileDialog::getSaveFileName(
       this, "Export to ", qApp->applicationDirPath(), "XML Files (*.xml)");
 
@@ -391,6 +580,7 @@ void DialogManagement::exportXML() {
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QMessageBox::warning(this, "Error",
                          file.fileName() + " could not be opened");
+    _isEditing = false;
     return;
   }
 
@@ -445,6 +635,7 @@ void DialogManagement::exportXML() {
 
 void DialogManagement::readDatabase() {
   // If the flag is set, ignore the signal to avoid recursion
+  // qDebug() << "readDatabase is executed";
   if (_isEditing) {
     return;
   }
@@ -452,6 +643,7 @@ void DialogManagement::readDatabase() {
   // Set the flag to true to prevent recursive calls
   _isEditing = true;
 
+  qDebug() << "readDatabase is executed";
   // temporare QString vector
   std::vector<QString> playlistsInDatabase;
 
@@ -476,7 +668,8 @@ void DialogManagement::readDatabase() {
     int rowCount = (playlistsInDatabase.size() / 2);
 
     // qDebug() << "rowCount: " << rowCount;
-    // set the table in Dialog Management to the corresponding number of rows
+    // set the table in Dialog Management to the corresponding number of
+    // rows
     ui->tableWidgetPlaylists->setRowCount(rowCount);
 
     // populate the table with data from query

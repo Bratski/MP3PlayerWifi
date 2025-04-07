@@ -67,7 +67,7 @@ public slots:
   void openAddPlaylistDialog();
   void addMusicFile();
   void addMusicFolder();
-  void saveToDatabase();
+  void savePlaylist();
   void deleteTrack();
   void deletePlaylist();
 
@@ -94,6 +94,9 @@ public slots:
 
   // network functions
   void getDataFromNetwork(QNetworkReply* reply);
+
+  // general saving database function
+  void saveToDatabase(CPlaylistContainer* playlist);
 
 private:
   // pointers

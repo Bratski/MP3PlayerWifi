@@ -52,6 +52,7 @@ public slots:
     QMutexLocker locker(&_mutex);
     _cancelSaving = true;
   }
+  void setPllIDbasedOnName(CPlaylistContainer* playlist, bool* success);
 
 signals:                                  // for progress bar functionality
   void sendProgress(const int& progress); // sends the amount of tracks being

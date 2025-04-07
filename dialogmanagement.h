@@ -12,6 +12,7 @@
 // for import and export XML functionalities
 #include <QFile>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
@@ -22,6 +23,7 @@
 #include <QList>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+
 // to deal with single and double click mouse events
 #include <QTimer>
 
@@ -49,19 +51,20 @@ public slots:
   void exportXML();
 
 signals:
-  void saveToDBMainWindow();
+  void saveToDBMainWindow(CPlaylistContainer* playlist);
 
 private:
   Ui::DialogManagement* ui;
   CPlaylistContainer* _playlist;
   CDatabaseWorker* _workerdb;
+
   int _lastrow;
   int _activeplaylistid;
   bool* _playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();
   bool _firstckick = true;
-
+  // std::vector<CPlaylistContainer*> _importedplaylists;
   // to colour the background of the current playlist
   void setItemBackgroundColour();
 };

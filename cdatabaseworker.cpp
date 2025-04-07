@@ -61,7 +61,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
   query.prepare("DELETE FROM TrackPlaylist WHERE PllFK = :pllID ");
   query.bindValue(":pllID", playlist->getPllID());
   if (!query.exec()) {
-    qDebug() << "error deleting tracks from the playlist";
+    qDebug() << "error deleting tracks from the playlist: "
+             << query.lastError();
     emit error(); // secures the closing of the progressbar, it will be
                   // staying in a blocked state otherways
     *success = false;
@@ -71,10 +72,38 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
   // iterate through the pointer vector
   for (auto it = playlist->beginPtr(); it != playlist->endPtr(); ++it) {
 
-    // qDebug() << "artist: " << (*it)->getArtist();
-    // qDebug() << "title: " << (*it)->getTitle();
+    qDebug() << "artist: " << (*it)->getArtist();
+    qDebug() << "title: " << (*it)->getTitle();
+    qDebug() << "genre: " << (*it)->getGenre();
     // qDebug() << "playlist: " << playlist->getPllName();
     // qDebug() << "playlist ID save: " << playlist->getPllID();
+
+    // check if the track attributes are empty or not, preventing SQL database
+    // from returning "Not Null" errors
+    QString TraID;
+    (*it)->getID().isEmpty() ? TraID = "00" : TraID = (*it)->getID();
+    QString TraTitle;
+    (*it)->getTitle().isEmpty() ? TraTitle = "unknown"
+                                : TraTitle = (*it)->getTitle();
+    QString TraArtist;
+    (*it)->getArtist().isEmpty() ? TraArtist = "unknown"
+                                 : TraArtist = (*it)->getArtist();
+    QString TraAlbum;
+    (*it)->getAlbum().isEmpty() ? TraAlbum = "unknown"
+                                : TraAlbum = (*it)->getAlbum();
+    int TraYear = (*it)->getYear();
+    int TraNumber = (*it)->getNumber();
+    QString TraGenre;
+    (*it)->getGenre().isEmpty() ? TraGenre = "unknown"
+                                : TraGenre = (*it)->getGenre();
+    int TraDuration = (*it)->getDuration();
+    int TraBitrate = (*it)->getBitrate();
+    int TraSamplerate = (*it)->getBitrate();
+    int TraChannels = (*it)->getChannels();
+    QString TraFileLocation;
+    (*it)->getFileLocation().isEmpty()
+        ? TraFileLocation = "unknown"
+        : TraFileLocation = (*it)->getFileLocation();
 
     // for one track:
     ++_tracknr;
@@ -83,10 +112,10 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
     query.prepare("INSERT INTO Artist (ArtName, ArtGenre) "
                   "VALUES (:artName, :artGenre) "
                   "ON CONFLICT(ArtName) DO UPDATE SET ArtGenre = :artGenre ");
-    query.bindValue(":artName", (*it)->getArtist());
-    query.bindValue(":artGenre", (*it)->getGenre());
+    query.bindValue(":artName", TraArtist);
+    query.bindValue(":artGenre", TraGenre);
     if (!query.exec()) {
-      qDebug() << "error inserting artist";
+      qDebug() << "error inserting artist: " << query.lastError();
       emit error(); // secures the closing of the progressbar, it will be
                     // staying in a blocked state otherways
       *success = false;
@@ -98,11 +127,10 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         "INSERT INTO Album (AlbName, AlbYear, AlbArtFK) VALUES (:albName, "
         ":albYear, (SELECT ArtID FROM Artist WHERE ArtName = :artName)) ON "
         "CONFLICT(AlbName, AlbArtFK) DO UPDATE SET AlbYear = :albYear ");
-    query.bindValue(":albName", (*it)->getAlbum());
-    query.bindValue(":albYear", (*it)->getYear());
-    query.bindValue(
-        ":artName",
-        (*it)->getArtist()); // Reuse the artist name to get the ArtID
+    query.bindValue(":albName", TraAlbum);
+    query.bindValue(":albYear", TraYear);
+    query.bindValue(":artName",
+                    TraArtist); // Reuse the artist name to get the ArtID
     if (!query.exec()) {
       qDebug() << "error inserting album";
       emit error(); // secures the closing of the progressbar, it will be
@@ -121,15 +149,15 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         "TraNumber = :traNumber, TraDuration = :traDuration, TraBitrate = "
         ":traBitrate, TraSamplerate = :traSamplerate, TraChannels = "
         ":traChannels, TraFileLocation = :traFileLocation ");
-    query.bindValue(":traTitle", (*it)->getTitle());
-    query.bindValue(":traNumber", (*it)->getNumber());
-    query.bindValue(":traDuration", (*it)->getDuration());
-    query.bindValue(":traBitrate", (*it)->getBitrate());
-    query.bindValue(":traSamplerate", (*it)->getSamplerate());
-    query.bindValue(":traChannels", (*it)->getChannels());
-    query.bindValue(":traFileLocation", (*it)->getFileLocation());
+    query.bindValue(":traTitle", TraTitle);
+    query.bindValue(":traNumber", TraNumber);
+    query.bindValue(":traDuration", TraDuration);
+    query.bindValue(":traBitrate", TraBitrate);
+    query.bindValue(":traSamplerate", TraSamplerate);
+    query.bindValue(":traChannels", TraChannels);
+    query.bindValue(":traFileLocation", TraFileLocation);
     query.bindValue(":albName",
-                    (*it)->getAlbum()); // Reuse the album name to get the AlbID
+                    TraAlbum); // Reuse the album name to get the AlbID
     if (!query.exec()) {
       qDebug() << "error inserting track";
       emit error(); // secures the closing of the progressbar, it will be
@@ -142,9 +170,8 @@ void CDatabaseWorker::writePlaylistTracksToDatabase(
         "INSERT INTO TrackPlaylist (TraFK, PllFK) VALUES ((SELECT TraID FROM "
         "Track WHERE TraName = :traTitle), :pllId) ON CONFLICT(TraFK, PllFK) "
         "DO NOTHING ");
-    query.bindValue(
-        ":traTitle",
-        (*it)->getTitle()); // Reuse the track title to get the TraID
+    query.bindValue(":traTitle",
+                    TraTitle); // Reuse the track title to get the TraID
     query.bindValue(":pllId",
                     playlist->getPllID()); // Use the PllID directly
     if (!query.exec()) {
@@ -232,7 +259,6 @@ void CDatabaseWorker::readPlaylistTracksFromDatabase(
   }
 
   *success = true;
-  emit progressReady();
   return;
 }
 
@@ -389,5 +415,23 @@ void CDatabaseWorker::closeDatabase() {
   if (db.isOpen()) {
     db.close(); // Close the database connection
     qDebug() << "Database connection closed";
+  }
+}
+
+void CDatabaseWorker::setPllIDbasedOnName(CPlaylistContainer* playlist,
+                                          bool* success) {
+  QSqlQuery query;
+  query.prepare("SELECT PllID FROM Playlist WHERE PllName = :PllName");
+  query.bindValue(":PllName", playlist->getPllName());
+
+  if (!query.exec()) {
+    qDebug() << "Error checking the Playlist name in the Database";
+    *success = false;
+    return;
+  }
+  if (query.first()) {
+    playlist->setPllID(query.value(0).toInt());
+    *success = true;
+    return;
   }
 }
