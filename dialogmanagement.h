@@ -58,6 +58,8 @@ private:
   CPlaylistContainer* _playlist;
   CDatabaseWorker* _workerdb;
 
+  QAction _action;
+
   int _lastrow;
   int _activeplaylistid;
   bool* _playlistChanged;  // to trigger the save to db question at shutdown

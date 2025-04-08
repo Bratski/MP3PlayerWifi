@@ -55,6 +55,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   ui->horizontalSliderVolume->setRange(0, 100);
   ui->horizontalSliderVolume->setSliderPosition(
       static_cast<int>(_audio->volume() * 100));
+  QString volumetext = "Volume: " + QString::number(_level) + "%";
+  ui->labelVolume->setText(volumetext);
   ui->progressBarSong->setFormat(_timeSong);
   ui->labelTotalTime->setText(_timeList);
   ui->tableWidgetCurrentPlaylist->hideColumn(0);
@@ -476,6 +478,8 @@ void MainWindow::setVolume(int level) {
   _level = level;
   float volume = static_cast<float>(_level) / 100.0f;
   _audio->setVolume(volume);
+  QString volumetext = "Volume: " + QString::number(_level) + "%";
+  ui->labelVolume->setText(volumetext);
 }
 
 void MainWindow::playAllSongs() {

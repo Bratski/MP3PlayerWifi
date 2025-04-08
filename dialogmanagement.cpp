@@ -15,6 +15,12 @@ DialogManagement::DialogManagement(QWidget* parent,
   readDatabase();
   ui->tableWidgetPlaylists->hideColumn(0);
 
+  // makes the delete key to delete the playlists as well
+  _action.setShortcut(Qt::Key_Delete);
+  this->addAction(&_action);
+  QObject::connect(&_action, &QAction::triggered, this,
+                   &DialogManagement::deletePlaylist);
+
   // setting the button connections
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
                    &DialogManagement::close);
@@ -205,9 +211,18 @@ void DialogManagement::deletePlaylist() {
 
       // if the playlist is currently opened in the main window or is the first
       // entry in the database, it can not be deleted
-      if (name == _playlist->getPllName() || id == 1) {
+      if (id == 1) {
         QMessageBox::warning(this, "Error",
-                             "The current playlist cannot be deleted!");
+                             "The default playlist: " + name +
+                                 " cannot be deleted!");
+        _isEditing = false;
+        return;
+      }
+
+      if (name == _playlist->getPllName()) {
+        QMessageBox::warning(this, "Error",
+                             "The activated playlist: " + name +
+                                 " in the main window cannot be deleted!");
         _isEditing = false;
         return;
       }
@@ -322,6 +337,12 @@ void DialogManagement::importXML() { // TODO
   // open file browser, select xml file to import
   QFile file = QFileDialog::getOpenFileName(
       this, "XML file to import", QDir::homePath(), "XML Files (*.xml)");
+
+  if (file.fileName().isEmpty()) {
+    // QMessageBox::warning(this, "Error", "No valid filename entered!");
+    _isEditing = false;
+    return;
+  }
 
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QMessageBox::warning(this, "Error",
@@ -468,8 +489,9 @@ void DialogManagement::importXML() { // TODO
     if (doubleName) {
       bool ok;
       QString otherpllname = QInputDialog::getText(
-          this, tr("Playlistname already in use"),
-          tr("Please enter another name: "), QLineEdit::Normal, QString(), &ok);
+          this, tr("Error"),
+          tr("Name already in use, please enter another name: "),
+          QLineEdit::Normal, QString(), &ok);
       if (!otherpllname.isEmpty() && ok)
         playlistImport.setPllName(otherpllname);
       else {
@@ -573,7 +595,7 @@ void DialogManagement::exportXML() {
 
   // cancel if no filename has been selected
   if (file.fileName().isEmpty()) {
-    QMessageBox::warning(this, "Error", "No valid filename entered!");
+    // QMessageBox::warning(this, "Error", "No valid filename entered!");
     _isEditing = false;
     return;
   }
