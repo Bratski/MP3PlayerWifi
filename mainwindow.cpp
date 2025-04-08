@@ -87,7 +87,6 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged, this,
                    &MainWindow::setVolume);
 
-
   // This is working, because _workingrtc lives in another thread, the lambda
   // function forces a queued connection
   QObject::connect(ui->horizontalSliderVolume, &QSlider::valueChanged,
@@ -268,7 +267,7 @@ void MainWindow::addMusicFile() {
       "(*.wma) ;; Wave Files (*.wav) ;; AAC Files (*.aac) ;; AC3 "
       "Files (*.ac3) ;; EAC3 Files (*.eac3) ;; ALAC Files (*.alac)";
   QString fileLocation = QFileDialog::getOpenFileName(
-      this, "Open a file", qApp->applicationDirPath(),
+      this, "Open a file", QDir::homePath(),
       //"/home/bart/Nextcloud/CPlusPlusProjects/qtgui/MP3PlayerWorking",
       filter);
 
@@ -292,8 +291,8 @@ void MainWindow::addMusicFile() {
 
 void MainWindow::addMusicFolder() {
   // open standard file browser, and get a selected directory
-  QString folder = QFileDialog::getExistingDirectory(
-      this, "Open folder", qApp->applicationDirPath());
+  QString folder =
+      QFileDialog::getExistingDirectory(this, "Open folder", QDir::homePath());
 
   // only if the folder contains data
   if (folder.size()) {
@@ -346,8 +345,8 @@ void MainWindow::saveToDatabase(CPlaylistContainer* playlist) {
   connect(_workerdb, &CDatabaseWorker::error, _dlgProgess,
           &DialogProgress::allowClose);
 
-  // Create an event loop to block all programm functions until the database operation is done,
-  // necessary to display the progressbar properly
+  // Create an event loop to block all programm functions until the database
+  // operation is done, necessary to display the progressbar properly
   QEventLoop loop;
   connect(_workerdb, &CDatabaseWorker::progressReady, &loop, &QEventLoop::quit);
 

@@ -320,9 +320,8 @@ void DialogManagement::importXML() { // TODO
   _isEditing = true;
 
   // open file browser, select xml file to import
-  QFile file = QFileDialog::getOpenFileName(this, "XML file to import",
-                                            qApp->applicationDirPath(),
-                                            "XML Files (*.xml)");
+  QFile file = QFileDialog::getOpenFileName(
+      this, "XML file to import", QDir::homePath(), "XML Files (*.xml)");
 
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QMessageBox::warning(this, "Error",
@@ -570,7 +569,14 @@ void DialogManagement::exportXML() {
   // open filebrowser to select/create file and location where the xml
   // file should be saved
   QFile file = QFileDialog::getSaveFileName(
-      this, "Export to ", qApp->applicationDirPath(), "XML Files (*.xml)");
+      this, "Export to ", QDir::homePath(), "XML Files (*.xml)");
+
+  // cancel if no filename has been selected
+  if (file.fileName().isEmpty()) {
+    QMessageBox::warning(this, "Error", "No valid filename entered!");
+    _isEditing = false;
+    return;
+  }
 
   // add the extension to the filename, in case it does not end with .xml
   if (!file.fileName().endsWith(".xml"))

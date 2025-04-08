@@ -50,6 +50,7 @@ INCLUDEPATH += OLEDDriver/
 
 # Library path and libraries to link against
 LIBS += -L../../OLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
+LIBS += -LOLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
 # LIBS += -L/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/OLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
 # LIBS += -L../../RotaryEncoder/build/Debug -lcrtcdriver
 LIBS += -lgpiod
