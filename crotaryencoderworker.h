@@ -59,6 +59,7 @@ private:
   QMutex _mutex; //
   int _counter = 0;
   bool _runRTCloop = true;
+  bool _initialisationSuccessfull = false;
 };
 
 #endif // CROTARYENCODERWORKER_H

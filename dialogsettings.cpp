@@ -13,12 +13,12 @@ DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
   _workerrtc->stop();
   showOledData();
   showRTCData();
+  // qDebug() << "status rtc: " << *_statusRTC;
   ui->checkBoxOled->setChecked(*_statusOled);
   ui->checkBoxRTC->setChecked(*_statusRTC);
   toggleOledButtons(*_statusOled);
   toggleRTCButtons(*_statusRTC);
   ui->lineEditApiKey->setText(*_apiKey);
-  _initialisationSuccessful = *_statusRTC;
 
   // connect button
   QObject::connect(ui->pushButtonCancel, &QPushButton::clicked, this,
@@ -91,14 +91,14 @@ void DialogSettings::initializeRTC() {
   bool success = false;
   _workerrtc->initialize(&success);
 
-  // start the event loop
+  // start the event loop // start the eventloop here??, maybe better at cancel or save and exit?
   if (success) {
     // success = false; // useless because its a queuedconnection
     QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
                               Q_ARG(bool*, &success));
   }
   *_statusRTC = success;
-  _initialisationSuccessful = success;
+  _workerrtc->stop();
   // send message successful or not
   if (!*_statusRTC) {
     QMessageBox::warning(this, "Error",
@@ -112,32 +112,36 @@ void DialogSettings::initializeRTC() {
 }
 
 void DialogSettings::toggleRTCButtons(bool checked) {
-  *_statusRTC = checked;
-  ui->lineEditChipNumber->setEnabled(*_statusRTC);
-  ui->lineEditRTCPin1->setEnabled(*_statusRTC);
-  ui->lineEditRTCPin2->setEnabled(*_statusRTC);
-  ui->lineEditRTCPin3->setEnabled(*_statusRTC);
-  ui->pushButtonInitializeRTC->setEnabled(*_statusRTC);
+  _optionsActivatedRTC = checked;
+  ui->lineEditChipNumber->setEnabled(checked);
+  ui->lineEditRTCPin1->setEnabled(checked);
+  ui->lineEditRTCPin2->setEnabled(checked);
+  ui->lineEditRTCPin3->setEnabled(checked);
+  ui->pushButtonInitializeRTC->setEnabled(checked);
 }
 
 void DialogSettings::saveSettings() {
-  if (!_initialisationSuccessful) {
+  if (!_optionsActivatedRTC) {
     _workerrtc->stop();
     _workerrtc->disconnect();
-  } else {
+  } else { // TODO toggle active rtc, cancel, reopen, cancel, crash! // double
+           // start "run" no problem?!
     bool success;
     QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
                               Q_ARG(bool*, &success));
   }
+  if (!_optionsActivatedOLED)
+    _oled->turnOff();
   *_apiKey = ui->lineEditApiKey->text();
   this->close();
 }
 
 void DialogSettings::cancel() {
-  if (!_initialisationSuccessful) {
+  if (!*_statusRTC) {
     _workerrtc->stop();
     _workerrtc->disconnect();
-  } else {
+  } else { // TODO toggle active rtc, cancel, reopen, cancel, crash! // double
+           // start "run" no problem?!
     bool success;
     QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
                               Q_ARG(bool*, &success));
@@ -158,12 +162,9 @@ void DialogSettings::showRTCData() {
 }
 
 void DialogSettings::toggleOledButtons(bool checked) {
-  *_statusOled = checked;
-  ui->pushButtonAutoDetectOled->setEnabled(*_statusOled);
-  ui->pushButtonInitializeOled->setEnabled(*_statusOled);
-  ui->lineEditi2cAdress->setEnabled(*_statusOled);
-  ui->lineEditi2cBus->setEnabled(*_statusOled);
-
-  if (!*_statusOled)
-    _oled->turnOff();
+  _optionsActivatedOLED = checked;
+  ui->pushButtonAutoDetectOled->setEnabled(checked);
+  ui->pushButtonInitializeOled->setEnabled(checked);
+  ui->lineEditi2cAdress->setEnabled(checked);
+  ui->lineEditi2cBus->setEnabled(checked);
 }

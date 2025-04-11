@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
 
   // set the playlistname and id from the database
 
+  // start the rtc, if it was active at last shut down
   if (_statusRTC) {
     bool success = false;
     _workerrtc->initialize(&success);

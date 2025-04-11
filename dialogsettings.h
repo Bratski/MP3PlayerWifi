@@ -40,9 +40,8 @@ private:
   bool* _statusOled;
   CRotaryEncoderWorker* _workerrtc;
   bool* _statusRTC;
-
-  bool _initialisationSuccessful = false;
-
+  bool _optionsActivatedRTC;
+  bool _optionsActivatedOLED;
   void showOledData();
   void showRTCData();
 };

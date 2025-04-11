@@ -11,6 +11,7 @@ void CRotaryEncoderWorker::stop() {
 void CRotaryEncoderWorker::initialize(bool* success) {
   // first disconnect the lines, make sure they are free
   disconnect();
+  _initialisationSuccessfull = false;
 
   switch (_chipnumber) {
   case 0:
@@ -93,11 +94,18 @@ void CRotaryEncoderWorker::initialize(bool* success) {
 
   qDebug() << "GPIO succesfully initialized pinSW:" << _pin1
            << " pin CLK: " << _pin2 << " pin DT: " << _pin3;
+  _initialisationSuccessfull = true;
   *success = true;
   return;
 }
 
 void CRotaryEncoderWorker::run(bool* success) {
+  if (!_initialisationSuccessfull) {
+    qDebug() << "Event detecting loop NOT started, because unsuccessfull "
+                "initialisation";
+    return;
+  }
+
   qDebug() << "Event detecting loop started";
   *success = true;
   _runRTCloop = true;
