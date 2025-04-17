@@ -1,10 +1,13 @@
 #include "dialogsearch.h"
 #include "ui_dialogsearch.h"
 
-DialogSearch::DialogSearch(QWidget* parent, CPlaylistContainer* playlist,
-                           bool* playlistChanged)
-    : QDialog(parent), ui(new Ui::DialogSearch), _playlist(playlist),
-      _playlistChanged(playlistChanged) {
+DialogSearch::DialogSearch(QWidget* parent, MainWindow* parentw,
+                           CPlaylistContainer* playlist, bool* playlistChanged,
+                           timefunctionptrtype convertTime)
+    : QDialog(parent), ui(new Ui::DialogSearch), _parentw(parentw),
+      _playlist(playlist), _playlistChanged(playlistChanged),
+      _convertTime(convertTime) {
+
   ui->setupUi(this);
 
   // initializing window
@@ -168,7 +171,9 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
     item = new QTableWidgetItem((*it)->getGenre());
     ui->tableWidgetFoundEntries->setItem(row, 6, item);
 
-    item = new QTableWidgetItem(convertSecToTimeString((*it)->getDuration()));
+    item = new QTableWidgetItem(convertTime(
+        (*it)->getDuration())); // now the member function in mainwindow is
+                                // called for the time conversion
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 7, item);
 
@@ -198,19 +203,20 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
 
 // converts seconds and returns a QString displaying the time in this
 // format "0:00:00", I tried to pass this function from the mainwindow by
-// pointer, but failed! How can this be done?
-const QString DialogSearch::convertSecToTimeString(const int& sec) {
+// pointer, but failed! How can this be done? --> 2 things must be passed: the
+// function pointer itself and the pointer to the mainwindow object const
+// QString DialogSearch::convertSecToTimeString(const int& sec) {
 
-  int seconds = sec % 60;
-  int min = (sec / 60) % 60;
-  int hr = (sec / (60 * 60));
+//   int seconds = sec % 60;
+//   int min = (sec / 60) % 60;
+//   int hr = (sec / (60 * 60));
 
-  QString timeExHr = QString::number(min).rightJustified(2, '0') + ":" +
-                     QString::number(seconds).rightJustified(2, '0');
-  QString timeInHr = QString::number(hr) + ":" + timeExHr;
+//   QString timeExHr = QString::number(min).rightJustified(2, '0') + ":" +
+//                      QString::number(seconds).rightJustified(2, '0');
+//   QString timeInHr = QString::number(hr) + ":" + timeExHr;
 
-  if (!hr)
-    return timeExHr;
-  else
-    return timeInHr;
-}
+//   if (!hr)
+//     return timeExHr;
+//   else
+//     return timeInHr;
+// }

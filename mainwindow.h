@@ -164,7 +164,11 @@ private:
 
   // methods
   const QString convertMilliSecToTimeString(const qint64& millisec);
+
+public:
   const QString convertSecToTimeString(const int& sec);
+
+private:
   void
   handleMediaStatusChanged(QMediaPlayer::MediaStatus
                                status); // detect if a song has finished playing

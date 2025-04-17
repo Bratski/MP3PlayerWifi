@@ -308,12 +308,12 @@ void DialogManagement::dealWithMouseOneTimeClick(QTableWidgetItem* item) {
   QTimer::singleShot(400, this, [this, item]() {
     // did the row change?
     if (_lastrow != item->row())
-      _firstckick = true;
+      _firstclick = true;
 
     // is this the first one click on the row?
-    if (_firstckick) {
+    if (_firstclick) {
       _lastrow = item->row();
-      _firstckick = false;
+      _firstclick = false;
       return;
     }
     // edit the row if it was not the first one click, and the row did not

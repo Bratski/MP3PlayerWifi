@@ -224,7 +224,8 @@ void MainWindow::openSettingsDialog() {
 }
 
 void MainWindow::openSearchDialog() {
-  _dlgSearch = new DialogSearch(this, _playlist, &_playlistChanged);
+  _dlgSearch = new DialogSearch(this, this, _playlist, &_playlistChanged,
+                                &MainWindow::convertSecToTimeString);
 
   // because it can contain lots of entries, some menu stretching buttons are
   // added to be able to maximize the window

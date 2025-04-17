@@ -65,7 +65,7 @@ private:
   bool* _playlistChanged;  // to trigger the save to db question at shutdown
   bool _isEditing = false; // to prevent multiple triggeringg
   void readDatabase();
-  bool _firstckick = true;
+  bool _firstclick = true;
   // std::vector<CPlaylistContainer*> _importedplaylists;
   // to colour the background of the current playlist
   void setItemBackgroundColour();

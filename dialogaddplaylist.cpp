@@ -32,18 +32,18 @@ void DialogAddPlaylist::addPlaylist() {
           ->text()
           .toInt();
 
-  // qDebug() << " id: " << id;
+  qDebug() << " id: " << id;
 
   // create a temporary playlist object
   CPlaylistContainer tempplaylist;
+  tempplaylist.setPllID(id);
 
   // fill that object with the selected playlistname from the tablewidget, only
   // 1!
   bool success = false;
-  QMetaObject::invokeMethod(_workerdb, "readDataBasePlaylist",
-                            Qt::BlockingQueuedConnection,
-                            Q_ARG(CPlaylistContainer*, &tempplaylist),
-                            Q_ARG(int, id), Q_ARG(bool*, &success));
+  QMetaObject::invokeMethod(
+      _workerdb, "readDataBasePlaylist", Qt::BlockingQueuedConnection,
+      Q_ARG(CPlaylistContainer*, &tempplaylist), Q_ARG(bool*, &success));
 
   bool doubleTrack = false;
   // add the temporary playlist object to the global one: _playlist
