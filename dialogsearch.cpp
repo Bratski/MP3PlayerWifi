@@ -171,8 +171,7 @@ void DialogSearch::refreshtableWidgetFoundEntries() {
     item = new QTableWidgetItem((*it)->getGenre());
     ui->tableWidgetFoundEntries->setItem(row, 6, item);
 
-    item = new QTableWidgetItem(convertTime(
-        (*it)->getDuration())); // now the member function in mainwindow is
+    item = new QTableWidgetItem(convertTime((*it)->getDuration())); // now the member function in mainwindow is
                                 // called for the time conversion
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->tableWidgetFoundEntries->setItem(row, 7, item);

@@ -19,9 +19,6 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-// for the SQL Database management
-#include <QtSql/QSqlQuery>
-
 // for the Table Widget handling
 #include <QList>
 #include <QTableWidget>

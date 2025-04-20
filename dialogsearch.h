@@ -13,6 +13,8 @@
 class MainWindow; // forward declaration of the mainwindow class
 typedef const QString (MainWindow::*timefunctionptrtype)(
     const int& sec); // without "typedef" or "using" it is far more complicated
+// using timefunctionptrtype = const QString (MainWindow::*)(const int& sec);
+
 
 namespace Ui {
 class DialogSearch;

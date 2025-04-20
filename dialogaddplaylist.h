@@ -10,9 +10,6 @@
 #include <QDialog>
 #include <QMessageBox>
 
-// for the SQL Database management
-#include <QtSql/QSqlQuery>
-
 namespace Ui {
 class DialogAddPlaylist;
 }

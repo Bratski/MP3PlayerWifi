@@ -5,7 +5,6 @@
 #define QT_NO_DEBUG_OUTPUT
 #include <QDebug>
 
-
 // adding the header files
 #include "COled.h"
 #include "cdatabaseworker.h"
@@ -21,10 +20,6 @@
 #include <QSettings>
 #include <QThread>
 #include <QTimer>
-
-// for the SQL Database management
-#include <QSqlError>
-#include <QtSql/QSqlQuery>
 
 // adding the dialog windows
 #include <dialogaddplaylist.h>
@@ -165,7 +160,10 @@ private:
       _shuffleAlreadyPlayed; // vector with tracks indexes, as a reference which
                              // songs already have been played, and for the
                              // check if all the songs have been played once
-  QSettings _settings{"Bratski", "MP3Player"}; // automatically creates settings file .config/Bratski/MP3Player.conf in users home dir
+  QSettings _settings{
+      "Bratski",
+      "MP3Player"}; // automatically creates settings file
+                    // .config/Bratski/MP3Player.conf in users home dir
 
   // methods
   const QString convertMilliSecToTimeString(const qint64& millisec);
