@@ -1,3 +1,10 @@
+
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+// for qt multimedia to turn off its qdebug messages
+#include <QLoggingCategory>
+
 #include "COled.h"
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
@@ -19,6 +26,9 @@ int main(int argc, char* argv[]) {
   qRegisterMetaType<uint*>("uint*");
   qRegisterMetaType<int*>("int*");
 #endif
+
+  // Disable all Qt Multimedia debug messages
+  QLoggingCategory::setFilterRules("qt.multimedia.*=false");
 
   QApplication a(argc, argv);
 

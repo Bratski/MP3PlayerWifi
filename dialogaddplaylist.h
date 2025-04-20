@@ -1,6 +1,10 @@
 #ifndef DIALOGADDPLAYLIST_H
 #define DIALOGADDPLAYLIST_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 #include <QDialog>

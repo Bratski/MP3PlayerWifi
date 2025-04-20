@@ -1,6 +1,9 @@
 #ifndef DIALOGMANAGEMENT_H
 #define DIALOGMANAGEMENT_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 

@@ -1,6 +1,9 @@
 #ifndef CDATABASEWORKER_H
 #define CDATABASEWORKER_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+
 // adding the libraries
 #include "cplaylistcontainer.h"
 #include "dbconnect.h"
@@ -59,7 +62,7 @@ signals:                                  // for progress bar functionality
                                           // saved for the progress bar
   void progressReady(); // sends a signal to let the progress bar know the
                         // process is finished or properly cancelled
-  void error();
+  void error(); // prevents the progress bar from stalling in case a database operation was unsuccessful
 
 private:
   int _tracknr; // to be able to count the number of tracks being saved, for

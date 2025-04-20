@@ -1,6 +1,9 @@
 #ifndef CPLAYLISTCONTAINER_H
 #define CPLAYLISTCONTAINER_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+
 // for the random generator
 #include <random>
 

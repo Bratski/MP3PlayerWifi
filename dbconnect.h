@@ -1,5 +1,9 @@
 #ifndef DBCONNECT_H
 #define DBCONNECT_H
+
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+
 #include <QApplication>
 #include <QDebug>
 #include <QMessageBox>

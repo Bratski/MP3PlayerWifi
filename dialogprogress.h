@@ -1,6 +1,10 @@
 #ifndef DIALOGPROGRESS_H
 #define DIALOGPROGRESS_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+
 #include "cdatabaseworker.h"
 #include "cplaylistcontainer.h"
 #include <QCloseEvent>

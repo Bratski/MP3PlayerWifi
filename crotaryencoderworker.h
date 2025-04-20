@@ -1,6 +1,9 @@
 #ifndef CROTARYENCODERWORKER_H
 #define CROTARYENCODERWORKER_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+
 #include <QDebug>
 #include <QMutex>
 #include <QObject>

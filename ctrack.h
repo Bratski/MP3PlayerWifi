@@ -1,6 +1,10 @@
 #ifndef CTRACK_H
 #define CTRACK_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+
 #include <QString>
 
 // libraries for the tag-reading from a mp3-file

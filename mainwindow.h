@@ -1,6 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+
+
 // adding the header files
 #include "COled.h"
 #include "cdatabaseworker.h"
@@ -123,7 +128,7 @@ private:
   QString _timePrevious =
       "00:00"; // needed for reduced flickering of the OLED Display
   QString _timeList = "Total Time"; // sum of the song durations in the playlist
-  QString _apiKey = "9d6171634a3f43ff46083c4534ed44db"; // default API key
+  QString _apiKey = "9d6171634a3f43ff46083c4534ed44db"; // default TEST API key
   QString _imageSize =
       "large"; // Options are: "small", "medium", "large", "extralarge", "mega"
 
@@ -160,7 +165,7 @@ private:
       _shuffleAlreadyPlayed; // vector with tracks indexes, as a reference which
                              // songs already have been played, and for the
                              // check if all the songs have been played once
-  QSettings _settings{"Bratski", "MP3Player"};
+  QSettings _settings{"Bratski", "MP3Player"}; // automatically creates settings file .config/Bratski/MP3Player.conf in users home dir
 
   // methods
   const QString convertMilliSecToTimeString(const qint64& millisec);

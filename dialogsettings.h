@@ -1,6 +1,10 @@
 #ifndef DIALOGSETTINGS_H
 #define DIALOGSETTINGS_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+
 #include "COled.h"
 #include "crotaryencoderworker.h"
 
@@ -8,7 +12,6 @@
 #include <QMessageBox>
 #include <QSettings>
 
-// TODO: save and read settings from a config file
 
 namespace Ui {
 class DialogSettings;

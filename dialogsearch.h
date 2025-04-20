@@ -1,6 +1,10 @@
 #ifndef DIALOGSEARCH_H
 #define DIALOGSEARCH_H
 
+// this should disable or enable qdebug output
+#define QT_NO_DEBUG_OUTPUT
+#include <QDebug>
+
 #include "cplaylistcontainer.h"
 #include <QDialog>
 #include <QTableWidget>
