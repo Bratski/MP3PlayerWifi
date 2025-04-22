@@ -46,13 +46,10 @@ FORMS += \
 # to use the oled drivers
 # Include path (relative to the .pro file)
 INCLUDEPATH += OLEDDriver/
-# INCLUDEPATH += RotaryEncoder/
 
 # Library path and libraries to link against
 LIBS += -L../../OLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
 LIBS += -LOLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
-# LIBS += -L/home/bart/Nextcloud/CPlusPlusProjects/Abschlussprojekt/MP3PlayerWifi/OLEDDriver/build/Debug -lCOled -lOledFont8x16 -lOledFont8x12 -lOledFont8x8 -lOledGraphics -lOledI2C -lOledPixel -lOledHardware -lFileDescriptor
-# LIBS += -L../../RotaryEncoder/build/Debug -lcrtcdriver
 LIBS += -lgpiod
 
 # for the use of the tag libraries
@@ -76,26 +73,6 @@ DISTFILES += \
 QMAKE_LINK += -v
 message("Resolved LIBDIR: $$QMAKE_LIBDIR")
 message("Resolved LIBS: $$LIBS")
-
-# # Default to dynamic linking
-# CONFIG += dynamic
-
-# # # Override for release builds
-# # CONFIG(release, debug|release) {
-# #     CONFIG += static
-# #     LIBS += -static
-# # }
-
-# # Release configuration
-# CONFIG(release, debug|release) {
-#     CONFIG += static
-#     # Prevent linking against .so files
-#     QMAKE_LFLAGS += -static
-#     # Explicitly link against static libraries
-#     LIBS += -L$$[QT_INSTALL_LIBS] -lQt6Core -lQt6Gui -lQt6Widgets -lQt6Multimedia
-#     # For taglib
-#     LIBS += -L$$PWD/myTaglib -ltag
-# }
 
 RESOURCES += \
     icons.qrc

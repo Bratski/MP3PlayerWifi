@@ -10,10 +10,8 @@ DialogSettings::DialogSettings(QWidget* parent, COled* oled, QString* apikey,
 
   // initialize
   setWindowTitle("Settings");
-  _workerrtc->stop();
   showOledData();
   showRTCData();
-  // qDebug() << "status rtc: " << *_statusRTC;
   ui->checkBoxOled->setChecked(*_statusOled);
   ui->checkBoxRTC->setChecked(*_statusRTC);
   toggleOledButtons(*_statusOled);
@@ -54,7 +52,8 @@ void DialogSettings::initializeOled() {
     *_statusOled = false;
     QMessageBox::warning(this, "Error", "NO Oled-display could be initialized");
   } else {
-    QMessageBox::information(this, "Success",
+      *_statusOled = true;
+      QMessageBox::information(this, "Success",
                              "Oled-display succesfully initialized");
   }
 }
@@ -91,14 +90,14 @@ void DialogSettings::initializeRTC() {
   bool success = false;
   _workerrtc->initialize(&success);
 
-  // start the event loop // start the eventloop here??, maybe better at cancel or save and exit?
+  // start the event loop
   if (success) {
     // success = false; // useless because its a queuedconnection
     QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
                               Q_ARG(bool*, &success));
   }
   *_statusRTC = success;
-  _workerrtc->stop();
+
   // send message successful or not
   if (!*_statusRTC) {
     QMessageBox::warning(this, "Error",
@@ -124,28 +123,17 @@ void DialogSettings::saveSettings() {
   if (!_optionsActivatedRTC) {
     _workerrtc->stop();
     _workerrtc->disconnect();
-  } else { // TODO toggle active rtc, cancel, reopen, cancel, crash! // double
-           // start "run" no problem?!
-    bool success;
-    QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
-                              Q_ARG(bool*, &success));
+    *_statusRTC = false;
   }
-  if (!_optionsActivatedOLED)
-    _oled->turnOff();
+  if (!_optionsActivatedOLED) {
+      _oled->turnOff();
+      *_statusOled = false;
+  }
   *_apiKey = ui->lineEditApiKey->text();
   this->close();
 }
 
 void DialogSettings::cancel() {
-  if (!*_statusRTC) {
-    _workerrtc->stop();
-    _workerrtc->disconnect();
-  } else { // TODO toggle active rtc, cancel, reopen, cancel, crash! // double
-           // start "run" no problem?!
-    bool success;
-    QMetaObject::invokeMethod(_workerrtc, "run", Qt::QueuedConnection,
-                              Q_ARG(bool*, &success));
-  }
   this->close();
 }
 

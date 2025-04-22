@@ -11,7 +11,7 @@
 #include "ctrack.h"
 #include <memory>
 
-// for vector managment
+// for vector management
 #include <QString>
 #include <algorithm>
 #include <vector>
@@ -63,6 +63,7 @@ public:
     byTracknumber,
     numberOfMethods
   };
+
   CPlaylistContainer() = default;
 
   // to get to a track by the vector index, which correspondig to the
