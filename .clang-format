@@ -1,0 +1,3 @@
+BasedOnStyle: LLVM  # or Google, Mozilla, etc.
+PointerAlignment: Left
+DerivePointerAlignment: false  # Strictly enforce the rule

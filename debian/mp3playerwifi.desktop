@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=MP3 Player
+Comment=MP3 player Wifi
+Exec=/usr/bin/MP3Player
+Icon=/usr/share/icons/hicolor/48x48/apps/fiets.png
+Terminal=false
+Type=Application
+Categories=Audio;AudioVideo;Player;
+StartupWMClass=mp3player

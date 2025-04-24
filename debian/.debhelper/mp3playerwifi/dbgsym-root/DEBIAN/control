@@ -1,0 +1,13 @@
+Package: mp3playerwifi-dbgsym
+Package-Type: ddeb
+Source: mp3playerwifi
+Version: 1.0-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: Bart Zonderland <bfm.zonderland@gmail.com>
+Installed-Size: 297
+Depends: mp3playerwifi (= 1.0-1)
+Section: debug
+Priority: optional
+Description: debug symbols for mp3playerwifi
+Build-Ids: 70ce2fa354bc4c34ae6eb54a3c5646ac4d17447a

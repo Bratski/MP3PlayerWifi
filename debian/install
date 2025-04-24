@@ -1,0 +1,3 @@
+MP3Player usr/bin
+icons/fiets.png usr/share/icons/hicolor/48x48/apps
+debian/mp3playerwifi.desktop usr/share/applications

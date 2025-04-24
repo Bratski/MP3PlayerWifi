@@ -1,0 +1,11 @@
+Package: mp3playerwifi
+Version: 1.0-1
+Architecture: amd64
+Maintainer: Bart Zonderland <bfm.zonderland@gmail.com>
+Installed-Size: 2299
+Depends: libc6 (>= 2.34), libgcc-s1 (>= 3.0), libgpiod2t64 (>= 1.1), libqt6core6t64 (>= 6.4.0), libqt6gui6t64 (>= 6.1.2), libqt6multimedia6 (>= 6.2.1), libqt6network6t64 (>= 6.1.2), libqt6sql6t64 (>= 6.1.2), libqt6widgets6t64 (>= 6.1.2), libstdc++6 (>= 13.1), libtag1v5 (>= 1.11), libqt5core5a, libqt5gui5, libqt5widgets5, libgpiod2, i2c-tools
+Section: mediaplayer
+Priority: optional
+Multi-Arch: foreign
+Homepage: <insert the upstream URL, if relevant>
+Description: "MP3 Player Wifi Project to manage songs and lists create mixes play songs from different compression formats"

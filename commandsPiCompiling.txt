@@ -1,0 +1,29 @@
+
+sudo apt install qt6-base-dev cmake
+sudo apt install libqt6multimedia6 qt6-multimedia-dev
+sudo apt install qt6-base-dev qt6-base-dev-tools qt6-wayland qml6-module-qtquick-controls
+sudo apt install breeze-icon-theme  # KDE's comprehensive icon set
+
+(sudo apt install libqt5multimedia5-plugins qtmultimedia5-dev)
+
+sudo apt install libgpiod-dev
+sudo apt install libtag1-dev
+
+
+
+#compiling OLED lib:
+g++ -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Wcast-align -Wconversion -Wsign-conversion -Wnull-dereference \
+--std=c++20 -g3 -O0 \
+-I./lib \
+-c ./COled.cpp \
+-o ./build/Debug/COled.o
+
+#run bash files:
+run compilelibs.sh
+run OLEDDriver/build/Debug/createLibs.sh
+
+make distclean
+make clean
+qmake6 MP3Plaver.pro
+make
+
