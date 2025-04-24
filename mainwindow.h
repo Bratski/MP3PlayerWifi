@@ -70,6 +70,7 @@ public slots:
   void savePlaylist();
   void deleteTrack();
   void deletePlaylist();
+  void showHelpInfo();
 
   // header sort methods
   void sortByAlbum();

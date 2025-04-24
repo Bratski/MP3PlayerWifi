@@ -149,6 +149,8 @@ MainWindow::MainWindow(QWidget* parent, COled* oled, QMediaPlayer* player,
                    &MainWindow::sortRandom);
   QObject::connect(ui->actionundo_Sort, &QAction::triggered, this,
                    &MainWindow::undoSort);
+  QObject::connect(ui->actionHelp_Window, &QAction::triggered, this,
+                   &MainWindow::showHelpInfo);
 
   // pushbuttons for playing songs
   QObject::connect(ui->pushButtonPlay, &QPushButton::clicked, this,
@@ -417,6 +419,11 @@ void MainWindow::deletePlaylist() {
   _playlistChanged = true;
   refreshTableWidgetCurrentPlaylist();
   setItemBackgroundColour();
+}
+
+void MainWindow::showHelpInfo()
+{
+    QMessageBox::information(this, "About", "This program is written by Mr. DI. Bart Zonderland (bfm.zonderland@gmail.com) under the supervision of Mr DI. Thomas Pipek, as part of the completion of the Software Developer:in C/C++ course (18170014) and it serves as a proof of competence upon positive evaluation at Wifi Institute in Vienna, Austria, Date of approval 05.05.2025");
 }
 
 void MainWindow::sortByAlbum() {
